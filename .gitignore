@@ -1,0 +1,15 @@
+# Ignore everything
+*
+
+# But not directories (so git can recurse into them)
+!*/
+
+# But not .tex files
+!*.tex
+
+# But not this .gitignore
+!.gitignore
+
+# Ignore embedded git repos
+CS3354/Java_Examples/bubblesort_profiling_example/
+CS3354/Java_Examples/spaceinvaders/
