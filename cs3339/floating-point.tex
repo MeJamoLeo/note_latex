@@ -760,32 +760,39 @@ Section~\ref{sec:solutions}.
 \begin{enumerate}
   \item Convert $12.375_{10}$ to IEEE~754 single precision.  Give the final
         32-bit representation in binary and hexadecimal.
+        \hfill\hyperref[sol:1]{$\to$ Solution}
 
   \item Convert the IEEE~754 single-precision value
         \texttt{0xC1480000} to decimal.
+        \hfill\hyperref[sol:2]{$\to$ Solution}
 
   \item What decimal value does the following 32-bit pattern represent?
         \[
           0\;\;10000010\;\;0110\;0000\;0000\;0000\;0000\;000
         \]
+        \hfill\hyperref[sol:3]{$\to$ Solution}
 
   \item Perform the following floating-point addition.  Show all steps
         (align exponents, add significands, normalize, round).
         \[
           1.0_2 \times 2^{3} \;+\; 1.01_2 \times 2^{1}
         \]
+        \hfill\hyperref[sol:4]{$\to$ Solution}
 
   \item Perform the following floating-point multiplication.
         \[
           -1.01_2 \times 2^{2} \;\times\; 1.1_2 \times 2^{3}
         \]
+        \hfill\hyperref[sol:5]{$\to$ Solution}
 
   \item Given the stored exponent byte $1001\;0110_2$, compute the true
         exponent by adding $-127$ in binary.  Show the vertical addition.
+        \hfill\hyperref[sol:6]{$\to$ Solution}
 
   \item Write a MIPS code fragment that loads two single-precision floats from
         memory addresses stored in \texttt{\$t0} and \texttt{\$t1}, adds them,
         and stores the result to the address in \texttt{\$t2}.
+        \hfill\hyperref[sol:7]{$\to$ Solution}
 \end{enumerate}
 \end{sub}
 
@@ -794,30 +801,37 @@ Section~\ref{sec:solutions}.
 \begin{enumerate}\setcounter{enumi}{7}
   \item What is the IEEE~754 single-precision representation of $-0.0$?
         How does it differ from $+0.0$?
+        \hfill\hyperref[sol:8]{$\to$ Solution}
 
   \item Convert $0.1_{10}$ to IEEE~754 single precision.  Why can this value
         \emph{not} be represented exactly?
+        \hfill\hyperref[sol:9]{$\to$ Solution}
 
   \item What is the result of the following in IEEE~754?
         \[
           (+\infty) + (-\infty) = \;?
         \]
+        \hfill\hyperref[sol:10]{$\to$ Solution}
 
   \item Consider a 4-bit fraction (instead of 23).  What is the smallest
         positive \emph{denormalized} number representable with an 8-bit
         exponent (bias $= 127$)?
+        \hfill\hyperref[sol:11]{$\to$ Solution}
 
   \item True or false: in IEEE~754, $\text{NaN} = \text{NaN}$.
         Explain your answer.
+        \hfill\hyperref[sol:12]{$\to$ Solution}
 
   \item Show that floating-point addition is not associative by computing
         $(a + b) + c$ and $a + (b + c)$ with
         $a = 2^{24}$, $b = -2^{24}$, $c = 1.0$ in single precision.
         Why do the results differ?
+        \hfill\hyperref[sol:13]{$\to$ Solution}
 
   \item A student writes the MIPS instruction
         \texttt{add.d~\$f1,~\$f2,~\$f4}.
         What is wrong with this instruction?
+        \hfill\hyperref[sol:14]{$\to$ Solution}
 \end{enumerate}
 \end{sub}
 
@@ -827,7 +841,7 @@ Section~\ref{sec:solutions}.
 \newpage
 \section{Solutions}\label{sec:solutions}
 
-\subsection{Problem 1}
+\subsection{Problem 1}\label{sol:1}
 \begin{sub}
 $12.375_{10}$:
 \begin{enumerate}
@@ -847,7 +861,7 @@ $12.375_{10}$:
 Hexadecimal: \texttt{0x41460000}.
 \end{sub}
 
-\subsection{Problem 2}
+\subsection{Problem 2}\label{sol:2}
 \begin{sub}
 \texttt{0xC1480000} $=$ \texttt{1100\,0001\,0100\,1000\,0000\,0000\,0000\,0000}$_2$.
 \begin{enumerate}
@@ -858,7 +872,7 @@ Hexadecimal: \texttt{0x41460000}.
 \end{enumerate}
 \end{sub}
 
-\subsection{Problem 3}
+\subsection{Problem 3}\label{sol:3}
 \begin{sub}
 \begin{enumerate}
   \item Sign: $0$ (positive).
@@ -868,7 +882,7 @@ Hexadecimal: \texttt{0x41460000}.
 \end{enumerate}
 \end{sub}
 
-\subsection{Problem 4}
+\subsection{Problem 4}\label{sol:4}
 \begin{sub}
 $1.0_2 \times 2^{3} + 1.01_2 \times 2^{1}$:
 \begin{enumerate}
@@ -880,7 +894,7 @@ $1.0_2 \times 2^{3} + 1.01_2 \times 2^{1}$:
 \end{enumerate}
 \end{sub}
 
-\subsection{Problem 5}
+\subsection{Problem 5}\label{sol:5}
 \begin{sub}
 $(-1.01_2 \times 2^{2}) \times (1.1_2 \times 2^{3})$:
 \begin{enumerate}
@@ -888,13 +902,11 @@ $(-1.01_2 \times 2^{2}) \times (1.1_2 \times 2^{3})$:
   \item Exponent: $2 + 3 = 5$.
   \item Significands: $1.01_2 \times 1.1_2 = 1.111_2$.
   \item Already normalized ($1.111 < 2$).
-  \item Result: $-1.111_2 \times 2^{5} = -111110_2 \times 2^{-1} = -11111.0_2 = -31.0_{10}$.
-
-  Alternatively: $-1.111_2 \times 2^5 = -11111.0_2 = -31.0_{10}$.
+  \item Result: $-1.111_2 \times 2^{5} = -111100.0_2 = -60.0_{10}$.
 \end{enumerate}
 \end{sub}
 
-\subsection{Problem 6}
+\subsection{Problem 6}\label{sol:6}
 \begin{sub}
 Stored exponent: $1001\;0110_2$. Add $-127 = 1000\;0001_2$:
 \[
@@ -908,7 +920,7 @@ Stored exponent: $1001\;0110_2$. Add $-127 = 1000\;0001_2$:
 Discard the overflow carry. True exponent $= 0001\;0111_2 = 23$.
 \end{sub}
 
-\subsection{Problem 7}
+\subsection{Problem 7}\label{sol:7}
 \begin{sub}
 \begin{verbatim}
       lwc1  $f0, 0($t0)     # load float from Mem[$t0]
@@ -918,7 +930,7 @@ Discard the overflow carry. True exponent $= 0001\;0111_2 = 23$.
 \end{verbatim}
 \end{sub}
 
-\subsection{Problem 8}
+\subsection{Problem 8}\label{sol:8}
 \begin{sub}
 Both $+0$ and $-0$ have exponent $= 0$ and fraction $= 0$. The only
 difference is the sign bit:
@@ -929,7 +941,7 @@ difference is the sign bit:
 IEEE~754 defines $+0 = -0$ for comparison purposes.
 \end{sub}
 
-\subsection{Problem 9}
+\subsection{Problem 9}\label{sol:9}
 \begin{sub}
 $0.1_{10}$ in binary is a repeating fraction:
 \[
@@ -941,7 +953,7 @@ approximation, which introduces a small rounding error
 ($\approx 1.49 \times 10^{-9}$ for single precision).
 \end{sub}
 
-\subsection{Problem 10}
+\subsection{Problem 10}\label{sol:10}
 \begin{sub}
 $+\infty + (-\infty) = \textbf{NaN}$.
 
@@ -949,7 +961,7 @@ Adding infinities of opposite signs is an invalid operation under IEEE~754.
 The result is Not a Number (NaN).
 \end{sub}
 
-\subsection{Problem 11}
+\subsection{Problem 11}\label{sol:11}
 \begin{sub}
 With a 4-bit fraction and 8-bit exponent (bias $= 127$):
 \begin{itemize}
@@ -960,14 +972,14 @@ With a 4-bit fraction and 8-bit exponent (bias $= 127$):
 \end{itemize}
 \end{sub}
 
-\subsection{Problem 12}
+\subsection{Problem 12}\label{sol:12}
 \begin{sub}
 \textbf{False.}  Any comparison involving NaN returns false, including
 $\text{NaN} = \text{NaN}$.  This is by definition in IEEE~754.  In fact,
 $x \neq x$ being true is a common test to check whether $x$ is NaN.
 \end{sub}
 
-\subsection{Problem 13}
+\subsection{Problem 13}\label{sol:13}
 \begin{sub}
 $a = 2^{24}$, $b = -2^{24}$, $c = 1.0$ (single precision, 23-bit fraction
 $\Rightarrow$ 24 significant bits):
@@ -982,7 +994,7 @@ The results differ ($1$ vs.\ $0$) because floating-point addition is not
 associative---the order of operations affects rounding.
 \end{sub}
 
-\subsection{Problem 14}
+\subsection{Problem 14}\label{sol:14}
 \begin{sub}
 Double-precision instructions require \textbf{even-numbered} register
 operands. \texttt{\$f1} is odd, so \texttt{add.d~\$f1,~\$f2,~\$f4} is
@@ -1001,7 +1013,7 @@ Each problem is printed on its own page with space for your handwritten solution
 
 % --- Problem 1 ---
 \newpage
-\subsection*{Problem 1}
+\subsection*{Problem 1 \hfill\normalsize\hyperref[sol:1]{$\to$ Solution}}
 \begin{sub}
 Convert $12.375_{10}$ to IEEE~754 single precision.  Give the final
 32-bit representation in binary and hexadecimal.
@@ -1010,7 +1022,7 @@ Convert $12.375_{10}$ to IEEE~754 single precision.  Give the final
 
 % --- Problem 2 ---
 \newpage
-\subsection*{Problem 2}
+\subsection*{Problem 2 \hfill\normalsize\hyperref[sol:2]{$\to$ Solution}}
 \begin{sub}
 Convert the IEEE~754 single-precision value
 \texttt{0xC1480000} to decimal.
@@ -1019,7 +1031,7 @@ Convert the IEEE~754 single-precision value
 
 % --- Problem 3 ---
 \newpage
-\subsection*{Problem 3}
+\subsection*{Problem 3 \hfill\normalsize\hyperref[sol:3]{$\to$ Solution}}
 \begin{sub}
 What decimal value does the following 32-bit pattern represent?
 \[
@@ -1030,7 +1042,7 @@ What decimal value does the following 32-bit pattern represent?
 
 % --- Problem 4 ---
 \newpage
-\subsection*{Problem 4}
+\subsection*{Problem 4 \hfill\normalsize\hyperref[sol:4]{$\to$ Solution}}
 \begin{sub}
 Perform the following floating-point addition.  Show all steps
 (align exponents, add significands, normalize, round).
@@ -1042,7 +1054,7 @@ Perform the following floating-point addition.  Show all steps
 
 % --- Problem 5 ---
 \newpage
-\subsection*{Problem 5}
+\subsection*{Problem 5 \hfill\normalsize\hyperref[sol:5]{$\to$ Solution}}
 \begin{sub}
 Perform the following floating-point multiplication.
 \[
@@ -1053,7 +1065,7 @@ Perform the following floating-point multiplication.
 
 % --- Problem 6 ---
 \newpage
-\subsection*{Problem 6}
+\subsection*{Problem 6 \hfill\normalsize\hyperref[sol:6]{$\to$ Solution}}
 \begin{sub}
 Given the stored exponent byte $1001\;0110_2$, compute the true
 exponent by adding $-127$ in binary.  Show the vertical addition.
@@ -1062,7 +1074,7 @@ exponent by adding $-127$ in binary.  Show the vertical addition.
 
 % --- Problem 7 ---
 \newpage
-\subsection*{Problem 7}
+\subsection*{Problem 7 \hfill\normalsize\hyperref[sol:7]{$\to$ Solution}}
 \begin{sub}
 Write a MIPS code fragment that loads two single-precision floats from
 memory addresses stored in \texttt{\$t0} and \texttt{\$t1}, adds them,
@@ -1072,7 +1084,7 @@ and stores the result to the address in \texttt{\$t2}.
 
 % --- Problem 8 ---
 \newpage
-\subsection*{Problem 8}
+\subsection*{Problem 8 \hfill\normalsize\hyperref[sol:8]{$\to$ Solution}}
 \begin{sub}
 What is the IEEE~754 single-precision representation of $-0.0$?
 How does it differ from $+0.0$?
@@ -1081,7 +1093,7 @@ How does it differ from $+0.0$?
 
 % --- Problem 9 ---
 \newpage
-\subsection*{Problem 9}
+\subsection*{Problem 9 \hfill\normalsize\hyperref[sol:9]{$\to$ Solution}}
 \begin{sub}
 Convert $0.1_{10}$ to IEEE~754 single precision.  Why can this value
 \emph{not} be represented exactly?
@@ -1090,7 +1102,7 @@ Convert $0.1_{10}$ to IEEE~754 single precision.  Why can this value
 
 % --- Problem 10 ---
 \newpage
-\subsection*{Problem 10}
+\subsection*{Problem 10 \hfill\normalsize\hyperref[sol:10]{$\to$ Solution}}
 \begin{sub}
 What is the result of the following in IEEE~754?
 \[
@@ -1101,7 +1113,7 @@ What is the result of the following in IEEE~754?
 
 % --- Problem 11 ---
 \newpage
-\subsection*{Problem 11}
+\subsection*{Problem 11 \hfill\normalsize\hyperref[sol:11]{$\to$ Solution}}
 \begin{sub}
 Consider a 4-bit fraction (instead of 23).  What is the smallest
 positive \emph{denormalized} number representable with an 8-bit
@@ -1111,7 +1123,7 @@ exponent (bias $= 127$)?
 
 % --- Problem 12 ---
 \newpage
-\subsection*{Problem 12}
+\subsection*{Problem 12 \hfill\normalsize\hyperref[sol:12]{$\to$ Solution}}
 \begin{sub}
 True or false: in IEEE~754, $\text{NaN} = \text{NaN}$.
 Explain your answer.
@@ -1120,7 +1132,7 @@ Explain your answer.
 
 % --- Problem 13 ---
 \newpage
-\subsection*{Problem 13}
+\subsection*{Problem 13 \hfill\normalsize\hyperref[sol:13]{$\to$ Solution}}
 \begin{sub}
 Show that floating-point addition is not associative by computing
 $(a + b) + c$ and $a + (b + c)$ with
@@ -1131,7 +1143,7 @@ Why do the results differ?
 
 % --- Problem 14 ---
 \newpage
-\subsection*{Problem 14}
+\subsection*{Problem 14 \hfill\normalsize\hyperref[sol:14]{$\to$ Solution}}
 \begin{sub}
 A student writes the MIPS instruction
 \texttt{add.d~\$f1,~\$f2,~\$f4}.
