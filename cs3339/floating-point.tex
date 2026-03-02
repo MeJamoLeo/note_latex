@@ -425,6 +425,24 @@ IEEE~754 reserves certain exponent values to encode special numbers.
   \item Both $+0$ (sign $=0$) and $-0$ (sign $=1$) exist.
   \item By definition, $+0 = -0$ in comparisons.
 \end{itemize}
+
+\begin{center}
+\begin{tikzpicture}[
+  bit/.style={draw, minimum height=0.55cm, font=\ttfamily\scriptsize, anchor=west},
+]
+% +0
+\node[font=\small\bfseries, anchor=east] at (-0.1, 0) {$+0.0$:};
+\node[bit, minimum width=0.7cm, fill=red!15]   (s1) at (0, 0) {0};
+\node[bit, minimum width=2.8cm, fill=blue!15]  (e1) at (s1.east) {0000\;0000};
+\node[bit, minimum width=5.5cm, fill=green!15] (f1) at (e1.east) {0000\;0000\;0000\;0000\;0000\;000};
+
+% -0
+\node[font=\small\bfseries, anchor=east] at (-0.1, -0.8) {$-0.0$:};
+\node[bit, minimum width=0.7cm, fill=red!30]   (s2) at (0, -0.8) {1};
+\node[bit, minimum width=2.8cm, fill=blue!15]  (e2) at (s2.east) {0000\;0000};
+\node[bit, minimum width=5.5cm, fill=green!15] (f2) at (e2.east) {0000\;0000\;0000\;0000\;0000\;000};
+\end{tikzpicture}
+\end{center}
 \end{sub}
 
 \subsection{Infinity}
@@ -434,6 +452,24 @@ IEEE~754 reserves certain exponent values to encode special numbers.
   \item $+\infty$: sign $= 0$; \quad $-\infty$: sign $= 1$.
   \item Results from overflow or division by zero (e.g., $1.0 / 0.0 = +\infty$).
 \end{itemize}
+
+\begin{center}
+\begin{tikzpicture}[
+  bit/.style={draw, minimum height=0.55cm, font=\ttfamily\scriptsize, anchor=west},
+]
+% +inf
+\node[font=\small\bfseries, anchor=east] at (-0.1, 0) {$+\infty$:};
+\node[bit, minimum width=0.7cm, fill=red!15]   (s1) at (0, 0) {0};
+\node[bit, minimum width=2.8cm, fill=blue!30]  (e1) at (s1.east) {1111\;1111};
+\node[bit, minimum width=5.5cm, fill=green!15] (f1) at (e1.east) {0000\;0000\;0000\;0000\;0000\;000};
+
+% -inf
+\node[font=\small\bfseries, anchor=east] at (-0.1, -0.8) {$-\infty$:};
+\node[bit, minimum width=0.7cm, fill=red!30]   (s2) at (0, -0.8) {1};
+\node[bit, minimum width=2.8cm, fill=blue!30]  (e2) at (s2.east) {1111\;1111};
+\node[bit, minimum width=5.5cm, fill=green!15] (f2) at (e2.east) {0000\;0000\;0000\;0000\;0000\;000};
+\end{tikzpicture}
+\end{center}
 \end{sub}
 
 \subsection{NaN (Not a Number)}
@@ -449,6 +485,25 @@ IEEE~754 reserves certain exponent values to encode special numbers.
   \item Any comparison involving NaN returns false
         (including $\text{NaN} = \text{NaN}$).
 \end{itemize}
+
+\begin{center}
+\begin{tikzpicture}[
+  bit/.style={draw, minimum height=0.55cm, font=\ttfamily\scriptsize, anchor=west},
+]
+% qNaN
+\node[font=\small\bfseries, anchor=east] at (-0.1, 0) {qNaN:};
+\node[bit, minimum width=0.7cm, fill=red!15]   (s1) at (0, 0) {0};
+\node[bit, minimum width=2.8cm, fill=blue!30]  (e1) at (s1.east) {1111\;1111};
+\node[bit, minimum width=5.5cm, fill=green!30] (f1) at (e1.east) {\textbf{1}000\;0000\;0000\;0000\;0000\;000};
+
+% sNaN
+\node[font=\small\bfseries, anchor=east] at (-0.1, -0.8) {sNaN:};
+\node[bit, minimum width=0.7cm, fill=red!15]   (s2) at (0, -0.8) {0};
+\node[bit, minimum width=2.8cm, fill=blue!30]  (e2) at (s2.east) {1111\;1111};
+\node[bit, minimum width=5.5cm, fill=green!30] (f2) at (e2.east) {\textbf{0}100\;0000\;0000\;0000\;0000\;000};
+\end{tikzpicture}
+\end{center}
+Key difference: fraction bit [22] distinguishes qNaN (\textbf{1}) from sNaN (\textbf{0}).
 \end{sub}
 
 \subsection{Denormalized (Subnormal) Numbers}
@@ -462,6 +517,24 @@ IEEE~754 reserves certain exponent values to encode special numbers.
 \end{itemize}
 
 Value: $(-1)^s \times 0.\text{fraction} \times 2^{-126}$ \quad (single precision).
+
+\begin{center}
+\begin{tikzpicture}[
+  bit/.style={draw, minimum height=0.55cm, font=\ttfamily\scriptsize, anchor=west},
+]
+% Smallest positive denormalized
+\node[font=\small\bfseries, anchor=east, align=right] at (-0.1, 0) {smallest\\denorm:};
+\node[bit, minimum width=0.7cm, fill=red!15]   (s1) at (0, 0) {0};
+\node[bit, minimum width=2.8cm, fill=blue!15]  (e1) at (s1.east) {0000\;0000};
+\node[bit, minimum width=5.5cm, fill=green!30] (f1) at (e1.east) {0000\;0000\;0000\;0000\;0000\;00\textbf{1}};
+
+% Largest denormalized
+\node[font=\small\bfseries, anchor=east, align=right] at (-0.1, -0.8) {largest\\denorm:};
+\node[bit, minimum width=0.7cm, fill=red!15]   (s2) at (0, -0.8) {0};
+\node[bit, minimum width=2.8cm, fill=blue!15]  (e2) at (s2.east) {0000\;0000};
+\node[bit, minimum width=5.5cm, fill=green!30] (f2) at (e2.east) {1111\;1111\;1111\;1111\;1111\;111};
+\end{tikzpicture}
+\end{center}
 \end{sub}
 
 \subsection{Summary Table (Single Precision)}
@@ -928,6 +1001,97 @@ Discard the overflow carry. True exponent $= 0001\;0111_2 = 23$.
       add.s $f2, $f0, $f1   # $f2 = $f0 + $f1
       swc1  $f2, 0($t2)     # store result to Mem[$t2]
 \end{verbatim}
+
+\medskip
+\textbf{Data flow overview:}
+
+\begin{center}
+\begin{tikzpicture}[
+  box/.style={draw, minimum height=0.7cm, minimum width=2.2cm,
+              font=\ttfamily\small, anchor=west},
+  lbl/.style={font=\small\bfseries, anchor=south},
+  arr/.style={-{Stealth[length=5pt]}, thick},
+  note/.style={font=\scriptsize, text=black!60},
+]
+
+% --- Column labels ---
+\node[lbl] at (0, 3.2)   {GPR};
+\node[lbl] at (3.8, 3.2) {Memory};
+\node[lbl] at (8, 3.2)   {FP Registers};
+
+% --- GPR column ---
+\node[box, fill=black!8] (t0) at (0, 2.4) {\$t0 = 100};
+\node[box, fill=black!8] (t1) at (0, 1.5) {\$t1 = 200};
+\node[box, fill=black!8] (t2) at (0, 0.6) {\$t2 = 300};
+
+% --- Memory column ---
+\node[box, fill=yellow!15] (m0) at (3.8, 2.4) {[100] \; 3.14};
+\node[box, fill=yellow!15] (m1) at (3.8, 1.5) {[200] \; 2.50};
+\node[box, fill=yellow!15] (m2) at (3.8, 0.6) {[300] \; 5.64};
+
+% --- FP register column ---
+\node[box, fill=green!15] (f0) at (8, 2.4) {\$f0 = 3.14};
+\node[box, fill=green!15] (f1) at (8, 1.5) {\$f1 = 2.50};
+\node[box, fill=blue!12]  (f2) at (8, 0.6) {\$f2 = 5.64};
+
+% --- Arrows: GPR -> Memory (address lookup) ---
+\draw[arr, dashed, black!50] (t0.east) -- (m0.west);
+\draw[arr, dashed, black!50] (t1.east) -- (m1.west);
+\draw[arr, dashed, black!50] (t2.east) -- (m2.west);
+
+% --- Arrows: Memory <-> FP registers ---
+\draw[arr, red!70!black] (m0.east) -- (f0.west)
+  node[midway, above, note] {lwc1};
+\draw[arr, red!70!black] (m1.east) -- (f1.west)
+  node[midway, above, note] {lwc1};
+\draw[arr, blue!70!black] (f2.west) -- (m2.east)
+  node[midway, above, note] {swc1};
+
+% --- add.s annotation ---
+\draw[arr, black!70] (f0.south east) -- (f2.north east)
+  node[midway, right, note, xshift=2pt] {add.s};
+\draw[arr, black!70] (f1.south east) -- (f2.east)
+  ;
+
+% --- Legend ---
+\node[anchor=north west, font=\scriptsize, text=black!70,
+      align=left] at (0, -0.2) {%
+  \tikz\draw[dashed, black!50, thick, -{Stealth[length=4pt]}] (0,0)--(0.6,0);
+  \; address reference \qquad
+  \tikz\draw[red!70!black, thick, -{Stealth[length=4pt]}] (0,0)--(0.6,0);
+  \; load (Memory $\to$ FP reg) \qquad
+  \tikz\draw[blue!70!black, thick, -{Stealth[length=4pt]}] (0,0)--(0.6,0);
+  \; store (FP reg $\to$ Memory)
+};
+
+\end{tikzpicture}
+\end{center}
+
+\textbf{Operand ordering principle.}\quad
+In MIPS, the \emph{register} operand always comes first:
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+\textbf{Type} & \textbf{Pattern} & \textbf{Data flow} \\
+\midrule
+Arithmetic & \texttt{op \; dest, src1, src2} & $\texttt{src1} \circ \texttt{src2} \to \texttt{dest}$ \\
+Load       & \texttt{op \; reg, \; offset(base)} & Memory $\to$ reg \\
+Store      & \texttt{op \; reg, \; offset(base)} & reg $\to$ Memory \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Load and store have the \emph{same} operand order---register first, memory
+address second.  The instruction name tells you the direction:
+\textbf{l}oad reads \emph{into} the register; \textbf{s}tore writes
+\emph{from} the register.
+
+\medskip
+\textbf{Addressing: \texttt{offset(\$base)}}\quad
+means memory address $= \texttt{\$base} + \texttt{offset}$.
+Writing \texttt{0(\$t0)} simply accesses the address stored in \texttt{\$t0}
+(offset $= 0$, i.e.\ no shift).
 \end{sub}
 
 \subsection{Problem 8}\label{sol:8}
@@ -1075,6 +1239,33 @@ exponent by adding $-127$ in binary.  Show the vertical addition.
 % --- Problem 7 ---
 \newpage
 \subsection*{Problem 7 \hfill\normalsize\hyperref[sol:7]{$\to$ Solution}}
+
+\textbf{Warm-up questions:}
+\begin{sub}
+\begin{enumerate}
+  \item[(a)] What unit in MIPS handles floating-point operations?
+        What are its registers called?
+
+  \vspace{1.5cm}
+
+  \item[(b)] What instruction loads a single-precision float from memory
+        into an FP register? (i.e., the FP equivalent of \texttt{lw})
+
+  \vspace{1.5cm}
+
+  \item[(c)] What does \texttt{4(\$t0)} mean?
+        If \texttt{\$t0} $= 200$, what memory address is accessed?
+
+  \vspace{1.5cm}
+
+  \item[(d)] What is the single-precision addition instruction?
+        What instruction stores an FP register back to memory?
+
+  \vspace{1.5cm}
+\end{enumerate}
+\end{sub}
+
+\textbf{Main problem:}
 \begin{sub}
 Write a MIPS code fragment that loads two single-precision floats from
 memory addresses stored in \texttt{\$t0} and \texttt{\$t1}, adds them,
@@ -1150,5 +1341,130 @@ A student writes the MIPS instruction
 What is wrong with this instruction?
 \end{sub}
 \vfill
+
+%=============================================================================
+% Appendix: MIPS Data Path Overview
+%=============================================================================
+\newpage
+\section*{Appendix: MIPS Data Path Overview}
+\addcontentsline{toc}{section}{Appendix: MIPS Data Path Overview}
+
+\begin{secbody}
+An architectural map showing which hardware components exist, where they
+live, and which instructions communicate between them.
+\end{secbody}
+
+\bigskip
+\begin{center}
+\begin{tikzpicture}[
+  comp/.style={draw, rounded corners=4pt, minimum height=0.8cm,
+               font=\small, align=center},
+  lbl/.style={font=\footnotesize\bfseries},
+  arr/.style={-{Stealth[length=5pt]}, thick},
+  note/.style={font=\scriptsize, text=black!60},
+]
+
+% ============ Processor boundary ============
+\draw[thick, rounded corners=8pt, fill=black!3]
+  (-0.5, 1.2) rectangle (15.3, -4.8);
+\node[lbl, anchor=north west] at (-0.2, 1.05) {Processor (chip)};
+
+% --- CPU box ---
+\draw[rounded corners=6pt, fill=red!5, thick]
+  (0.1, -0.1) rectangle (4.3, -4.2);
+\node[lbl, anchor=north west] at (0.3, -0.2) {CPU};
+
+\node[comp, fill=red!12, minimum width=3.4cm] (gpr) at (2.2, -1.0)
+  {GPR \\ \texttt{\$0}--\texttt{\$31}};
+\node[comp, fill=red!12, minimum width=3.4cm] (alu) at (2.2, -2.3)
+  {ALU \\ (integer arithmetic)};
+\node[comp, fill=red!12, minimum width=1.4cm] (pc) at (1.3, -3.5)
+  {PC};
+\node[comp, fill=red!12, minimum width=1.4cm] (cu) at (3.1, -3.5)
+  {Control};
+
+% --- CP1 (FPU) box ---
+\draw[rounded corners=6pt, fill=green!5, thick]
+  (5.3, -0.1) rectangle (9.9, -4.2);
+\node[lbl, anchor=north west] at (5.5, -0.2) {Coprocessor 1 (FPU)};
+
+\node[comp, fill=green!12, minimum width=3.6cm] (fpr) at (7.6, -1.0)
+  {FPR \\ \texttt{\$f0}--\texttt{\$f31}};
+\node[comp, fill=green!12, minimum width=3.6cm] (fpalu) at (7.6, -2.5)
+  {FP ALU \\ (FP arithmetic)};
+
+% --- CP0 box ---
+\draw[rounded corners=6pt, fill=orange!5, thick]
+  (10.7, -0.1) rectangle (14.9, -4.2);
+\node[lbl, anchor=north west] at (10.9, -0.2) {Coprocessor 0};
+\node[font=\footnotesize, anchor=north west] at (10.9, -0.55) {(System Control)};
+
+\node[comp, fill=orange!12, minimum width=3.2cm] (cp0) at (12.8, -1.7)
+  {Status, Cause, EPC};
+
+% --- mtc1/mfc1 arrows between GPR and FPR ---
+\draw[arr, purple!70, <->] (gpr.east) -- (fpr.west)
+  node[midway, above, font=\scriptsize] {\texttt{mtc1} / \texttt{mfc1}};
+
+% ============ Memory (outside processor) ============
+\draw[thick, rounded corners=6pt, fill=yellow!8]
+  (0.5, -5.8) rectangle (10.3, -7.2);
+\node[lbl, anchor=north west] at (0.7, -5.9) {Memory (RAM)};
+\node[font=\small, align=center] at (5.4, -6.7)
+  {Instructions + Data};
+
+% --- Bus from CPU/CP1 through processor to memory ---
+\draw[arr, thick, <->] (2.2, -4.2) -- (2.2, -5.8)
+  node[midway, left, note] {\texttt{lw / sw}};
+\draw[arr, thick, <->] (7.6, -4.2) -- (7.6, -5.8)
+  node[midway, right, note] {\texttt{lwc1 / swc1}};
+
+\end{tikzpicture}
+\end{center}
+
+\bigskip
+\textbf{Which instruction talks to which component?}
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+\textbf{Instruction} & \textbf{Path} & \textbf{Description} \\
+\midrule
+\texttt{add \$t0, \$t1, \$t2}
+  & GPR $\to$ ALU $\to$ GPR
+  & CPU internal \\
+\texttt{add.s \$f0, \$f1, \$f2}
+  & FPR $\to$ FP ALU $\to$ FPR
+  & CP1 internal \\
+\midrule
+\texttt{lw \$t0, 0(\$t1)}
+  & Memory $\to$ GPR
+  & Load integer \\
+\texttt{sw \$t0, 0(\$t1)}
+  & GPR $\to$ Memory
+  & Store integer \\
+\texttt{lwc1 \$f0, 0(\$t0)}
+  & Memory $\to$ FPR (addr from GPR)
+  & Load float \\
+\texttt{swc1 \$f0, 0(\$t0)}
+  & FPR $\to$ Memory (addr from GPR)
+  & Store float \\
+\midrule
+\texttt{mtc1 \$t0, \$f0}
+  & GPR $\to$ FPR
+  & Transfer within processor \\
+\texttt{mfc1 \$t0, \$f0}
+  & FPR $\to$ GPR
+  & Transfer within processor \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip
+\begin{remark}
+\texttt{lwc1} and \texttt{swc1} are \emph{cooperative} operations:
+the CPU computes the memory address (using GPR + ALU), while the data
+travels between Memory and the FP register file in CP1.
+\end{remark}
 
 \end{document}
