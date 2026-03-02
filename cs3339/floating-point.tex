@@ -352,8 +352,8 @@ informally but technically refers to the fractional part of a logarithm.
   \item Determine the \textbf{sign bit}: $s=0$ if positive, $s=1$ if negative.
         Work with the absolute value from here.
   \item Convert the \textbf{integer part} to binary (repeated division by 2).
-  \item Convert the \textbf{fractional part} to binary (repeated multiplication
-        by 2).
+  \item \colorbox{yellow!40}{Convert the \textbf{fractional part} to binary (repeated multiplication
+        by 2).}
   \item Combine and write in normalized form $1.xxxxx \times 2^{E}$.
   \item Compute the \textbf{biased exponent}: stored exponent $= E + 127$.
         Convert to 8-bit binary.
@@ -366,11 +366,11 @@ informally but technically refers to the fractional part of a logarithm.
 \begin{enumerate}
   \item Sign: negative $\Rightarrow s = 1$.
   \item Integer part $6 = 110_2$.
-  \item Fractional part $0.625$:
-        $0.625\times2=1.25$ (1),
-        $0.25\times2=0.5$ (0),
-        $0.5\times2=1.0$ (1).
-        So $0.625_{10} = 0.101_2$.
+  \item \colorbox{yellow!40}{Fractional part $0.625$:}
+        \colorbox{yellow!40}{$0.625\times2=1.25$ (1),}
+        \colorbox{yellow!40}{$0.25\times2=0.5$ (0),}
+        \colorbox{yellow!40}{$0.5\times2=1.0$ (1).}
+        \colorbox{yellow!40}{So $0.625_{10} = 0.101_2$.}
   \item Combined: $110.101_2 = 1.10101 \times 2^{2}$.
   \item Biased exponent: $2 + 127 = 129 = 10000001_2$.
   \item Fraction: $10101\underbrace{000\ldots0}_{18\text{ zeros}}$.
@@ -675,6 +675,124 @@ direction without storing the full intermediate result.
 % SECTION 9: Floating-Point in MIPS
 %=============================================================================
 \section{Floating-Point in MIPS}
+
+\subsection{MIPS Data Path Overview}
+\begin{sub}
+An architectural map showing which hardware components exist, where they
+live, and which instructions communicate between them.
+
+\bigskip
+\begin{center}
+\begin{tikzpicture}[
+  comp/.style={draw, rounded corners=4pt, minimum height=0.8cm,
+               font=\small, align=center},
+  lbl/.style={font=\footnotesize\bfseries},
+  arr/.style={-{Stealth[length=5pt]}, thick},
+  note/.style={font=\scriptsize, text=black!60},
+]
+
+% ============ Processor boundary ============
+\draw[thick, rounded corners=8pt, fill=black!3]
+  (-0.5, 1.2) rectangle (15.3, -4.8);
+\node[lbl, anchor=north west] at (-0.2, 1.05) {Processor (chip)};
+
+% --- CPU box ---
+\draw[rounded corners=6pt, fill=red!5, thick]
+  (0.1, -0.1) rectangle (4.3, -4.2);
+\node[lbl, anchor=north west] at (0.3, -0.2) {CPU};
+
+\node[comp, fill=red!12, minimum width=3.4cm] (gpr) at (2.2, -1.0)
+  {GPR \\ \texttt{\$0}--\texttt{\$31}};
+\node[comp, fill=red!12, minimum width=3.4cm] (alu) at (2.2, -2.3)
+  {ALU \\ (integer arithmetic)};
+\node[comp, fill=red!12, minimum width=1.4cm] (pc) at (1.3, -3.5)
+  {PC};
+\node[comp, fill=red!12, minimum width=1.4cm] (cu) at (3.1, -3.5)
+  {Control};
+
+% --- CP1 (FPU) box ---
+\draw[rounded corners=6pt, fill=green!5, thick]
+  (5.3, -0.1) rectangle (9.9, -4.2);
+\node[lbl, anchor=north west] at (5.5, -0.2) {Coprocessor 1 (FPU)};
+
+\node[comp, fill=green!12, minimum width=3.6cm] (fpr) at (7.6, -1.0)
+  {FPR \\ \texttt{\$f0}--\texttt{\$f31}};
+\node[comp, fill=green!12, minimum width=3.6cm] (fpalu) at (7.6, -2.5)
+  {FP ALU \\ (FP arithmetic)};
+
+% --- CP0 box ---
+\draw[rounded corners=6pt, fill=orange!5, thick]
+  (10.7, -0.1) rectangle (14.9, -4.2);
+\node[lbl, anchor=north west] at (10.9, -0.2) {Coprocessor 0};
+\node[font=\footnotesize, anchor=north west] at (10.9, -0.55) {(System Control)};
+
+\node[comp, fill=orange!12, minimum width=3.2cm] (cp0) at (12.8, -1.7)
+  {Status, Cause, EPC};
+
+% --- mtc1/mfc1 arrows between GPR and FPR ---
+\draw[arr, purple!70, <->] (gpr.east) -- (fpr.west)
+  node[midway, above, font=\scriptsize] {\texttt{mtc1} / \texttt{mfc1}};
+
+% ============ Memory (outside processor) ============
+\draw[thick, rounded corners=6pt, fill=yellow!8]
+  (0.5, -5.8) rectangle (10.3, -7.2);
+\node[lbl, anchor=north west] at (0.7, -5.9) {Memory (RAM)};
+\node[font=\small, align=center] at (5.4, -6.7)
+  {Instructions + Data};
+
+% --- Bus from CPU/CP1 through processor to memory ---
+\draw[arr, thick, <->] (2.2, -4.2) -- (2.2, -5.8)
+  node[midway, left, note] {\texttt{lw / sw}};
+\draw[arr, thick, <->] (7.6, -4.2) -- (7.6, -5.8)
+  node[midway, right, note] {\texttt{lwc1 / swc1}};
+
+\end{tikzpicture}
+\end{center}
+
+\bigskip
+\textbf{Which instruction talks to which component?}
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+\textbf{Instruction} & \textbf{Path} & \textbf{Description} \\
+\midrule
+\texttt{add \$t0, \$t1, \$t2}
+  & GPR $\to$ ALU $\to$ GPR
+  & CPU internal \\
+\texttt{add.s \$f0, \$f1, \$f2}
+  & FPR $\to$ FP ALU $\to$ FPR
+  & CP1 internal \\
+\midrule
+\texttt{lw \$t0, 0(\$t1)}
+  & Memory $\to$ GPR
+  & Load integer \\
+\texttt{sw \$t0, 0(\$t1)}
+  & GPR $\to$ Memory
+  & Store integer \\
+\texttt{lwc1 \$f0, 0(\$t0)}
+  & Memory $\to$ FPR (addr from GPR)
+  & Load float \\
+\texttt{swc1 \$f0, 0(\$t0)}
+  & FPR $\to$ Memory (addr from GPR)
+  & Store float \\
+\midrule
+\texttt{mtc1 \$t0, \$f0}
+  & GPR $\to$ FPR
+  & Transfer within processor \\
+\texttt{mfc1 \$t0, \$f0}
+  & FPR $\to$ GPR
+  & Transfer within processor \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{remark}
+\texttt{lwc1} and \texttt{swc1} are \emph{cooperative} operations:
+the CPU computes the memory address (using GPR + ALU), while the data
+travels between Memory and the FP register file in CP1.
+\end{remark}
+\end{sub}
 
 \subsection{Coprocessor 1 and FP Registers}
 \begin{sub}
@@ -1107,10 +1225,22 @@ IEEE~754 defines $+0 = -0$ for comparison purposes.
 
 \subsection{Problem 9}\label{sol:9}
 \begin{sub}
-$0.1_{10}$ in binary is a repeating fraction:
+Use the repeated multiplication by 2 method (same as Section~5.1, Step~3):
+
 \[
-  0.1_{10} = 0.0\overline{0011}_2 = 0.0001\;1001\;1001\;1001\;\ldots_2
+\begin{array}{rcll}
+  0.1 \times 2 &=& 0.2 & \to 0 \\
+  0.2 \times 2 &=& 0.4 & \to 0 \\
+  0.4 \times 2 &=& 0.8 & \to 0 \\
+  0.8 \times 2 &=& 1.6 & \to 1 \\
+  0.6 \times 2 &=& 1.2 & \to 1 \\
+  0.2 \times 2 &=& 0.4 & \to 0 \quad \leftarrow \text{back to } 0.2\text{; loop detected}
+\end{array}
 \]
+
+Reading the integer parts top-to-bottom gives
+$0.1_{10} = 0.0\overline{0011}_2 = 0.0001\;1001\;1001\;1001\;\ldots_2$.
+
 Since the pattern repeats infinitely, it cannot be represented exactly in a
 finite number of bits.  The stored value is the nearest representable
 approximation, which introduces a small rounding error
@@ -1341,130 +1471,5 @@ A student writes the MIPS instruction
 What is wrong with this instruction?
 \end{sub}
 \vfill
-
-%=============================================================================
-% Appendix: MIPS Data Path Overview
-%=============================================================================
-\newpage
-\section*{Appendix: MIPS Data Path Overview}
-\addcontentsline{toc}{section}{Appendix: MIPS Data Path Overview}
-
-\begin{secbody}
-An architectural map showing which hardware components exist, where they
-live, and which instructions communicate between them.
-\end{secbody}
-
-\bigskip
-\begin{center}
-\begin{tikzpicture}[
-  comp/.style={draw, rounded corners=4pt, minimum height=0.8cm,
-               font=\small, align=center},
-  lbl/.style={font=\footnotesize\bfseries},
-  arr/.style={-{Stealth[length=5pt]}, thick},
-  note/.style={font=\scriptsize, text=black!60},
-]
-
-% ============ Processor boundary ============
-\draw[thick, rounded corners=8pt, fill=black!3]
-  (-0.5, 1.2) rectangle (15.3, -4.8);
-\node[lbl, anchor=north west] at (-0.2, 1.05) {Processor (chip)};
-
-% --- CPU box ---
-\draw[rounded corners=6pt, fill=red!5, thick]
-  (0.1, -0.1) rectangle (4.3, -4.2);
-\node[lbl, anchor=north west] at (0.3, -0.2) {CPU};
-
-\node[comp, fill=red!12, minimum width=3.4cm] (gpr) at (2.2, -1.0)
-  {GPR \\ \texttt{\$0}--\texttt{\$31}};
-\node[comp, fill=red!12, minimum width=3.4cm] (alu) at (2.2, -2.3)
-  {ALU \\ (integer arithmetic)};
-\node[comp, fill=red!12, minimum width=1.4cm] (pc) at (1.3, -3.5)
-  {PC};
-\node[comp, fill=red!12, minimum width=1.4cm] (cu) at (3.1, -3.5)
-  {Control};
-
-% --- CP1 (FPU) box ---
-\draw[rounded corners=6pt, fill=green!5, thick]
-  (5.3, -0.1) rectangle (9.9, -4.2);
-\node[lbl, anchor=north west] at (5.5, -0.2) {Coprocessor 1 (FPU)};
-
-\node[comp, fill=green!12, minimum width=3.6cm] (fpr) at (7.6, -1.0)
-  {FPR \\ \texttt{\$f0}--\texttt{\$f31}};
-\node[comp, fill=green!12, minimum width=3.6cm] (fpalu) at (7.6, -2.5)
-  {FP ALU \\ (FP arithmetic)};
-
-% --- CP0 box ---
-\draw[rounded corners=6pt, fill=orange!5, thick]
-  (10.7, -0.1) rectangle (14.9, -4.2);
-\node[lbl, anchor=north west] at (10.9, -0.2) {Coprocessor 0};
-\node[font=\footnotesize, anchor=north west] at (10.9, -0.55) {(System Control)};
-
-\node[comp, fill=orange!12, minimum width=3.2cm] (cp0) at (12.8, -1.7)
-  {Status, Cause, EPC};
-
-% --- mtc1/mfc1 arrows between GPR and FPR ---
-\draw[arr, purple!70, <->] (gpr.east) -- (fpr.west)
-  node[midway, above, font=\scriptsize] {\texttt{mtc1} / \texttt{mfc1}};
-
-% ============ Memory (outside processor) ============
-\draw[thick, rounded corners=6pt, fill=yellow!8]
-  (0.5, -5.8) rectangle (10.3, -7.2);
-\node[lbl, anchor=north west] at (0.7, -5.9) {Memory (RAM)};
-\node[font=\small, align=center] at (5.4, -6.7)
-  {Instructions + Data};
-
-% --- Bus from CPU/CP1 through processor to memory ---
-\draw[arr, thick, <->] (2.2, -4.2) -- (2.2, -5.8)
-  node[midway, left, note] {\texttt{lw / sw}};
-\draw[arr, thick, <->] (7.6, -4.2) -- (7.6, -5.8)
-  node[midway, right, note] {\texttt{lwc1 / swc1}};
-
-\end{tikzpicture}
-\end{center}
-
-\bigskip
-\textbf{Which instruction talks to which component?}
-
-\begin{center}
-\begin{tabular}{lll}
-\toprule
-\textbf{Instruction} & \textbf{Path} & \textbf{Description} \\
-\midrule
-\texttt{add \$t0, \$t1, \$t2}
-  & GPR $\to$ ALU $\to$ GPR
-  & CPU internal \\
-\texttt{add.s \$f0, \$f1, \$f2}
-  & FPR $\to$ FP ALU $\to$ FPR
-  & CP1 internal \\
-\midrule
-\texttt{lw \$t0, 0(\$t1)}
-  & Memory $\to$ GPR
-  & Load integer \\
-\texttt{sw \$t0, 0(\$t1)}
-  & GPR $\to$ Memory
-  & Store integer \\
-\texttt{lwc1 \$f0, 0(\$t0)}
-  & Memory $\to$ FPR (addr from GPR)
-  & Load float \\
-\texttt{swc1 \$f0, 0(\$t0)}
-  & FPR $\to$ Memory (addr from GPR)
-  & Store float \\
-\midrule
-\texttt{mtc1 \$t0, \$f0}
-  & GPR $\to$ FPR
-  & Transfer within processor \\
-\texttt{mfc1 \$t0, \$f0}
-  & FPR $\to$ GPR
-  & Transfer within processor \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-\medskip
-\begin{remark}
-\texttt{lwc1} and \texttt{swc1} are \emph{cooperative} operations:
-the CPU computes the memory address (using GPR + ALU), while the data
-travels between Memory and the FP register file in CP1.
-\end{remark}
 
 \end{document}
