@@ -135,15 +135,18 @@ Instructions ($\times 10^9$) & 20   & 25    & 18.18 \\
 \end{tabular}
 \end{center}
 
-\medskip\noindent\textbf{c.} New time $= 0.7 \times 10 = 7$ s, new CPI $= 1.2
-\times \text{CPI}_{\text{old}}$.
-From the original: $\text{IC} \times \text{CPI}_{\text{old}} =
-10 \times \text{Clock}_{\text{old}}$.
+\medskip\noindent\textbf{c.} Let $T_{\text{new}} = 0.7\,T_{\text{old}}$, \;
+$\text{CPI}_{\text{new}} = 1.2\,\text{CPI}_{\text{old}}$.
+Since $T = \text{IC} \times \text{CPI} / \text{CR}$:
 \[
-  \text{Clock}_{\text{new}}
-  = \frac{\text{IC} \times 1.2 \times \text{CPI}_{\text{old}}}{7}
-  = \frac{1.2 \times 10 \times \text{Clock}_{\text{old}}}{7}
-  = \frac{12}{7}\;\text{Clock}_{\text{old}}
+  \frac{\text{IC} \times 1.2\,\text{CPI}_{\text{old}}}{\text{CR}_{\text{new}}}
+  = 0.7 \times \frac{\text{IC} \times \text{CPI}_{\text{old}}}{\text{CR}_{\text{old}}}
+\]
+IC and $\text{CPI}_{\text{old}}$ cancel:
+\[
+  \text{CR}_{\text{new}}
+  = \frac{1.2}{0.7}\;\text{CR}_{\text{old}}
+  = \frac{12}{7}\;\text{CR}_{\text{old}}
 \]
 
 \begin{center}
