@@ -250,16 +250,30 @@ Clock cycle time $= 1$ ns $\Rightarrow$ Clock rate $= 1$ GHz $= 10^9$ Hz.
     \;\Rightarrow\; \text{CPI}_B = 1.25
 \end{align*}
 
-\noindent\textbf{b.} Equal execution times on different processors:
+\noindent\textbf{b.} ``The clock of the processor running \ldots'' refers to
+the clock rate (CR) of each processor.
+
+\smallskip\noindent Start from
+$T = \text{IC} \times \text{CPI} \times \dfrac{1}{\text{CR}}$
+where CR = clock rate.
+The two processors achieve the same execution time, so $T_A = T_B$:
 \[
-  \frac{\text{IC}_A \times \text{CPI}_A}{\text{Clock}_A}
-  = \frac{\text{IC}_B \times \text{CPI}_B}{\text{Clock}_B}
-  \quad\Rightarrow\quad
-  \frac{\text{Clock}_A}{\text{Clock}_B}
+  \text{IC}_A \times \text{CPI}_A \times \frac{1}{\text{CR}_A}
+  = \text{IC}_B \times \text{CPI}_B \times \frac{1}{\text{CR}_B}
+\]
+Rearranging for the clock rate ratio:
+\[
+  \frac{\text{CR}_A}{\text{CR}_B}
+  = \frac{\text{IC}_A \times \text{CPI}_A}{\text{IC}_B \times \text{CPI}_B}
   = \frac{10^9 \times 1.1}{1.2 \times 10^9 \times 1.25}
   = \frac{1.1}{1.5} \approx 0.733
 \]
 Compiler A's processor clock is about 73.3\% of compiler B's.
+
+\smallskip\noindent\textit{Note:} The problem asks about ``the clock,'' which refers
+to clock rate (CR).  Since $\text{CR} = 1/\text{CC}$ (CC = clock cycle time),
+comparing clock rates is equivalent to comparing clocks---a higher CR means a
+faster clock.
 
 \medskip\noindent\textbf{c.} New compiler: IC $= 6 \times 10^8$, CPI $= 1.1$:
 \[
