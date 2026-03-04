@@ -1,0 +1,914 @@
+%=============================================================================
+% Chapter 2 Solutions
+%=============================================================================
+\newpage
+\section*{Chapter 2 Solutions}
+\addcontentsline{toc}{section}{Chapter 2 Solutions}
+
+%-----------------------------------------------------------------------------
+\subsection*{2.1 --- C to MIPS: Arithmetic}
+\hypertarget{sol-2.1}{}
+\markright{2.1}
+\addcontentsline{toc}{subsection}{2.1 --- C to MIPS: Arithmetic}
+
+\texttt{f = g + h - 5;} with \texttt{f}$=$\texttt{\$s0},
+\texttt{g}$=$\texttt{\$s1}, \texttt{h}$=$\texttt{\$s2}.
+
+\begin{verbatim}
+    add  $s0, $s1, $s2     # f = g + h
+    addi $s0, $s0, -5      # f = f - 5
+\end{verbatim}
+Two instructions (minimal).
+
+%-----------------------------------------------------------------------------
+\subsection*{2.2 --- MIPS to C: Two Adds}
+\hypertarget{sol-2.2}{}
+\markright{2.2}
+\addcontentsline{toc}{subsection}{2.2 --- MIPS to C: Two Adds}
+
+\begin{verbatim}
+    add $t0, $s1, $s2      # t0 = g + h
+    add $s0, $t0, $s3      # f = t0 + i
+\end{verbatim}
+C statement: \texttt{f = g + h + i;}
+
+(Assuming \texttt{f}$=$\texttt{\$s0}, \texttt{g}$=$\texttt{\$s1},
+\texttt{h}$=$\texttt{\$s2}, \texttt{i}$=$\texttt{\$s3}.)
+
+%-----------------------------------------------------------------------------
+\subsection*{2.3 --- C to MIPS: Array Access}
+\hypertarget{sol-2.3}{}
+\markright{2.3}
+\addcontentsline{toc}{subsection}{2.3 --- C to MIPS: Array Access}
+
+\texttt{B[8] = A[i] + A[j];} with 4-byte (word) elements.
+\begin{verbatim}
+    sll  $t0, $s3, 2       # $t0 = i * 4
+    add  $t0, $s6, $t0     # $t0 = &A[i]
+    lw   $t0, 0($t0)       # $t0 = A[i]
+    sll  $t1, $s4, 2       # $t1 = j * 4
+    add  $t1, $s6, $t1     # $t1 = &A[j]
+    lw   $t1, 0($t1)       # $t1 = A[j]
+    add  $t0, $t0, $t1     # $t0 = A[i] + A[j]
+    sw   $t0, 32($s7)      # B[8] = $t0  (8*4=32)
+\end{verbatim}
+
+%-----------------------------------------------------------------------------
+\subsection*{2.4 --- MIPS to C: Array Code}
+\hypertarget{sol-2.4}{}
+\markright{2.4}
+\addcontentsline{toc}{subsection}{2.4 --- MIPS to C: Array Code}
+
+Reading the assembly line by line:
+\begin{enumerate}
+  \item \texttt{sll \$t0, \$s0, 2} $\rightarrow$ \texttt{\$t0 = f * 4}
+  \item \texttt{add \$t0, \$s6, \$t0} $\rightarrow$ \texttt{\$t0 = \&A[f]}
+  \item \texttt{sll \$t1, \$s1, 2} $\rightarrow$ \texttt{\$t1 = g * 4}
+  \item \texttt{add \$t1, \$s7, \$t1} $\rightarrow$ \texttt{\$t1 = \&B[g]}
+  \item \texttt{lw \$s0, 0(\$t0)} $\rightarrow$ \texttt{f = A[f]}
+  \item \texttt{addi \$t2, \$t0, 4} $\rightarrow$ \texttt{\$t2 = \&A[f] + 4
+        = \&A[f+1]}
+  \item \texttt{lw \$t0, 0(\$t2)} $\rightarrow$ \texttt{\$t0 = A[f+1]}
+  \item \texttt{add \$t0, \$t0, \$s0} $\rightarrow$ \texttt{\$t0 = A[f+1] + f}
+        (but f was overwritten in step 5 to A[f])
+  \item \texttt{sw \$t0, 0(\$t1)} $\rightarrow$ \texttt{B[g] = \$t0}
+\end{enumerate}
+
+C code (using original f):
+\begin{verbatim}
+    B[g] = A[f] + A[f + 1];
+\end{verbatim}
+Note: the original value of \texttt{f} is destroyed (overwritten with
+\texttt{A[f]}).
+
+%-----------------------------------------------------------------------------
+\subsection*{2.5 --- Byte Ordering: Endianness}
+\hypertarget{sol-2.5}{}
+\markright{2.5}
+\addcontentsline{toc}{subsection}{2.5 --- Byte Ordering: Endianness}
+
+Value \texttt{0xABCDEF12} stored at address 0:
+
+\begin{center}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Address} & 0 & 1 & 2 & 3 \\
+\midrule
+Big-endian    & \texttt{AB} & \texttt{CD} & \texttt{EF} & \texttt{12} \\
+Little-endian & \texttt{12} & \texttt{EF} & \texttt{CD} & \texttt{AB} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Big-endian stores the most significant byte at the lowest address.
+Little-endian stores the least significant byte at the lowest address.
+
+%-----------------------------------------------------------------------------
+\subsection*{2.6 --- Hex to Decimal Conversion}
+\hypertarget{sol-2.6}{}
+\markright{2.6}
+\addcontentsline{toc}{subsection}{2.6 --- Hex to Decimal Conversion}
+
+\texttt{0xABCDEF12}:
+\begin{align*}
+  &= 10 \times 16^7 + 11 \times 16^6 + 12 \times 16^5 + 13 \times 16^4
+     + 14 \times 16^3 + 15 \times 16^2 + 1 \times 16^1 + 2 \times 16^0 \\
+  &= 2{,}882{,}400{,}018
+\end{align*}
+
+As a signed 32-bit integer (MSB is 1):
+$2{,}882{,}400{,}018 - 2^{32} = -1{,}412{,}567{,}278$.
+
+%-----------------------------------------------------------------------------
+\subsection*{2.7 --- C to MIPS: 8-Byte Word Arrays}
+\hypertarget{sol-2.7}{}
+\markright{2.7}
+\addcontentsline{toc}{subsection}{2.7 --- C to MIPS: 8-Byte Word Arrays}
+
+Same as 2.3 but with 8-byte elements, so multiply index by 8 (shift left by
+3):
+\begin{verbatim}
+    sll  $t0, $s3, 3       # $t0 = i * 8
+    add  $t0, $s6, $t0     # $t0 = &A[i]
+    lw   $t0, 0($t0)       # $t0 = A[i] (lower 32 bits)
+    sll  $t1, $s4, 3       # $t1 = j * 8
+    add  $t1, $s6, $t1     # $t1 = &A[j]
+    lw   $t1, 0($t1)       # $t1 = A[j] (lower 32 bits)
+    add  $t0, $t0, $t1     # $t0 = A[i] + A[j]
+    sw   $t0, 64($s7)      # B[8] = $t0  (8*8=64)
+\end{verbatim}
+Note: for a full 64-bit value on a 32-bit MIPS, both the upper and lower
+32 bits would need to be loaded and added. The solution above handles only
+the lower word.
+
+%-----------------------------------------------------------------------------
+\subsection*{2.8 --- Instruction Format Fields}
+\hypertarget{sol-2.8}{}
+\markright{2.8}
+\addcontentsline{toc}{subsection}{2.8 --- Instruction Format Fields}
+
+\texttt{add \$s0, \$s0, \$s1} --- R-type:
+\begin{center}
+\begin{tabular}{cccccc}
+\toprule
+op & rs & rt & rd & shamt & funct \\
+\midrule
+0 & 16 (\$s0) & 17 (\$s1) & 16 (\$s0) & 0 & 32 (add) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\texttt{sw \$t1, 0(\$s0)} --- I-type:
+\begin{center}
+\begin{tabular}{cccc}
+\toprule
+op & rs & rt & immediate \\
+\midrule
+43 (sw) & 16 (\$s0) & 9 (\$t1) & 0 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+%-----------------------------------------------------------------------------
+\subsection*{2.9 --- MIPS Fields for Exercise 2.8}
+\hypertarget{sol-2.9}{}
+\markright{2.9}
+\addcontentsline{toc}{subsection}{2.9 --- MIPS Fields for Exercise 2.8}
+
+Binary encoding for each instruction:
+
+\texttt{add \$s0, \$s0, \$s1}:
+\begin{verbatim}
+  000000 10000 10001 10000 00000 100000
+  op=0   rs=16 rt=17  rd=16 sh=0  fn=32
+\end{verbatim}
+Hex: \texttt{0x02118020}
+
+\texttt{sw \$t1, 0(\$s0)}:
+\begin{verbatim}
+  101011 10000 01001 0000000000000000
+  op=43  rs=16 rt=9   imm=0
+\end{verbatim}
+Hex: \texttt{0xAE090000}
+
+%-----------------------------------------------------------------------------
+\subsection*{2.10 --- Register Arithmetic and Overflow}
+\hypertarget{sol-2.10}{}
+\markright{2.10}
+\addcontentsline{toc}{subsection}{2.10 --- Register Arithmetic and Overflow}
+
+\texttt{\$s0 = 0x80000000} $= -2{,}147{,}483{,}648$, \quad
+\texttt{\$s1 = 0xD0000000} $= -805{,}306{,}368$.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{2.10.1}
+\medskip\noindent\textbf{2.10.1} \texttt{add \$t0, \$s0, \$s1}:
+$\texttt{0x80000000} + \texttt{0xD0000000} = \texttt{0x(1)50000000}$.
+Lower 32 bits: \texttt{\$t0 = 0x50000000}.
+
+\noindent\textbf{2.10.2}
+Both operands are negative; the true sum is
+$-2{,}147{,}483{,}648 + (-805{,}306{,}368) = -2{,}952{,}789{,}016$,
+which is below $-2^{31}$.  The result \texttt{0x50000000} is positive.
+\textbf{Overflow has occurred.}
+
+\phantomsection\addcontentsline{toc}{subsubsection}{2.10.3}
+\medskip\noindent\textbf{2.10.3} \texttt{sub \$t0, \$s0, \$s1}:
+$\texttt{0x80000000} - \texttt{0xD0000000} = \texttt{0x80000000}
++ \texttt{0x30000000} = \texttt{0xB0000000}$.
+\texttt{\$t0 = 0xB0000000} $= -1{,}342{,}177{,}280$.
+
+\noindent\textbf{2.10.4}
+True result: $-2{,}147{,}483{,}648 - (-805{,}306{,}368)
+= -1{,}342{,}177{,}280$, which fits in 32 bits.
+\textbf{No overflow.}
+
+\phantomsection\addcontentsline{toc}{subsubsection}{2.10.5}
+\medskip\noindent\textbf{2.10.5}
+First: \texttt{add \$t0, \$s0, \$s1}
+$\rightarrow$ \texttt{\$t0 = 0x50000000} (overflow already).
+Then: \texttt{add \$t0, \$t0, \$s0}
+$= \texttt{0x50000000} + \texttt{0x80000000} = \texttt{0xD0000000}$.
+
+\noindent\textbf{2.10.6}
+The first add already overflowed. The final value \texttt{0xD0000000}
+happens to equal \texttt{\$s1}, but the computation is incorrect.
+\textbf{Overflow occurred} in the first instruction.
+
+%-----------------------------------------------------------------------------
+\subsection*{2.11 --- Overflow Ranges}
+\hypertarget{sol-2.11}{}
+\markright{2.11}
+\addcontentsline{toc}{subsection}{2.11 --- Overflow Ranges}
+
+\texttt{\$s1 = 128}.
+
+\noindent\textbf{2.11.1} \texttt{add \$s0, \$s0, \$s1}: overflow when
+$\texttt{\$s0} + 128 > 2^{31}-1$, i.e.\ $\texttt{\$s0} > 2^{31}-129
+= 2{,}147{,}483{,}519$.
+Range: $\texttt{\$s0} \in [2{,}147{,}483{,}520,\; 2{,}147{,}483{,}647]$.
+
+\noindent\textbf{2.11.2} \texttt{sub \$s0, \$s0, \$s1}: overflow when
+$\texttt{\$s0} - 128 < -2^{31}$, i.e.\ $\texttt{\$s0} < -2^{31}+128
+= -2{,}147{,}483{,}520$.
+Range: $\texttt{\$s0} \in [-2{,}147{,}483{,}648,\; -2{,}147{,}483{,}521]$.
+
+\noindent\textbf{2.11.3} \texttt{sub \$s0, \$s1, \$s0}: overflow when
+$128 - \texttt{\$s0} > 2^{31}-1$ (positive overflow) or
+$128 - \texttt{\$s0} < -2^{31}$ (negative overflow).
+Positive: $\texttt{\$s0} < 128 - (2^{31}-1) = -2{,}147{,}483{,}519$, so
+$\texttt{\$s0} \in [-2{,}147{,}483{,}648,\; -2{,}147{,}483{,}520]$.
+
+%-----------------------------------------------------------------------------
+\subsection*{2.12 --- Binary to Instruction Type}
+\hypertarget{sol-2.12}{}
+\markright{2.12}
+\addcontentsline{toc}{subsection}{2.12 --- Binary to Instruction Type}
+
+Binary: \texttt{0000 0010 0001 0100 1000 0000 0010 0000}.
+
+\begin{verbatim}
+  000000 10001 01001 00000 00100 000
+\end{verbatim}
+Wait---let us regroup by field boundaries:
+\begin{verbatim}
+  000000 00100 10100 10000 00000 100000
+  op=0   rs=4  rt=20  rd=16 sh=0  fn=32
+\end{verbatim}
+
+Hmm, let me recount the 32 bits:
+\begin{verbatim}
+  0000 0010 0001 0100 1000 0000 0010 0000
+\end{verbatim}
+R-type field split (6-5-5-5-5-6):
+\begin{verbatim}
+  000000 10001 01001 00000 00010 000000
+\end{verbatim}
+Wait, that does not add up to 32 bits properly either. Let me be careful:
+\begin{verbatim}
+  Bits: 0000 0010 0001 0100 1000 0000 0010 0000
+  Flat: 00000010000101001000000000100000
+  R:    000000 10000 10100 10000 00000 100000
+        op=0   rs=16 rt=20 rd=16 sh=0  fn=32
+\end{verbatim}
+op=0, funct=32 $\Rightarrow$ \textbf{R-type, \texttt{add}}.
+\texttt{add \$s0, \$s0, \$s4} \quad (rd=16=\$s0, rs=16=\$s0, rt=20=\$s4).
+
+%-----------------------------------------------------------------------------
+\subsection*{2.13 --- Instruction to Hex Representation}
+\hypertarget{sol-2.13}{}
+\markright{2.13}
+\addcontentsline{toc}{subsection}{2.13 --- Instruction to Hex Representation}
+
+\texttt{add \$t1, \$s2, \$t1}: R-type.
+Registers: rd=\$t1=9, rs=\$s2=18, rt=\$t1=9, shamt=0, funct=32.
+\begin{verbatim}
+  000000 10010 01001 01001 00000 100000
+\end{verbatim}
+Hex: \texttt{0x02494820}.
+
+%-----------------------------------------------------------------------------
+\subsection*{2.14 --- MIPS Fields to Instruction (R-type)}
+\hypertarget{sol-2.14}{}
+\markright{2.14}
+\addcontentsline{toc}{subsection}{2.14 --- MIPS Fields to Instruction (R-type)}
+
+\texttt{op=0, rs=3, rt=2, rd=3, shamt=0, funct=34}.
+
+op=0, funct=34 $\Rightarrow$ \texttt{sub}.
+rs=3=\$v1, rt=2=\$v0, rd=3=\$v1.
+
+Assembly: \texttt{sub \$v1, \$v1, \$v0}.
+
+Binary:
+\begin{verbatim}
+  000000 00011 00010 00011 00000 100010
+\end{verbatim}
+
+%-----------------------------------------------------------------------------
+\subsection*{2.15 --- MIPS Fields to Instruction (I-type)}
+\hypertarget{sol-2.15}{}
+\markright{2.15}
+\addcontentsline{toc}{subsection}{2.15 --- MIPS Fields to Instruction (I-type)}
+
+\texttt{op=0x23, rs=1, rt=2, const=0x4}.
+
+op=0x23=35 $\Rightarrow$ \texttt{lw} (load word).
+rs=1=\$at, rt=2=\$v0.
+
+Assembly: \texttt{lw \$v0, 4(\$at)}.
+
+Binary:
+\begin{verbatim}
+  100011 00001 00010 0000000000000100
+\end{verbatim}
+
+%-----------------------------------------------------------------------------
+\subsection*{2.16 --- Expanding the Register File}
+\hypertarget{sol-2.16}{}
+\markright{2.16}
+\addcontentsline{toc}{subsection}{2.16 --- Expanding the Register File}
+
+128 registers $\Rightarrow$ 7 bits per register field.
+4$\times$ instructions $\Rightarrow$ opcode from 6 to 8 bits.
+
+\noindent\textbf{2.16.1} R-type: op(8) + rs(7) + rt(7) + rd(7) + shamt(?)
++ funct(?) = 32 bits. 32 $-$ 8 $-$ 7 $-$ 7 $-$ 7 = 3 bits left for
+shamt + funct. The funct field shrinks drastically, limiting the number of
+R-type ALU operations.
+
+\noindent\textbf{2.16.2} I-type: op(8) + rs(7) + rt(7) + immediate(?)
+= 32 bits. Immediate $= 32 - 8 - 7 - 7 = 10$ bits (reduced from 16).
+
+\noindent\textbf{2.16.3}
+\textit{Decrease program size:} more registers means fewer load/store
+spills; more opcodes can encode complex operations in one instruction.
+\textit{Increase program size:} the smaller immediate field forces more
+\texttt{lui}/\texttt{ori} pairs to load constants, and branch offsets become
+shorter, possibly requiring extra jumps.
+
+%-----------------------------------------------------------------------------
+\subsection*{2.17 --- Bitwise Operations on Registers}
+\hypertarget{sol-2.17}{}
+\markright{2.17}
+\addcontentsline{toc}{subsection}{2.17 --- Bitwise Operations on Registers}
+
+\texttt{\$t0 = 0xAAAAAAAA}, \texttt{\$t1 = 0x12345678}.
+
+\noindent\textbf{2.17.1}
+\begin{align*}
+  \texttt{sll \$t2, \$t0, 4}: &\quad \texttt{0xAAAAAAAA} \ll 4
+    = \texttt{0xAAAAAAA0} \\
+  \texttt{or  \$t2, \$t2, \$t1}: &\quad \texttt{0xAAAAAAA0}
+    \mid \texttt{0x12345678} = \texttt{0xBABEFEF8}
+\end{align*}
+
+\noindent\textbf{2.17.2}
+\begin{align*}
+  \texttt{srl \$t2, \$t0, 3}: &\quad \texttt{0xAAAAAAAA} \gg 3
+    = \texttt{0x15555555} \\
+  \texttt{and \$t2, \$t2, \$t1}: &\quad \texttt{0x15555555}
+    \mathbin{\&} \texttt{0x12345678} = \texttt{0x10145450}
+\end{align*}
+
+\noindent\textbf{2.17.3}
+\begin{align*}
+  \texttt{srl \$t2, \$t0, 4}: &\quad \texttt{0xAAAAAAAA} \gg 4
+    = \texttt{0x0AAAAAAA} \\
+  \texttt{andi \$t2, \$t2, -1}: &\quad \text{andi sign-extends the 16-bit
+    immediate } \texttt{-1} = \texttt{0xFFFF} \\
+  &\quad \texttt{0x0AAAAAAA} \mathbin{\&} \texttt{0x0000FFFF}
+    = \texttt{0x0000AAAA}
+\end{align*}
+Note: \texttt{andi} zero-extends the 16-bit immediate, so \texttt{-1} as a
+16-bit value is \texttt{0xFFFF}, which becomes \texttt{0x0000FFFF}.
+
+%-----------------------------------------------------------------------------
+\subsection*{2.18 --- Bit Field Extraction}
+\hypertarget{sol-2.18}{}
+\markright{2.18}
+\addcontentsline{toc}{subsection}{2.18 --- Bit Field Extraction}
+
+Extract bits 16:11 from \texttt{\$t0}, place into bits 31:26 of
+\texttt{\$t1}:
+\begin{verbatim}
+    srl  $t2, $t0, 11      # shift bits 16:11 to 5:0
+    andi $t2, $t2, 0x3F    # mask to 6 bits
+    sll  $t2, $t2, 26      # move to bits 31:26
+    lui  $t3, 0x03FF       # $t3 = 0x03FFFFFF
+    ori  $t3, $t3, 0xFFFF  # mask for bits 25:0
+    and  $t1, $t1, $t3     # clear bits 31:26 of $t1
+    or   $t1, $t1, $t2     # insert extracted bits
+\end{verbatim}
+
+%-----------------------------------------------------------------------------
+\subsection*{2.19 --- Pseudoinstruction Implementation}
+\hypertarget{sol-2.19}{}
+\markright{2.19}
+\addcontentsline{toc}{subsection}{2.19 --- Pseudoinstruction Implementation}
+
+\texttt{not \$t0, \$t1} $\equiv$ bitwise NOT.
+\begin{verbatim}
+    nor $t0, $t1, $zero    # $t0 = ~($t1 | 0) = ~$t1
+\end{verbatim}
+One instruction.
+
+%-----------------------------------------------------------------------------
+\subsection*{2.20 --- C to MIPS: Array Sum}
+\hypertarget{sol-2.20}{}
+\markright{2.20}
+\addcontentsline{toc}{subsection}{2.20 --- C to MIPS: Array Sum}
+
+\texttt{A = C[0] + C[4];}  with \texttt{A}$=$\texttt{\$t0},
+base of \texttt{C}$=$\texttt{\$s0}.
+\begin{verbatim}
+    lw   $t1, 0($s0)       # $t1 = C[0]
+    lw   $t2, 16($s0)      # $t2 = C[4]  (4*4=16)
+    add  $t0, $t1, $t2     # A = C[0] + C[4]
+\end{verbatim}
+
+%-----------------------------------------------------------------------------
+\subsection*{2.21 --- SLT and Branch}
+\hypertarget{sol-2.21}{}
+\markright{2.21}
+\addcontentsline{toc}{subsection}{2.21 --- SLT and Branch}
+
+\texttt{\$s0 = 0x80000000} $= -2^{31}$ (most negative signed value).
+\begin{verbatim}
+    slt  $t2, $s0, $zero   # -2^31 < 0? Yes -> $t2 = 1
+    bne  $t2, $zero, ELSE  # 1 != 0, branch taken
+    j    EXIT              # (skipped)
+ELSE:
+    addi $t2, $t2, 2       # $t2 = 1 + 2 = 3
+EXIT:
+\end{verbatim}
+\textbf{\$t2 = 3.}
+
+%-----------------------------------------------------------------------------
+\subsection*{2.22 --- PC Addressing Range}
+\hypertarget{sol-2.22}{}
+\markright{2.22}
+\addcontentsline{toc}{subsection}{2.22 --- PC Addressing Range}
+
+PC $=$ \texttt{0x00400000}.
+
+\noindent\textbf{2.22.1} \texttt{jal} uses a 26-bit word address. The
+target address is formed by concatenating the upper 4 bits of PC+4 with the
+26-bit field shifted left by 2:
+\[
+  \text{Range} = [\texttt{0x00000000},\; \texttt{0x0FFFFFFC}]
+\]
+(any address in the same 256 MB region as PC+4).
+
+\noindent\textbf{2.22.2} \texttt{beq} uses a 16-bit signed offset
+(word-aligned):
+\[
+  \text{Range} = [\text{PC}+4 - 2^{17},\; \text{PC}+4 + 2^{17}-4]
+  = [\texttt{0x003E0004},\; \texttt{0x00420000}]
+\]
+($\pm 128$ KB from PC+4.)
+
+%-----------------------------------------------------------------------------
+\subsection*{2.23 --- Proposed \texttt{rpt} Instruction}
+\hypertarget{sol-2.23}{}
+\markright{2.23}
+\addcontentsline{toc}{subsection}{2.23 --- Proposed \texttt{rpt} Instruction}
+
+\textbf{Format:} I-type works well---rs holds the counter register, the
+immediate encodes the decrement value, and the offset (or label) points to
+the loop target.
+
+\textbf{Issues:} (1) The instruction does two operations (decrement +
+conditional branch), violating the MIPS ``simplicity'' design principle.
+(2) It writes a register \emph{and} changes the PC in one instruction,
+complicating the pipeline. (3) The branch offset may need more bits than
+available in a single I-type immediate field.
+
+%-----------------------------------------------------------------------------
+\subsection*{2.24 --- MIPS Loop Analysis}
+\hypertarget{sol-2.24}{}
+\markright{2.24}
+\addcontentsline{toc}{subsection}{2.24 --- MIPS Loop Analysis}
+
+\noindent\textbf{2.24.1}
+The loop loads \texttt{MemArray[0]} through \texttt{MemArray[9]} and
+accumulates the sum in \texttt{\$s2}:
+$\texttt{\$s2} = \sum_{k=0}^{9} \texttt{MemArray}[k]$.
+
+\noindent\textbf{2.24.2} C code:
+\begin{verbatim}
+    int b = 0;
+    for (int i = 10; i > 0; i--) {
+        b = b + *ptr;   // ptr initially = &MemArray[0]
+        ptr++;
+    }
+\end{verbatim}
+
+\noindent\textbf{2.24.3}
+Loop body = 5 instructions, plus 1 initialization = 1 + $5N$
+instructions total. The \texttt{bne} in the last iteration falls through.
+Total: $5N + 1$.
+
+%-----------------------------------------------------------------------------
+\subsection*{2.25 --- C to MIPS: Nested Loop}
+\hypertarget{sol-2.25}{}
+\markright{2.25}
+\addcontentsline{toc}{subsection}{2.25 --- C to MIPS: Nested Loop}
+
+\begin{verbatim}
+        add  $t0, $zero, $zero    # i = 0
+OUTER:  slt  $t2, $t0, $s0       # i < a?
+        beq  $t2, $zero, DONE    # if not, exit
+        add  $t1, $zero, $zero   # j = 0
+INNER:  slt  $t2, $t1, $s1      # j < b?
+        beq  $t2, $zero, ENDIN  # if not, exit inner
+        add  $t3, $t0, $t1      # i + j
+        sll  $t4, $t1, 4        # 4*j*4 = j*16 (byte offset)
+        add  $t4, $s2, $t4      # &D[4*j]
+        sw   $t3, 0($t4)        # D[4*j] = i + j
+        addi $t1, $t1, 1        # j++
+        j    INNER
+ENDIN:  addi $t0, $t0, 1        # i++
+        j    OUTER
+DONE:
+\end{verbatim}
+
+%-----------------------------------------------------------------------------
+\subsection*{2.26 --- Instruction Count for Nested Loop}
+\hypertarget{sol-2.26}{}
+\markright{2.26}
+\addcontentsline{toc}{subsection}{2.26 --- Instruction Count for Nested Loop}
+
+Static instruction count: 13 instructions (as listed above).
+
+With $a=10$, $b=1$: outer loop runs 10 times, inner loop runs 1 time per
+outer iteration.
+\begin{itemize}
+  \item Outer setup: 1 (init i)
+  \item Per outer iteration: 3 (slt, beq, init j) + inner iterations +
+        2 (addi i, j OUTER)
+  \item Per inner iteration: 7 instructions (slt, beq, add, sll, add, sw,
+        addi, j)---actually 8 counting the j INNER.
+  \item Final outer exit: 2 (slt, beq)
+\end{itemize}
+Total $\approx 1 + 10 \times (3 + 1 \times 8 + 2 + 2) + 2
+= 1 + 10 \times 15 + 2 = 153$ (approximate; exact count depends on
+implementation details).
+
+%-----------------------------------------------------------------------------
+\subsection*{2.27 --- MIPS Loop to C}
+\hypertarget{sol-2.27}{}
+\markright{2.27}
+\addcontentsline{toc}{subsection}{2.27 --- MIPS Loop to C}
+
+Reading the assembly:
+\begin{verbatim}
+    i = 0;
+    for (i = 0; i < 10; i++) {
+        result = MemArray[i] + i;
+    }
+\end{verbatim}
+Note: \texttt{result} is overwritten each iteration, so the final value
+is \texttt{MemArray[9] + 9}.
+
+Actually, looking more carefully at the code: the \texttt{lw} loads from
+the current pointer, then adds \texttt{i} to the loaded value and stores
+the result in \texttt{\$s2}. The pointer advances by 4 each iteration.
+
+%-----------------------------------------------------------------------------
+\subsection*{2.28 --- Optimize MIPS Loop}
+\hypertarget{sol-2.28}{}
+\markright{2.28}
+\addcontentsline{toc}{subsection}{2.28 --- Optimize MIPS Loop}
+
+The variable \texttt{i} is only used for loop control (\texttt{slti \$t0,
+\$s1, 10}). We can eliminate it by computing a terminal address instead:
+\begin{verbatim}
+          addi $t0, $s0, 40       # end = &MemArray[10]
+    LOOP: lw   $s2, 0($s0)        # result = *ptr
+          addi $s0, $s0, 4        # ptr++
+          slt  $t1, $s0, $t0     # ptr < end?
+          bne  $t1, $zero, LOOP
+\end{verbatim}
+Reduced from 6 to 4 instructions per iteration.
+
+%-----------------------------------------------------------------------------
+\subsection*{2.29 --- Fibonacci in MIPS}
+\hypertarget{sol-2.29}{}
+\markright{2.29}
+\addcontentsline{toc}{subsection}{2.29 --- Fibonacci in MIPS}
+
+\begin{verbatim}
+fib:
+    addi $sp, $sp, -16     # allocate stack frame
+    sw   $ra, 12($sp)      # save return address
+    sw   $a0, 8($sp)       # save n
+    sw   $s0, 4($sp)       # save $s0
+
+    slti $t0, $a0, 2       # n < 2?
+    beq  $t0, $zero, RECUR # if n >= 2, recurse
+
+    # Base case: return n (n=0 or n=1)
+    add  $v0, $a0, $zero
+    j    RETURN
+
+RECUR:
+    addi $a0, $a0, -1      # arg = n - 1
+    jal  fib                # fib(n-1)
+    add  $s0, $v0, $zero   # $s0 = fib(n-1)
+
+    lw   $a0, 8($sp)       # restore n
+    addi $a0, $a0, -2      # arg = n - 2
+    jal  fib                # fib(n-2)
+
+    add  $v0, $s0, $v0     # return fib(n-1)+fib(n-2)
+
+RETURN:
+    lw   $s0, 4($sp)       # restore $s0
+    lw   $ra, 12($sp)      # restore $ra
+    addi $sp, $sp, 16      # free stack frame
+    jr   $ra
+\end{verbatim}
+
+%-----------------------------------------------------------------------------
+\subsection*{2.30 --- Stack Contents for Function Calls}
+\hypertarget{sol-2.30}{}
+\markright{2.30}
+\addcontentsline{toc}{subsection}{2.30 --- Stack Contents for Function Calls}
+
+Each call to \texttt{fib} pushes 16 bytes (4 words): \texttt{\$ra},
+\texttt{\$a0} (n), \texttt{\$s0}, and padding. Starting at
+\texttt{SP = 0x7FFFFFFC}:
+
+For \texttt{fib(3)}: SP goes to \texttt{0x7FFFFFEC}, then \texttt{fib(2)}
+pushes another frame at \texttt{0x7FFFFFDC}, and so on. Each recursive call
+adds a 16-byte frame containing the saved \texttt{\$ra}, \texttt{n},
+\texttt{\$s0}, and one padding word.
+
+The maximum stack depth for \texttt{fib(n)} is $O(n)$ frames.
+
+%-----------------------------------------------------------------------------
+\subsection*{2.31 --- Translate Function to MIPS}
+\hypertarget{sol-2.31}{}
+\markright{2.31}
+\addcontentsline{toc}{subsection}{2.31 --- Translate Function to MIPS}
+
+\begin{verbatim}
+f:
+    addi $sp, $sp, -16     # allocate frame
+    sw   $ra, 12($sp)      # save $ra
+    sw   $s0, 8($sp)       # save $s0
+
+    add  $s0, $a2, $a3     # $s0 = c + d (save for later)
+    jal  func              # func(a, b) -- $a0,$a1 already set
+    add  $a0, $v0, $zero   # first arg = func(a,b)
+    add  $a1, $s0, $zero   # second arg = c + d
+    jal  func              # func(func(a,b), c+d)
+
+    lw   $s0, 8($sp)       # restore $s0
+    lw   $ra, 12($sp)      # restore $ra
+    addi $sp, $sp, 16      # free frame
+    jr   $ra               # return (result in $v0)
+\end{verbatim}
+
+%-----------------------------------------------------------------------------
+\subsection*{2.32 --- Tail-Call Optimization}
+\hypertarget{sol-2.32}{}
+\markright{2.32}
+\addcontentsline{toc}{subsection}{2.32 --- Tail-Call Optimization}
+
+\textbf{No}, we cannot use tail-call optimization. The return value of the
+first call to \texttt{func(a,b)} must be saved before making the second call
+to \texttt{func}. The function \texttt{f} performs work \emph{between} the
+two calls, so the last action is not a single function call---it depends on
+the result of a prior call.
+
+%-----------------------------------------------------------------------------
+\subsection*{2.33 --- Stack State Before Return}
+\hypertarget{sol-2.33}{}
+\markright{2.33}
+\addcontentsline{toc}{subsection}{2.33 --- Stack State Before Return}
+
+Before \texttt{f} returns: \texttt{\$s0} is restored to its original
+(caller-saved) value. \texttt{\$s1}, \texttt{\$s3}, \texttt{\$s4} were never
+modified by \texttt{f}, so they hold whatever value the caller set.
+\texttt{\$t5} through \texttt{\$t7} are caller-saved---\texttt{func} may
+have changed them, so their values are \textbf{unknown}.
+
+%-----------------------------------------------------------------------------
+\subsection*{2.34 --- ASCII String to Integer}
+\hypertarget{sol-2.34}{}
+\markright{2.34}
+\addcontentsline{toc}{subsection}{2.34 --- ASCII String to Integer}
+
+\begin{verbatim}
+atoi:
+    add  $v0, $zero, $zero  # result = 0
+    add  $t1, $zero, $zero  # sign = 0 (positive)
+    lb   $t0, 0($a0)        # load first char
+    li   $t3, 0x2D           # '-'
+    bne  $t0, $t3, LOOP     # not minus, skip
+    li   $t1, 1              # sign = 1 (negative)
+    addi $a0, $a0, 1         # advance past '-'
+LOOP:
+    lb   $t0, 0($a0)        # load char
+    beq  $t0, $zero, DONE   # null terminator -> done
+    slti $t2, $t0, 48       # < '0'?
+    bne  $t2, $zero, ERR
+    slti $t2, $t0, 58       # < '9'+1?
+    beq  $t2, $zero, ERR
+    addi $t0, $t0, -48      # digit = char - '0'
+    li   $t2, 10
+    mult $v0, $t2
+    mflo $v0                 # result *= 10
+    add  $v0, $v0, $t0      # result += digit
+    addi $a0, $a0, 1
+    j    LOOP
+DONE:
+    beq  $t1, $zero, POS
+    sub  $v0, $zero, $v0    # negate if negative
+POS:
+    jr   $ra
+ERR:
+    li   $v0, -1
+    jr   $ra
+\end{verbatim}
+
+%-----------------------------------------------------------------------------
+\subsection*{2.35 --- Memory Store and Endianness}
+\hypertarget{sol-2.35}{}
+\markright{2.35}
+\addcontentsline{toc}{subsection}{2.35 --- Memory Store and Endianness}
+
+\texttt{lbu \$t0, 0(\$t1)}: loads byte at \texttt{0x10000000} into
+\texttt{\$t0} (zero-extended to 32 bits).
+
+\texttt{sw \$t0, 0(\$t1)}: stores the 32-bit value in \texttt{\$t0} back
+to \texttt{0x10000000}.
+
+\noindent\textbf{2.35.1} Big-endian: the byte was at address 0 of the word
+(MSB). After \texttt{lbu}, \texttt{\$t0 = 0x000000XX} where \texttt{XX} is
+the byte. After \texttt{sw}, the word at \texttt{0x10000000} becomes
+\texttt{0x000000XX}---only the original MSB remains.
+
+\noindent\textbf{2.35.2} Little-endian: the byte at address 0 is the LSB.
+After \texttt{lbu}, \texttt{\$t0 = 0x000000XX}. After \texttt{sw}, the word
+becomes \texttt{0x000000XX}---same result, but the LSB position is preserved.
+
+%-----------------------------------------------------------------------------
+\subsection*{2.36 --- Create 32-bit Constant}
+\hypertarget{sol-2.36}{}
+\markright{2.36}
+\addcontentsline{toc}{subsection}{2.36 --- Create 32-bit Constant}
+
+\texttt{0x0000FACE}: upper 16 bits are 0, lower 16 are \texttt{0xFACE}.
+\begin{verbatim}
+    ori $t1, $zero, 0xFACE   # $t1 = 0x0000FACE
+\end{verbatim}
+One instruction suffices because the upper half is zero and \texttt{ori}
+zero-extends its 16-bit immediate.
+
+%-----------------------------------------------------------------------------
+\subsection*{2.37 --- Atomic Set-Max with \texttt{ll/sc}}
+\hypertarget{sol-2.37}{}
+\markright{2.37}
+\addcontentsline{toc}{subsection}{2.37 --- Atomic Set-Max with \texttt{ll/sc}}
+
+\begin{verbatim}
+setmax:
+    # $a0 = x (address), $a1 = s (value)
+RETRY:
+    ll   $t0, 0($a0)       # $t0 = *x (linked)
+    slt  $t1, $t0, $a1     # *x < s?
+    beq  $t1, $zero, SKIP  # if *x >= s, skip
+    sc   $a1, 0($a0)       # try *x = s
+    beq  $a1, $zero, RETRY # if sc failed, retry
+SKIP:
+    jr   $ra
+\end{verbatim}
+
+Note: after \texttt{sc}, \texttt{\$a1} is overwritten with success/failure.
+If the store fails (another processor modified the location), we retry.
+
+%-----------------------------------------------------------------------------
+\subsection*{2.38 --- Concurrent Critical Section}
+\hypertarget{sol-2.38}{}
+\markright{2.38}
+\addcontentsline{toc}{subsection}{2.38 --- Concurrent Critical Section}
+
+When two processors execute simultaneously:
+\begin{enumerate}
+  \item Both execute \texttt{ll} and read the same value of \texttt{*x}.
+  \item Both compare and decide to update.
+  \item One processor's \texttt{sc} succeeds (returns 1); the other's fails
+        (returns 0) because the \texttt{ll/sc} pair detects the intervening
+        write.
+  \item The failing processor retries from the \texttt{ll}, now reading the
+        updated value.
+\end{enumerate}
+This guarantees atomicity---only one processor's update takes effect per
+\texttt{ll/sc} pair.
+
+%-----------------------------------------------------------------------------
+\subsection*{2.39 --- New Arithmetic Instructions}
+\hypertarget{sol-2.39}{}
+\markright{2.39}
+\addcontentsline{toc}{subsection}{2.39 --- New Arithmetic Instructions}
+
+CPI: arith=1, L/S=10, branch=3.
+IC: arith=500M, L/S=300M, branch=100M.
+
+Original CPU time (relative):
+$500 \times 1 + 300 \times 10 + 100 \times 3 = 500 + 3000 + 300 = 3800$
+(in millions of cycles).
+
+\noindent\textbf{2.39.1}
+New arith IC $= 0.75 \times 500 = 375$M. Clock cycle time $\times 1.1$.
+\[
+  \text{New cycles} = 375 \times 1 + 300 \times 10 + 100 \times 3
+  = 375 + 3000 + 300 = 3675
+\]
+\[
+  \text{New time} = 3675 \times 1.1 = 4042.5
+  \quad\text{vs.}\quad 3800
+\]
+\textbf{No}, this is a bad design choice---execution time increases by 6.4\%.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{2.39.2}
+\medskip\noindent\textbf{2.39.2}
+Double arithmetic performance $\Rightarrow$ arith CPI $= 0.5$:
+$\text{New cycles} = 500(0.5) + 3000 + 300 = 3550$.
+Speedup $= 3800/3550 = 1.070$ ($7.0\%$).
+
+10$\times$ arithmetic: arith CPI $= 0.1$:
+$\text{New cycles} = 500(0.1) + 3000 + 300 = 3350$.
+Speedup $= 3800/3350 = 1.134$ ($13.4\%$).
+
+Even 10$\times$ improvement in arithmetic yields only 13\% overall speedup
+(Amdahl's law---arithmetic is only $500/3800 = 13\%$ of total time).
+
+%-----------------------------------------------------------------------------
+\subsection*{2.40 --- CPI and Instruction Mix}
+\hypertarget{sol-2.40}{}
+\markright{2.40}
+\addcontentsline{toc}{subsection}{2.40 --- CPI and Instruction Mix}
+
+70\% arithmetic (2 cyc), 10\% L/S (6 cyc), 20\% branch (3 cyc).
+
+\noindent\textbf{2.40.1}
+$\text{CPI} = 0.7(2) + 0.1(6) + 0.2(3) = 1.4 + 0.6 + 0.6 = 2.6$.
+
+\noindent\textbf{2.40.2}
+25\% improvement $\Rightarrow$ new CPI $= 2.6/1.25 = 2.08$.
+$0.7 \cdot x + 0.6 + 0.6 = 2.08 \Rightarrow 0.7x = 0.88
+\Rightarrow x = 1.257$ cycles per arithmetic instruction.
+
+\noindent\textbf{2.40.3}
+50\% improvement $\Rightarrow$ new CPI $= 2.6/1.5 = 1.733$.
+$0.7 \cdot x + 0.6 + 0.6 = 1.733 \Rightarrow 0.7x = 0.533
+\Rightarrow x = 0.762$ cycles.
+
+This requires arithmetic CPI $< 1$, which is physically unrealistic for
+a single-issue processor. \textbf{Cannot be achieved} by improving only
+arithmetic instructions.
+
+%-----------------------------------------------------------------------------
+\subsection*{2.41 --- Scaled Offset for Exercise 2.4}
+\hypertarget{sol-2.41}{}
+\markright{2.41}
+\addcontentsline{toc}{subsection}{2.41 --- Scaled Offset for Exercise 2.4}
+
+With scaled offset addressing, \texttt{lw \$s0, A(\$s0*4)} would combine
+the shift-left-by-2 and the base addition into the addressing mode. This
+eliminates the explicit \texttt{sll} and \texttt{add} instructions. The
+9-instruction sequence in 2.4 could be reduced to roughly 5--6 instructions.
+
+%-----------------------------------------------------------------------------
+\subsection*{2.42 --- Scaled Offset for Exercise 2.7}
+\hypertarget{sol-2.42}{}
+\markright{2.42}
+\addcontentsline{toc}{subsection}{2.42 --- Scaled Offset for Exercise 2.7}
+
+Similarly, with scaled offset loads, the \texttt{sll} (shift by 3 for
+8-byte elements) and \texttt{add} to form the address can be folded into a
+single load instruction like \texttt{lw \$t0, A(\$s3*8)}. This reduces the
+8-instruction sequence from 2.7 by 2--3 instructions.

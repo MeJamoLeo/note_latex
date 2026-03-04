@@ -1,0 +1,657 @@
+%=============================================================================
+% Chapter 1 Solutions
+%=============================================================================
+\newpage
+\section*{Chapter 1 Solutions}
+\addcontentsline{toc}{section}{Chapter 1 Solutions}
+
+%-----------------------------------------------------------------------------
+\subsection*{1.1 --- Types of Computers}
+\hypertarget{sol-1.1}{}
+\markright{1.1}
+\addcontentsline{toc}{subsection}{1.1 --- Types of Computers}
+
+Three major types:
+
+\begin{enumerate}
+  \item \textbf{Personal computers (PCs)} --- general-purpose computers
+        designed for individual use (desktops, laptops).
+  \item \textbf{Servers} --- computers that provide services to other
+        computers over a network; optimized for reliability, throughput, and
+        availability.
+  \item \textbf{Embedded computers} --- processors built into other devices
+        (cars, appliances, IoT sensors); typically have strict power, cost,
+        and real-time constraints.
+\end{enumerate}
+
+Other valid answers include supercomputers, warehouse-scale computers, and
+personal mobile devices (PMDs).
+
+%-----------------------------------------------------------------------------
+\subsection*{1.2 --- Seven Great Ideas Matching}
+\hypertarget{sol-1.2}{}
+\markright{1.2}
+\addcontentsline{toc}{subsection}{1.2 --- Seven Great Ideas Matching}
+
+\begin{center}
+\begin{tabular}{cl}
+\toprule
+\textbf{Item} & \textbf{Matching Idea} \\
+\midrule
+a. Assembly lines              & Performance via Pipelining \\
+b. Suspension bridge cables    & Dependability via Redundancy \\
+c. Navigation with wind info   & Performance via Prediction \\
+d. Express elevators           & Make the Common Case Fast \\
+e. Library reserve desk        & Hierarchy of Memories \\
+f. Wider CMOS gate area        & Performance via Parallelism \\
+g. Self-driving / existing sensors & Use Abstraction to Simplify Design \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Reasoning:}
+\begin{itemize}
+  \item[a.] Each station performs one step, handing the product to the next
+        --- classic pipelining.
+  \item[b.] Many cables carry the load; if one fails, others compensate
+        --- redundancy.
+  \item[c.] The system predicts future position by incorporating wind
+        --- prediction.
+  \item[d.] Express elevators skip uncommon floors, making the most frequent
+        trips fast --- common case fast.
+  \item[e.] Popular books are kept closer (reserve desk) while others are in
+        the stacks --- memory hierarchy.
+  \item[f.] A wider transistor gate allows more current to flow in parallel
+        --- parallelism.
+  \item[g.] Reusing an existing sensor subsystem without redesigning it
+        --- abstraction.
+\end{itemize}
+
+%-----------------------------------------------------------------------------
+\subsection*{1.3 --- High-Level Language to Machine Code}
+\hypertarget{sol-1.3}{}
+\markright{1.3}
+\addcontentsline{toc}{subsection}{1.3 --- High-Level Language to Machine Code}
+
+\begin{enumerate}
+  \item \textbf{Compiler} translates the high-level language program (e.g.\ C)
+        into \textbf{assembly language}.
+  \item \textbf{Assembler} translates the assembly language into
+        \textbf{machine language} (object module, binary).
+  \item \textbf{Linker} combines one or more object modules with library
+        routines to produce the \textbf{executable}.
+  \item \textbf{Loader} loads the executable into memory for the processor
+        to fetch and execute.
+\end{enumerate}
+
+%-----------------------------------------------------------------------------
+\subsection*{1.4 --- Color Display Frame Buffer}
+\hypertarget{sol-1.4}{}
+\markright{1.4}
+\addcontentsline{toc}{subsection}{1.4 --- Color Display Frame Buffer}
+
+$640 \times 480$ pixels, 8 bits/color $\times$ 3 colors = 24 bits/pixel = 3 bytes/pixel.
+
+\medskip\noindent\textbf{a.} Frame buffer size:
+\[
+  640 \times 480 \times 3 = 921{,}600 \text{ bytes} \approx 900 \text{ KB}
+\]
+
+\noindent\textbf{b.} Time over 100 Mbit/s network:
+\[
+  921{,}600 \times 8 = 7{,}372{,}800 \text{ bits}
+\]
+\[
+  t = \frac{7{,}372{,}800}{100 \times 10^6} \approx 0.0737 \text{ s}
+  \approx 73.7 \text{ ms}
+\]
+
+%-----------------------------------------------------------------------------
+\subsection*{1.5 --- Comparing Three Processors}
+\hypertarget{sol-1.5}{}
+\markright{1.5}
+\addcontentsline{toc}{subsection}{1.5 --- Comparing Three Processors}
+
+\noindent\textbf{a.} Instructions per second $= \text{Clock rate} / \text{CPI}$:
+\[
+  \text{P1} = \frac{3 \times 10^9}{1.5} = 2.0 \times 10^9, \quad
+  \text{P2} = \frac{2.5 \times 10^9}{1.0} = 2.5 \times 10^9, \quad
+  \text{P3} = \frac{4.0 \times 10^9}{2.2} \approx 1.82 \times 10^9
+\]
+\textbf{P2} has the highest performance.
+
+\medskip\noindent\textbf{b.} Execute in 10 s $\Rightarrow$
+Cycles $= \text{Clock rate} \times 10$, \quad
+Instructions $= \text{Cycles} / \text{CPI}$:
+
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+& P1 & P2 & P3 \\
+\midrule
+Cycles ($\times 10^9$)       & 30   & 25    & 40 \\
+Instructions ($\times 10^9$) & 20   & 25    & 18.18 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip\noindent\textbf{c.} New time $= 0.7 \times 10 = 7$ s, new CPI $= 1.2
+\times \text{CPI}_{\text{old}}$.
+From the original: $\text{IC} \times \text{CPI}_{\text{old}} =
+10 \times \text{Clock}_{\text{old}}$.
+\[
+  \text{Clock}_{\text{new}}
+  = \frac{\text{IC} \times 1.2 \times \text{CPI}_{\text{old}}}{7}
+  = \frac{1.2 \times 10 \times \text{Clock}_{\text{old}}}{7}
+  = \frac{12}{7}\;\text{Clock}_{\text{old}}
+\]
+
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+& Old Clock (GHz) & Required Clock (GHz) \\
+\midrule
+P1 & 3.0 & $\frac{12}{7}\times 3.0 \approx 5.14$ \\
+P2 & 2.5 & $\frac{12}{7}\times 2.5 \approx 4.29$ \\
+P3 & 4.0 & $\frac{12}{7}\times 4.0 \approx 6.86$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+%-----------------------------------------------------------------------------
+\subsection*{1.6 --- Intel Processor Performance Trends}
+\hypertarget{sol-1.6}{}
+\markright{1.6}
+\addcontentsline{toc}{subsection}{1.6 --- Intel Processor Performance Trends}
+
+Average annual rate: $r = (V_n / V_0)^{1/n} - 1$ where $n = 9$ years (2010--2019).
+
+Years to double: $n_d = \ln 2 / \ln(1 + r)$.
+
+\begin{center}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Indicator} & \textbf{2010} & \textbf{2019} & \textbf{Rate/yr} &
+\textbf{Yrs to double} \\
+\midrule
+Tech (nm, smaller = better) & 45 & 14 & 13.8\% & 5.4 \\
+Clock (GHz)      & 2.93 & 3.60 & 2.3\%  & 30.2 \\
+Integer IPC/Core & 1.0  & 1.5  & 4.6\%  & 15.4 \\
+Cores            & 4    & 8    & 8.0\%  & 9.0  \\
+Max DRAM (GB)    & 16   & 128  & 26.0\% & 3.0  \\
+DRAM BW (GB/s)   & 21   & 41.6 & 7.9\%  & 9.1  \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+For Tech, ``improvement'' means shrinking: ratio $= 45/14 \approx 3.21$.
+
+%-----------------------------------------------------------------------------
+\subsection*{1.7 --- Two ISA Implementations Compared}
+\hypertarget{sol-1.7}{}
+\markright{1.7}
+\addcontentsline{toc}{subsection}{1.7 --- Two ISA Implementations Compared}
+
+Weighted CPI:
+\begin{align*}
+  \text{CPI}_{\text{P1}} &= 0.10(1) + 0.20(2) + 0.50(3) + 0.20(3) = 2.6 \\
+  \text{CPI}_{\text{P2}} &= 0.10(2) + 0.20(2) + 0.50(2) + 0.20(2) = 2.0
+\end{align*}
+
+\noindent\textbf{a.} Execution time $= \text{IC} \times \text{CPI} /
+\text{Clock}$ with $\text{IC} = 10^6$:
+\begin{align*}
+  T_{\text{P1}} &= \frac{10^6 \times 2.6}{2.5 \times 10^9}
+                 = 1.04 \times 10^{-3}\text{ s} = 1.04\text{ ms} \\
+  T_{\text{P2}} &= \frac{10^6 \times 2.0}{3.0 \times 10^9}
+                 = 0.667 \times 10^{-3}\text{ s} = 0.667\text{ ms}
+\end{align*}
+\textbf{P2 is faster} by a factor of $1.04/0.667 \approx 1.56$.
+
+\medskip\noindent\textbf{b.} Clock cycles:
+\[
+  \text{P1}: 10^6 \times 2.6 = 2.6 \times 10^6, \qquad
+  \text{P2}: 10^6 \times 2.0 = 2.0 \times 10^6
+\]
+
+%-----------------------------------------------------------------------------
+\subsection*{1.8 --- Compiler Impact on Performance}
+\hypertarget{sol-1.8}{}
+\markright{1.8}
+\addcontentsline{toc}{subsection}{1.8 --- Compiler Impact on Performance}
+
+Clock cycle time $= 1$ ns $\Rightarrow$ Clock rate $= 1$ GHz $= 10^9$ Hz.
+
+\medskip\noindent\textbf{a.} $\text{CPU time} = \text{IC} \times \text{CPI}
+\times \text{cycle time}$:
+\begin{align*}
+  \text{A}: &\quad 1.1 = 10^9 \times \text{CPI}_A \times 10^{-9}
+    \;\Rightarrow\; \text{CPI}_A = 1.1 \\
+  \text{B}: &\quad 1.5 = 1.2 \times 10^9 \times \text{CPI}_B \times 10^{-9}
+    \;\Rightarrow\; \text{CPI}_B = 1.25
+\end{align*}
+
+\noindent\textbf{b.} Equal execution times on different processors:
+\[
+  \frac{\text{IC}_A \times \text{CPI}_A}{\text{Clock}_A}
+  = \frac{\text{IC}_B \times \text{CPI}_B}{\text{Clock}_B}
+  \quad\Rightarrow\quad
+  \frac{\text{Clock}_A}{\text{Clock}_B}
+  = \frac{10^9 \times 1.1}{1.2 \times 10^9 \times 1.25}
+  = \frac{1.1}{1.5} \approx 0.733
+\]
+Compiler A's processor clock is about 73.3\% of compiler B's.
+
+\medskip\noindent\textbf{c.} New compiler: IC $= 6 \times 10^8$, CPI $= 1.1$:
+\[
+  T_{\text{new}} = 6 \times 10^8 \times 1.1 \times 10^{-9} = 0.66\text{ s}
+\]
+\[
+  \text{Speedup vs.\ A} = \frac{1.1}{0.66} \approx 1.67, \qquad
+  \text{Speedup vs.\ B} = \frac{1.5}{0.66} \approx 2.27
+\]
+
+%-----------------------------------------------------------------------------
+\subsection*{1.9 --- Processor Power and Capacitance}
+\hypertarget{sol-1.9}{}
+\markright{1.9}
+\addcontentsline{toc}{subsection}{1.9 --- Processor Power and Capacitance}
+
+Dynamic power: $P_{\text{dyn}} = C \times V^2 \times f$.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{1.9.1}
+\medskip\noindent\textbf{1.9.1} Solve for $C$:
+
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+& Prescott & Ivy Bridge \\
+\midrule
+$P_{\text{dyn}}$ (W)  & 90   & 40 \\
+$V$ (V)                & 1.25 & 0.9 \\
+$f$ (GHz)              & 3.6  & 3.4 \\
+\midrule
+$C = P_{\text{dyn}}/(V^2 f)$ & $\dfrac{90}{1.5625 \times 3.6\text{G}}
+  \approx 16.0$ nF & $\dfrac{40}{0.81 \times 3.4\text{G}} \approx 14.5$ nF \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\phantomsection\addcontentsline{toc}{subsubsection}{1.9.2}
+\medskip\noindent\textbf{1.9.2} Static power fraction:
+
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+& Prescott & Ivy Bridge \\
+\midrule
+$P_{\text{total}}$ (W)       & 100  & 70 \\
+$P_{\text{static}}$ (W)      & 10   & 30 \\
+Static \%                     & 10\% & 42.9\% \\
+$P_{\text{static}}/P_{\text{dyn}}$ & $1/9 \approx 0.111$ & $3/4 = 0.75$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\phantomsection\addcontentsline{toc}{subsubsection}{1.9.3}
+\medskip\noindent\textbf{1.9.3}
+Let $V' = V - \Delta V$.  Leakage current $I_{\text{leak}}$ is constant,
+so $P_{\text{static}}' = V' \times I_{\text{leak}}$, and
+$P_{\text{dyn}}' = C V'^{2} f$.
+
+Set $P' = 0.9 \times P_{\text{total}}$ and solve the quadratic
+$C f \cdot V'^2 + I_{\text{leak}} \cdot V' - 0.9 P_{\text{total}} = 0$.
+
+\textbf{Prescott:} $I_{\text{leak}} = 10/1.25 = 8$ A, $Cf = 57.6$ A/V.
+\[
+  57.6\,V'^2 + 8\,V' - 90 = 0
+  \;\Rightarrow\;
+  V' = \frac{-8 + \sqrt{64 + 4(57.6)(90)}}{2(57.6)}
+     = \frac{-8 + 144.2}{115.2} \approx 1.182\text{ V}
+\]
+Reduction $\approx 0.068$ V ($5.4\%$).
+
+\textbf{Ivy Bridge:} $I_{\text{leak}} = 30/0.9 = 33.3$ A, $Cf = 49.4$ A/V.
+\[
+  49.4\,V'^2 + 33.3\,V' - 63 = 0
+  \;\Rightarrow\;
+  V' = \frac{-33.3 + \sqrt{33.3^2 + 4(49.4)(63)}}{2(49.4)}
+     = \frac{-33.3 + 116.4}{98.8} \approx 0.841\text{ V}
+\]
+Reduction $\approx 0.059$ V ($6.5\%$).
+
+%-----------------------------------------------------------------------------
+\subsection*{1.10 --- Multiprocessor Execution Speedup}
+\hypertarget{sol-1.10}{}
+\markright{1.10}
+\addcontentsline{toc}{subsection}{1.10 --- Multiprocessor Execution Speedup}
+
+CPI: arithmetic = 1, load/store = 12, branch = 5.
+
+Total clock cycles on a single processor:
+\[
+  2.56 \times 10^9 \times 1 + 1.28 \times 10^9 \times 12
+  + 256 \times 10^6 \times 5
+  = (2.56 + 15.36 + 1.28) \times 10^9
+  = 19.2 \times 10^9
+\]
+
+Assuming a 2 GHz clock: $T_1 = 19.2 \times 10^9 / (2 \times 10^9) = 9.6$ s.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{1.10.1}
+\medskip\noindent\textbf{1.10.1}
+Assuming instructions are divided equally among $p$ processors:
+\[
+  T_p = \frac{T_1}{p} = \frac{9.6}{p}
+\]
+
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+$p$ & $T_p$ (s) & Speedup \\
+\midrule
+1 & 9.6  & 1.0 \\
+2 & 4.8  & 2.0 \\
+8 & 1.2  & 8.0 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+(With perfectly parallelizable work, speedup is linear.)
+
+\phantomsection\addcontentsline{toc}{subsubsection}{1.10.2}
+\medskip\noindent\textbf{1.10.2}
+Arithmetic time halved $\Rightarrow$ new arithmetic cycles
+$= 2.56 \times 10^9 \times 0.5 = 1.28 \times 10^9$.
+\[
+  \text{New total} = 1.28 + 15.36 + 1.28 = 17.92 \times 10^9 \text{ cycles}
+\]
+\[
+  \text{Speedup} = \frac{19.2}{17.92} \approx 1.071
+\]
+Arithmetic as percentage of new total:
+$1.28 / 17.92 \approx 7.1\%$ (down from $2.56/19.2 = 13.3\%$).
+
+%-----------------------------------------------------------------------------
+\subsection*{1.11 --- Wafer Yield and Cost per Die}
+\hypertarget{sol-1.11}{}
+\markright{1.11}
+\addcontentsline{toc}{subsection}{1.11 --- Wafer Yield and Cost per Die}
+
+Die area $\approx$ Wafer area / Dies per wafer.
+
+Wafer yield formula (from textbook):
+$\text{Yield} = 1 / (1 + \text{Defects/cm}^2 \times \text{Die area}/2)^2$.
+
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+& Wafer 1 & Wafer 2 \\
+\midrule
+Diameter (cm) & 15 & 20 \\
+Wafer area (cm$^2$) & $\pi(7.5)^2 \approx 176.7$ & $\pi(10)^2 \approx 314.2$ \\
+Dies & 84 & 100 \\
+Die area (cm$^2$) & $\approx 2.10$ & $\approx 3.14$ \\
+Defects/cm$^2$ & 0.020 & 0.031 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\phantomsection\addcontentsline{toc}{subsubsection}{1.11.1}
+\medskip\noindent\textbf{1.11.1} Yield:
+\begin{align*}
+  Y_1 &= \frac{1}{(1 + 0.020 \times 2.10/2)^2}
+       = \frac{1}{(1.021)^2} \approx 0.959 \quad (95.9\%) \\
+  Y_2 &= \frac{1}{(1 + 0.031 \times 3.14/2)^2}
+       = \frac{1}{(1.0487)^2} \approx 0.909 \quad (90.9\%)
+\end{align*}
+
+\noindent\textbf{1.11.2} Cost per die $=$ Wafer cost / (Dies $\times$ Yield):
+\begin{align*}
+  C_1 &= \$12 / (84 \times 0.959) = \$12 / 80.6 \approx \$0.149 \\
+  C_2 &= \$15 / (100 \times 0.909) = \$15 / 90.9 \approx \$0.165
+\end{align*}
+
+\noindent\textbf{1.11.3}
+Dies increase by 10\% $\Rightarrow$ new die area $=$ wafer area / new dies:
+\begin{align*}
+  A_1' &= 176.7 / (84 \times 1.1) = 176.7 / 92.4 \approx 1.91\text{ cm}^2 \\
+  A_2' &= 314.2 / (100 \times 1.1) = 314.2 / 110 \approx 2.86\text{ cm}^2
+\end{align*}
+
+\noindent\textbf{1.11.4}
+Solve for defect density $D$ from yield $= 1/(1 + D \cdot A/2)^2$:
+\[
+  1 + \frac{DA}{2} = \frac{1}{\sqrt{Y}}
+  \quad\Rightarrow\quad
+  D = \frac{2}{A}\!\left(\frac{1}{\sqrt{Y}} - 1\right)
+\]
+Using Wafer 1's die area ($A = 2.10$ cm$^2$) as example:
+\begin{align*}
+  Y = 0.92: &\quad D = \frac{2}{2.10}(1/\sqrt{0.92} - 1)
+             = 0.952 \times 0.04256 \approx 0.0405 \text{ defects/cm}^2 \\
+  Y = 0.95: &\quad D = \frac{2}{2.10}(1/\sqrt{0.95} - 1)
+             = 0.952 \times 0.02598 \approx 0.0247 \text{ defects/cm}^2
+\end{align*}
+
+%-----------------------------------------------------------------------------
+\subsection*{1.12 --- SPEC CPU2006 Benchmark Analysis}
+\hypertarget{sol-1.12}{}
+\markright{1.12}
+\addcontentsline{toc}{subsection}{1.12 --- SPEC CPU2006 Benchmark Analysis}
+
+IC $= 2.389 \times 10^{12}$, Execution time $= 750$ s, Reference time
+$= 9650$ s.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{1.12.1}
+\medskip\noindent\textbf{1.12.1}
+Clock cycle time $= 0.333$ ns $\Rightarrow f = 1/0.333\text{n} = 3.0$ GHz.
+\[
+  \text{CPI} = \frac{T \times f}{\text{IC}}
+  = \frac{750 \times 3.0 \times 10^9}{2.389 \times 10^{12}}
+  = \frac{2250 \times 10^9}{2389 \times 10^9} \approx 0.942
+\]
+
+\noindent\textbf{1.12.2}
+\[
+  \text{SPECratio} = \frac{\text{Reference time}}{\text{Execution time}}
+  = \frac{9650}{750} \approx 12.87
+\]
+
+\noindent\textbf{1.12.3}
+New clock $= 4$ GHz, IC reduced 15\% $\Rightarrow \text{IC}' = 0.85 \times
+2.389 \times 10^{12} = 2.031 \times 10^{12}$.
+SPECratio $= 13.7 \Rightarrow T' = 9650/13.7 \approx 704.4$ s.
+\[
+  \text{CPI}' = \frac{704.4 \times 4 \times 10^9}{2.031 \times 10^{12}}
+  = \frac{2817.6}{2031} \approx 1.387
+\]
+
+\noindent\textbf{1.12.4}
+IC increases 10\%, CPI and clock unchanged:
+$T' = 1.1 \times T = 1.1 \times 750 = 825$ s.
+\textbf{Increase = 10\%.}
+
+\phantomsection\addcontentsline{toc}{subsubsection}{1.12.5}
+\medskip\noindent\textbf{1.12.5}
+IC $+10\%$, CPI $-15\%$, clock unchanged:
+\[
+  T' = \frac{1.1 \times \text{IC} \times 0.85 \times \text{CPI}}{f}
+     = 0.935 \times T = 0.935 \times 750 = 701.3\text{ s}
+\]
+CPU time \textbf{decreases by 6.5\%}.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{1.12.6}
+\medskip\noindent\textbf{1.12.6}
+IC $+10\%$, CPI $-15\%$, and require $T' = 0.8T$ (20\% reduction).
+\[
+  T' = \frac{\text{IC}' \times \text{CPI}'}{f'}
+  \;\Rightarrow\;
+  f' = \frac{1.1 \times 0.85 \times \text{IC} \times \text{CPI}}{0.8\,T}
+     = \frac{0.935}{0.8}\,f = 1.169\,f
+\]
+Clock must \textbf{increase by $\approx 16.9\%$}
+(e.g.\ $3.0 \to 3.51$ GHz).
+
+%-----------------------------------------------------------------------------
+\subsection*{1.13 --- Performance Equation Pitfall}
+\hypertarget{sol-1.13}{}
+\markright{1.13}
+\addcontentsline{toc}{subsection}{1.13 --- Performance Equation Pitfall}
+
+P1: $f = 4$ GHz, CPI $= 0.9$, IC $= 5.0 \times 10^9$. \quad
+P2: $f = 3$ GHz, CPI $= 0.75$, IC $= 1.0 \times 10^9$.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{1.13.1}
+\medskip\noindent\textbf{1.13.1}
+\begin{align*}
+  T_{\text{P1}} &= \frac{5.0 \times 10^9 \times 0.9}{4 \times 10^9}
+                 = 1.125\text{ s} \\
+  T_{\text{P2}} &= \frac{1.0 \times 10^9 \times 0.75}{3 \times 10^9}
+                 = 0.25\text{ s}
+\end{align*}
+\textbf{P2 is faster} despite having a lower clock rate.  The fallacy is
+\textbf{false}.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{1.13.2}
+\medskip\noindent\textbf{1.13.2}
+P1 time for $10^9$ instructions:
+$T = 10^9 \times 0.9 / (4 \times 10^9) = 0.225$ s.
+
+P2 instructions in same time:
+$0.225 = \text{IC}_{P2} \times 0.75 / (3 \times 10^9)$
+$\Rightarrow \text{IC}_{P2} = 0.225 \times 3 \times 10^9 / 0.75
+= 9.0 \times 10^8$.
+
+P2 executes \textbf{fewer} instructions ($9.0 \times 10^8 < 1.0 \times 10^9$)
+in the same time.  More instructions $\neq$ more time.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{1.13.3}
+\medskip\noindent\textbf{1.13.3}
+$\text{MIPS} = f / (\text{CPI} \times 10^6)$:
+\[
+  \text{P1} = \frac{4 \times 10^9}{0.9 \times 10^6} = 4444, \qquad
+  \text{P2} = \frac{3 \times 10^9}{0.75 \times 10^6} = 4000
+\]
+P1 has higher MIPS yet P2 is faster (from 1.13.1).  MIPS ignores differences
+in instruction count and is therefore a \textbf{misleading} metric for
+cross-program or cross-ISA comparisons.
+
+%-----------------------------------------------------------------------------
+\subsection*{1.14 --- Amdahl's Law and Partial Improvement}
+\hypertarget{sol-1.14}{}
+\markright{1.14}
+\addcontentsline{toc}{subsection}{1.14 --- Amdahl's Law and Partial Improvement}
+
+Total $= 250$ s.  FP $= 70$ s, L/S $= 85$ s, Branch $= 40$ s.
+INT $= 250 - 70 - 85 - 40 = 55$ s.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{1.14.1}
+\medskip\noindent\textbf{1.14.1}
+FP reduced 20\%: new FP $= 70 \times 0.8 = 56$ s.
+\[
+  T' = 56 + 85 + 40 + 55 = 236\text{ s} \quad
+  \text{(reduction of } 14\text{ s} = 5.6\%)
+\]
+
+\noindent\textbf{1.14.2}
+Need $T' = 0.8 \times 250 = 200$ s $\Rightarrow$ must save 50 s.
+FP, L/S, Branch are unchanged, so all 50 s must come from INT:
+new INT $= 55 - 50 = 5$ s.
+INT must be reduced by $50/55 \approx$ \textbf{90.9\%}.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{1.14.3}
+\medskip\noindent\textbf{1.14.3}
+Need 50 s reduction from branch alone, but branch $= 40$ s total.
+Even reducing branch to 0 s saves only 40 s $< 50$ s.
+\textbf{No}, it is impossible.
+
+%-----------------------------------------------------------------------------
+\subsection*{1.15 --- CPI Optimization for Speedup}
+\hypertarget{sol-1.15}{}
+\markright{1.15}
+\addcontentsline{toc}{subsection}{1.15 --- CPI Optimization for Speedup}
+
+\begin{center}
+\begin{tabular}{lcccc}
+\toprule
+Type & IC ($\times 10^6$) & CPI & Cycles ($\times 10^6$) \\
+\midrule
+FP     & 50  & 1 & 50  \\
+INT    & 110 & 1 & 110 \\
+L/S    & 80  & 4 & 320 \\
+Branch & 16  & 2 & 32  \\
+\midrule
+Total  &     &   & 512 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+$T = 512 \times 10^6 / (2 \times 10^9) = 0.256$ s.  Target for $2\times$
+speedup: $256 \times 10^6$ cycles.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{1.15.1}
+\medskip\noindent\textbf{1.15.1}
+FP cycles needed $= 256 - 110 - 320 - 32 = -206 \times 10^6$.
+This is negative --- \textbf{impossible} to achieve $2\times$ speedup by
+improving FP CPI alone.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{1.15.2}
+\medskip\noindent\textbf{1.15.2}
+L/S cycles needed $= 256 - 50 - 110 - 32 = 64 \times 10^6$.
+\[
+  \text{New CPI}_{L/S} = \frac{64 \times 10^6}{80 \times 10^6} = 0.8
+\]
+L/S CPI must drop from 4 to 0.8 --- an \textbf{80\% reduction}.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{1.15.3}
+\medskip\noindent\textbf{1.15.3}
+FP and INT CPI $\times 0.6$; L/S and Branch CPI $\times 0.7$:
+\begin{align*}
+  \text{FP}' &= 50 \times 10^6 \times (1 \times 0.6) = 30 \times 10^6 \\
+  \text{INT}' &= 110 \times 10^6 \times (1 \times 0.6) = 66 \times 10^6 \\
+  \text{L/S}' &= 80 \times 10^6 \times (4 \times 0.7) = 224 \times 10^6 \\
+  \text{Branch}' &= 16 \times 10^6 \times (2 \times 0.7) = 22.4 \times 10^6
+\end{align*}
+\[
+  \text{Total}' = 342.4 \times 10^6, \qquad
+  T' = 342.4 / 2000 = 0.1712\text{ s}
+\]
+\[
+  \text{Speedup} = \frac{0.256}{0.1712} \approx 1.50\times
+\]
+
+%-----------------------------------------------------------------------------
+\subsection*{1.16 --- Parallel Overhead and Speedup}
+\hypertarget{sol-1.16}{}
+\markright{1.16}
+\addcontentsline{toc}{subsection}{1.16 --- Parallel Overhead and Speedup}
+
+$t = 100$ s single-processor, overhead $= 4$ s/processor.
+Per-processor time $= 100/p + 4$.
+
+\[
+  \text{Speedup} = \frac{100}{100/p + 4}, \qquad
+  \text{Ideal speedup} = p, \qquad
+  \text{Ratio} = \frac{\text{Speedup}}{p}
+\]
+
+\begin{center}
+\begin{tabular}{rrrr}
+\toprule
+$p$ & Time (s) & Speedup & Ratio \\
+\midrule
+2   & 54.000 & 1.85  & 0.926 \\
+4   & 29.000 & 3.45  & 0.862 \\
+8   & 16.500 & 6.06  & 0.758 \\
+16  & 10.250 & 9.76  & 0.610 \\
+32  & 7.125  & 14.04 & 0.439 \\
+64  & 5.563  & 17.98 & 0.281 \\
+128 & 4.781  & 20.92 & 0.163 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+As $p$ grows, overhead dominates and speedup saturates.
+The ratio shows that efficiency drops sharply beyond $\sim$16 processors
+for this workload.

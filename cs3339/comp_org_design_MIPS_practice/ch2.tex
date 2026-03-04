@@ -1,0 +1,737 @@
+%=============================================================================
+% Chapter 2 Exercises
+%=============================================================================
+\newpage
+\section{Chapter 2 Exercises}
+
+%-----------------------------------------------------------------------------
+\subsection{[5] C to MIPS: Arithmetic}
+\hypertarget{prob-2.1}{}
+\noindent$\langle$\S2.2$\rangle$\medskip
+
+\noindent For the following C statement, what is the corresponding MIPS assembly
+code? Assume that the variables \texttt{f}, \texttt{g}, \texttt{h} have
+already been placed in registers \texttt{\$s0}, \texttt{\$s1}, and
+\texttt{\$s2}, respectively. Use a minimal number of MIPS assembly
+instructions.
+\begin{verbatim}
+    f = g + h - 5;
+\end{verbatim}
+
+\problembreak
+
+%-----------------------------------------------------------------------------
+\subsection{[5] MIPS to C: Two Adds}
+\hypertarget{prob-2.2}{}
+\noindent$\langle$\S2.2$\rangle$\medskip
+
+\noindent Write a single C statement that corresponds to the two MIPS assembly
+instructions below.
+\begin{verbatim}
+    add $t0, $s1, $s2
+    add $s0, $t0, $s3
+\end{verbatim}
+
+\problembreak
+
+%-----------------------------------------------------------------------------
+\subsection{[5] C to MIPS: Array Access}
+\hypertarget{prob-2.3}{}
+\noindent$\langle$\S2.2, 2.5$\rangle$\medskip
+
+\noindent For the following C statement, write the corresponding MIPS assembly
+code. Assume that the variables \texttt{f}, \texttt{g}, \texttt{h},
+\texttt{i}, and \texttt{j} are assigned to registers \texttt{\$s0} through
+\texttt{\$s4}. Assume that the base addresses of the arrays \texttt{A} and
+\texttt{B} are in registers \texttt{\$s6} and \texttt{\$s7}, respectively.
+\begin{verbatim}
+    B[8] = A[i] + A[j];
+\end{verbatim}
+
+\problembreak
+
+%-----------------------------------------------------------------------------
+\subsection{[10] MIPS to C: Array Code}
+\hypertarget{prob-2.4}{}
+\noindent$\langle$\S2.2, 2.5$\rangle$\medskip
+
+\noindent Translate the following MIPS code to C. Assume that the variables
+\texttt{f}, \texttt{g}, \texttt{h}, \texttt{i}, and \texttt{j} are assigned
+to registers \texttt{\$s0} through \texttt{\$s4}. Assume that the base
+addresses of the arrays \texttt{A} and \texttt{B} are in registers
+\texttt{\$s6} and \texttt{\$s7}, respectively.
+\begin{verbatim}
+    sll  $t0, $s0, 2       # $t0 = f * 4
+    add  $t0, $s6, $t0     # $t0 = &A[f]
+    sll  $t1, $s1, 2       # $t1 = g * 4
+    add  $t1, $s7, $t1     # $t1 = &B[g]
+    lw   $s0, 0($t0)       # f = A[f]
+    addi $t2, $t0, 4
+    lw   $t0, 0($t2)
+    add  $t0, $t0, $s0
+    sw   $t0, 0($t1)
+\end{verbatim}
+
+\problembreak
+
+%-----------------------------------------------------------------------------
+\subsection{[5] Byte Ordering: Endianness}
+\hypertarget{prob-2.5}{}
+\noindent$\langle$\S2.3$\rangle$\medskip
+
+\noindent Show how the value \texttt{0xabcdef12} would be arranged in memory
+of a little-endian and a big-endian machine. Assume that the data are stored
+starting at address 0 and that the word size is 4 bytes.
+
+\problembreak
+
+%-----------------------------------------------------------------------------
+\subsection{[5] Hex to Decimal Conversion}
+\hypertarget{prob-2.6}{}
+\noindent$\langle$\S2.4$\rangle$\medskip
+
+\noindent Translate \texttt{0xabcdef12} into decimal.
+
+\problembreak
+
+%-----------------------------------------------------------------------------
+\subsection{[5] C to MIPS: 8-Byte Word Arrays}
+\hypertarget{prob-2.7}{}
+\noindent$\langle$\S2.2, 2.3$\rangle$\medskip
+
+\noindent Translate the following C code to MIPS. Assume that the variables
+\texttt{f}, \texttt{g}, \texttt{h}, \texttt{i}, and \texttt{j} are assigned
+to registers \texttt{\$s0} through \texttt{\$s4}. Assume that the base
+addresses of the arrays \texttt{a} and \texttt{b} are in registers
+\texttt{\$s6} and \texttt{\$s7}, respectively. Assume that the elements of
+the arrays \texttt{a} and \texttt{b} are 8-byte words.
+\begin{verbatim}
+    B[8] = A[i] + A[j];
+\end{verbatim}
+
+\problembreak
+
+%-----------------------------------------------------------------------------
+\subsection{[5] Instruction Format Fields}
+\hypertarget{prob-2.8}{}
+\noindent$\langle$\S2.5$\rangle$\medskip
+
+\noindent For each MIPS instruction below, show the value of the opcode
+(\texttt{op}), source register (\texttt{rs}), funct field, and destination
+register (\texttt{rd}) fields. For I-type instructions, show the value of the
+immediate field. For R-type instructions, show the value of the second source
+register (\texttt{rt}).
+\begin{verbatim}
+    add $s0, $s0, $s1
+    sw  $t1, 0($s0)
+\end{verbatim}
+
+\problembreak
+
+%-----------------------------------------------------------------------------
+\subsection{[20] MIPS Fields for Exercise 2.8}
+\hypertarget{prob-2.9}{}
+\noindent$\langle$\S2.3, 2.5$\rangle$\medskip
+
+\noindent For each MIPS instruction in Exercise 2.8, show the value of the
+opcode (op), source register (rs) and funct field, and destination register
+(rd) fields. For I-type instructions, show the value of the immediate field,
+and for R-type instructions, show the value of the second source register (rt).
+
+\problembreak
+
+%-----------------------------------------------------------------------------
+\subsection{[5] Register Arithmetic and Overflow}
+\hypertarget{prob-2.10}{}
+\noindent$\langle$\S2.4$\rangle$\medskip
+
+\noindent Assume that registers \texttt{\$s0} and \texttt{\$s1} hold the
+values \texttt{0x80000000} and \texttt{0xD0000000}, respectively.
+
+\begin{enumerate}
+  \phantomsection\addcontentsline{toc}{subsubsection}{2.10.1}
+  \item[2.10.1] What is the value of \texttt{\$t0} for the following assembly
+        code? \quad \texttt{add \$t0, \$s0, \$s1}
+  \phantomsection\addcontentsline{toc}{subsubsection}{2.10.2}
+  \item[2.10.2] Is the result in \texttt{\$t0} the desired result, or has
+        there been overflow?
+  \phantomsection\addcontentsline{toc}{subsubsection}{2.10.3}
+  \item[2.10.3] For the contents of registers \texttt{\$s0} and
+        \texttt{\$s1} as specified above, what is the value of \texttt{\$t0}
+        for the following assembly code? \quad \texttt{sub \$t0, \$s0, \$s1}
+  \phantomsection\addcontentsline{toc}{subsubsection}{2.10.4}
+  \item[2.10.4] Is the result in \texttt{\$t0} the desired result, or has
+        there been overflow?
+  \phantomsection\addcontentsline{toc}{subsubsection}{2.10.5}
+  \item[2.10.5] For the contents of registers \texttt{\$s0} and
+        \texttt{\$s1} as specified above, what is the value of \texttt{\$t0}
+        for the following assembly code?
+        \quad \texttt{add \$t0, \$s0, \$s1} \quad followed by
+        \quad \texttt{add \$t0, \$t0, \$s0}
+  \phantomsection\addcontentsline{toc}{subsubsection}{2.10.6}
+  \item[2.10.6] Is the result in \texttt{\$t0} the desired result, or has
+        there been overflow?
+\end{enumerate}
+
+\problembreak
+
+%-----------------------------------------------------------------------------
+\subsection{[5] Overflow Ranges}
+\hypertarget{prob-2.11}{}
+\noindent$\langle$\S2.4$\rangle$\medskip
+
+\noindent Assume that \texttt{\$s1} holds the value $128_{10}$.
+
+\begin{enumerate}
+  \phantomsection\addcontentsline{toc}{subsubsection}{2.11.1}
+  \item[2.11.1] For the instruction \texttt{add \$s0, \$s0, \$s1}, what is
+        the range(s) of values for \texttt{\$s0} that would result in
+        overflow?
+  \phantomsection\addcontentsline{toc}{subsubsection}{2.11.2}
+  \item[2.11.2] For the instruction \texttt{sub \$s0, \$s0, \$s1}, what is
+        the range(s) of values for \texttt{\$s0} that would result in
+        overflow?
+  \phantomsection\addcontentsline{toc}{subsubsection}{2.11.3}
+  \item[2.11.3] For the instruction \texttt{sub \$s0, \$s1, \$s0}, what is
+        the range(s) of values for \texttt{\$s0} that would result in
+        overflow?
+\end{enumerate}
+
+\problembreak
+
+%-----------------------------------------------------------------------------
+\subsection{[5] Binary to Instruction Type}
+\hypertarget{prob-2.12}{}
+\noindent$\langle$\S2.4, 2.5$\rangle$\medskip
+
+\noindent Provide the type and assembly language instruction for the following
+binary value:
+\begin{verbatim}
+    0000 0010 0001 0100 1000 0000 0010 0000
+\end{verbatim}
+Hint: Figure 2.20 may be helpful.
+
+\problembreak
+
+%-----------------------------------------------------------------------------
+\subsection{[5] Instruction to Hex Representation}
+\hypertarget{prob-2.13}{}
+\noindent$\langle$\S2.4, 2.5$\rangle$\medskip
+
+\noindent Provide the type and hexadecimal representation of the following
+instructions:
+\begin{verbatim}
+    add $t1, $s2, $t1
+\end{verbatim}
+
+\problembreak
+
+%-----------------------------------------------------------------------------
+\subsection{[5] MIPS Fields to Instruction (R-type)}
+\hypertarget{prob-2.14}{}
+\noindent$\langle$\S2.5$\rangle$\medskip
+
+\noindent Provide the type, assembly language instruction, and binary
+representation of the instruction described by the following MIPS fields:
+\texttt{op=0, rs=3, rt=2, rd=3, shamt=0, funct=34}.
+
+\problembreak
+
+%-----------------------------------------------------------------------------
+\subsection{[5] MIPS Fields to Instruction (I-type)}
+\hypertarget{prob-2.15}{}
+\noindent$\langle$\S2.5$\rangle$\medskip
+
+\noindent Provide the type, assembly language instruction, and binary
+representation of the instruction described by the following MIPS fields:
+\texttt{op=0x23, rs=1, rt=2, const=0x4}.
+
+\problembreak
+
+%-----------------------------------------------------------------------------
+\subsection{[5] Expanding the Register File}
+\hypertarget{prob-2.16}{}
+\noindent$\langle$\S2.5$\rangle$\medskip
+
+\noindent Assume that we would like to expand the MIPS register file to 128
+registers and expand the instruction set to contain four times as many
+instructions.
+
+\begin{enumerate}
+  \phantomsection\addcontentsline{toc}{subsubsection}{2.16.1}
+  \item[2.16.1] How would this affect the size of each of the bit fields in
+        the R-type instructions?
+  \phantomsection\addcontentsline{toc}{subsubsection}{2.16.2}
+  \item[2.16.2] How would this affect the size of each of the bit fields in
+        the I-type instructions?
+  \phantomsection\addcontentsline{toc}{subsubsection}{2.16.3}
+  \item[2.16.3] How could each of two proposed changes decrease the size of
+        an MIPS assembly program? On the other hand, how could the proposed
+        change increase the size of an MIPS assembly program?
+\end{enumerate}
+
+\problembreak
+
+%-----------------------------------------------------------------------------
+\subsection{[5] Bitwise Operations on Registers}
+\hypertarget{prob-2.17}{}
+\noindent$\langle$\S2.6$\rangle$\medskip
+
+\noindent Assume the following register contents:
+\texttt{\$t0 = 0xAAAAAAAA}, \texttt{\$t1 = 0x12345678}.
+
+\begin{enumerate}
+  \phantomsection\addcontentsline{toc}{subsubsection}{2.17.1}
+  \item[2.17.1] What is the value of \texttt{\$t2} after the following
+        instructions?
+\begin{verbatim}
+    sll $t2, $t0, 4
+    or  $t2, $t2, $t1
+\end{verbatim}
+  \phantomsection\addcontentsline{toc}{subsubsection}{2.17.2}
+  \item[2.17.2] What is the value of \texttt{\$t2} after the following
+        instructions?
+\begin{verbatim}
+    srl $t2, $t0, 3
+    and $t2, $t2, $t1
+\end{verbatim}
+  \phantomsection\addcontentsline{toc}{subsubsection}{2.17.3}
+  \item[2.17.3] What is the value of \texttt{\$t2} after the following
+        instructions?
+\begin{verbatim}
+    srl $t2, $t0, 4
+    andi $t2, $t2, -1
+\end{verbatim}
+\end{enumerate}
+
+\problembreak
+
+%-----------------------------------------------------------------------------
+\subsection{[10] Bit Field Extraction}
+\hypertarget{prob-2.18}{}
+\noindent$\langle$\S2.6$\rangle$\medskip
+
+\noindent Find the shortest sequence of MIPS instructions that extracts bits
+16 down to 11 from register \texttt{\$t0} and uses the value of this field to
+replace bits 31 down to 26 in register \texttt{\$t1} without changing the
+other bits of registers \texttt{\$t0} and \texttt{\$t1}. (Be sure to test
+your code using \texttt{\$t0 = 0} and \texttt{\$t1 = 0xFFFFFFFF}. Doing so
+may reveal a common oversight.)
+
+\problembreak
+
+%-----------------------------------------------------------------------------
+\subsection{[10] Pseudoinstruction Implementation}
+\hypertarget{prob-2.19}{}
+\noindent$\langle$\S2.6$\rangle$\medskip
+
+\noindent Provide a minimal set of MIPS instructions that may be used to
+implement the following pseudoinstruction:
+\begin{verbatim}
+    not $t0, $t1
+\end{verbatim}
+
+\problembreak
+
+%-----------------------------------------------------------------------------
+\subsection{[5] C to MIPS: Array Sum}
+\hypertarget{prob-2.20}{}
+\noindent$\langle$\S2.6$\rangle$\medskip
+
+\noindent For the following C statement, write a minimal sequence of MIPS
+assembly instructions that does the identical operation. Assume
+\texttt{\$t0 = A} and \texttt{\$s0} is the base address of \texttt{C}.
+\begin{verbatim}
+    A = C[0] + C[4];
+\end{verbatim}
+
+\problembreak
+
+%-----------------------------------------------------------------------------
+\subsection{[5] SLT and Branch}
+\hypertarget{prob-2.21}{}
+\noindent$\langle$\S2.6$\rangle$\medskip
+
+\noindent Assume \texttt{\$s0} holds the value \texttt{0x80000000}. What is
+the value of \texttt{\$t2} after the following instructions?
+\begin{verbatim}
+    slt  $t2, $s0, $zero
+    bne  $t2, $zero, ELSE
+    j    EXIT
+ELSE:
+    addi $t2, $t2, 2
+EXIT:
+\end{verbatim}
+
+\problembreak
+
+%-----------------------------------------------------------------------------
+\subsection{[5] PC Addressing Range}
+\hypertarget{prob-2.22}{}
+\noindent$\langle$\S2.10$\rangle$\medskip
+
+\noindent Suppose the program counter (PC) is set to \texttt{0x00400000}.
+
+\begin{enumerate}
+  \phantomsection\addcontentsline{toc}{subsubsection}{2.22.1}
+  \item[2.22.1] What range of addresses can be reached using the MIPS
+        jump-and-link (\texttt{jal}) instruction? (In other words, what is
+        the set of possible values for the PC after the jump instruction
+        executes?)
+  \phantomsection\addcontentsline{toc}{subsubsection}{2.22.2}
+  \item[2.22.2] What range of addresses can be reached using the MIPS branch
+        if equal (\texttt{beq}) instruction? (In other words, what is the set
+        of possible values for the PC after the branch instruction executes?)
+\end{enumerate}
+
+\problembreak
+
+%-----------------------------------------------------------------------------
+\subsection{[5] Proposed \texttt{rpt} Instruction}
+\hypertarget{prob-2.23}{}
+\medskip
+
+\noindent Consider a proposed new instruction named \texttt{rpt}. This
+instruction combines a loop's condition check and counter decrement into a
+single instruction. For example, \texttt{rpt \$s0, 1, LOOP} would do the
+following:
+
+\begin{verbatim}
+    if ($s0 > 0)
+        $s0 = $s0 - 1
+        goto LOOP
+\end{verbatim}
+
+\noindent What instruction format would be a good fit for this instruction?
+What are the issues that might prevent this from being a real MIPS instruction?
+
+\problembreak
+
+%-----------------------------------------------------------------------------
+\subsection{[5] MIPS Loop Analysis}
+\hypertarget{prob-2.24}{}
+\noindent$\langle$\S2.7$\rangle$\medskip
+
+\noindent Consider the following MIPS loop:
+\begin{verbatim}
+          add  $s2, $zero, $zero
+    LOOP: lw   $s1, 0($s0)
+          add  $s2, $s2, $s1
+          addi $s0, $s0, 4
+          addi $t1, $t1, -1
+          bne  $t1, $zero, LOOP
+\end{verbatim}
+
+\begin{enumerate}
+  \phantomsection\addcontentsline{toc}{subsubsection}{2.24.1}
+  \item[2.24.1] Assume that the register \texttt{\$t1} is initialized to the
+        value 10. What is the value in register \texttt{\$s2} assuming
+        \texttt{\$s0} initially points to an array of integers?
+  \phantomsection\addcontentsline{toc}{subsubsection}{2.24.2}
+  \item[2.24.2] For the loop above, write the equivalent C code. Assume that
+        the registers \texttt{\$s1}, \texttt{\$s2}, \texttt{\$t1}, and
+        \texttt{\$t2} are integers \texttt{a}, \texttt{b}, \texttt{i}, and
+        \texttt{temp}, respectively.
+  \phantomsection\addcontentsline{toc}{subsubsection}{2.24.3}
+  \item[2.24.3] For the loop above, assume that \texttt{\$t1} is initialized
+        to the value $N$. How many MIPS instructions are executed?
+\end{enumerate}
+
+\problembreak
+
+%-----------------------------------------------------------------------------
+\subsection{[10] C to MIPS: Nested Loop}
+\hypertarget{prob-2.25}{}
+\noindent$\langle$\S2.7$\rangle$\medskip
+
+\noindent Translate the following C code to MIPS assembly code. Use a minimum
+number of instructions. Assume that the values of \texttt{a}, \texttt{b},
+\texttt{i}, and \texttt{j} are in registers \texttt{\$s0}, \texttt{\$s1},
+\texttt{\$t0}, and \texttt{\$t1}, respectively. Also, assume that register
+\texttt{\$s2} holds the base address of array \texttt{D}.
+\begin{verbatim}
+    for (i = 0; i < a; i++)
+        for (j = 0; j < b; j++)
+            D[4*j] = i + j;
+\end{verbatim}
+
+\problembreak
+
+%-----------------------------------------------------------------------------
+\subsection{[5] Instruction Count for Nested Loop}
+\hypertarget{prob-2.26}{}
+\noindent$\langle$\S2.7$\rangle$\medskip
+
+\noindent How many MIPS instructions does it take to implement the C code from
+Exercise 2.25? If the variables \texttt{a} and \texttt{b} are initialized to
+10 and 1 and all elements of \texttt{D} are initially 0, what is the total
+number of MIPS instructions that is executed to complete the loop?
+
+\problembreak
+
+%-----------------------------------------------------------------------------
+\subsection{[5] MIPS Loop to C}
+\hypertarget{prob-2.27}{}
+\noindent$\langle$\S2.7$\rangle$\medskip
+
+\noindent Translate the following loop into C. Assume that the C-level integer
+\texttt{i} is held in register \texttt{\$s1}; \texttt{\$s2} holds the C-level
+integer called \texttt{result}; and \texttt{\$s0} holds the base address of
+the integer array \texttt{MemArray}.
+\begin{verbatim}
+          addi $s1, $zero, 0
+    LOOP: lw   $s2, 0($s0)
+          add  $s2, $s2, $s1
+          addi $s0, $s0, 4
+          addi $s1, $s1, 1
+          slti $t0, $s1, 10
+          bne  $t0, $zero, LOOP
+\end{verbatim}
+
+\problembreak
+
+%-----------------------------------------------------------------------------
+\subsection{[10] Optimize MIPS Loop}
+\hypertarget{prob-2.28}{}
+\noindent$\langle$\S2.7$\rangle$\medskip
+
+\noindent Rewrite the loop from Exercise 2.27 to reduce the number of MIPS
+instructions executed. Hint: Notice that variable \texttt{i} is used only for
+loop control.
+
+\problembreak
+
+%-----------------------------------------------------------------------------
+\subsection{[10] Fibonacci in MIPS}
+\hypertarget{prob-2.29}{}
+\noindent$\langle$\S2.8$\rangle$\medskip
+
+\noindent Implement the following C code in MIPS assembly. Hint: Remember that
+the stack pointer must remain aligned on a multiple of 16.
+\begin{verbatim}
+    int fib(int n) {
+        if (n == 0) return 0;
+        else if (n == 1) return 1;
+        else return fib(n-1) + fib(n-2);
+    }
+\end{verbatim}
+
+\problembreak
+
+%-----------------------------------------------------------------------------
+\subsection{[20] Stack Contents for Function Calls}
+\hypertarget{prob-2.30}{}
+\noindent$\langle$\S2.8$\rangle$\medskip
+
+\noindent For each function call, show the contents of the stack after the
+function call is made. Assume the stack pointer is initially at address
+\texttt{0x7FFFFFFC}, and follow the register conventions as specified in
+Figure 2.11.
+
+\problembreak
+
+%-----------------------------------------------------------------------------
+\subsection{[20] Translate Function to MIPS}
+\hypertarget{prob-2.31}{}
+\noindent$\langle$\S2.8$\rangle$\medskip
+
+\noindent Translate function \texttt{f} into MIPS assembly language. If you
+need to use registers \texttt{\$t5} through \texttt{\$t7}, use the
+lower-numbered registers first. Assume the function declaration for
+\texttt{func} is \texttt{int func(int a, int b);}. The code for function
+\texttt{f} is as follows:
+\begin{verbatim}
+    int f(int a, int b, int c, int d) {
+        return func(func(a, b), c + d);
+    }
+\end{verbatim}
+
+\problembreak
+
+%-----------------------------------------------------------------------------
+\subsection{[5] Tail-Call Optimization}
+\hypertarget{prob-2.32}{}
+\noindent$\langle$\S2.8$\rangle$\medskip
+
+\noindent Can we use the tail-call optimization in the function from Exercise
+2.31? If not, explain why not. If yes, what is the difference in the number of
+instructions executed with and without the optimization?
+
+\problembreak
+
+%-----------------------------------------------------------------------------
+\subsection{[5] Stack State Before Return}
+\hypertarget{prob-2.33}{}
+\noindent$\langle$\S2.8$\rangle$\medskip
+
+\noindent Right before your function \texttt{f} from Exercise 2.31 returns,
+what do we know about contents of registers \texttt{\$s1}, \texttt{\$s3},
+\texttt{\$s4}, and \texttt{\$t5}? Keep in mind that we know what the entire
+function \texttt{f} looks like, but for \texttt{func} we only know its
+declaration.
+
+\problembreak
+
+%-----------------------------------------------------------------------------
+\subsection{[10] ASCII String to Integer}
+\hypertarget{prob-2.34}{}
+\noindent$\langle$\S2.9$\rangle$\medskip
+
+\noindent Write a program in MIPS assembly language to convert an ASCII number
+string containing positive and negative integer decimal strings, to an
+integer. Your program should expect register \texttt{\$a0} to hold the
+address of a null-terminated string containing some combination of the digits
+0 through 9. Your program should compute the integer value equivalent to this
+string of digits, then place the number in register \texttt{\$v0}. If a
+non-digit character appears anywhere in the string, your program should stop
+with the value $-1$ in register \texttt{\$v0}. For example, if register
+\texttt{\$a0} points to a sequence of three bytes
+$50_{10}$, $52_{10}$, $0_{10}$ (the null-terminated string ``24''), then when
+the program stops, register \texttt{\$v0} should contain the value $24_{10}$.
+The RISC-V null instruction takes two registers as input.
+There is no ``null'' instruction. Just store the constant 10 in a register.
+
+\problembreak
+
+%-----------------------------------------------------------------------------
+\subsection{[5] Memory Store and Endianness}
+\hypertarget{prob-2.35}{}
+\noindent$\langle$\S2.9$\rangle$\medskip
+
+\noindent For the following code:
+\begin{verbatim}
+    lbu $t0, 0($t1)
+    sw  $t0, 0($t1)
+\end{verbatim}
+
+\noindent Assume that the register \texttt{\$t1} contains the address
+\texttt{0x10000000}.
+
+\begin{enumerate}
+  \phantomsection\addcontentsline{toc}{subsubsection}{2.35.1}
+  \item[2.35.1] What value is stored at \texttt{0x10000000} on a big-endian
+        machine?
+  \phantomsection\addcontentsline{toc}{subsubsection}{2.35.2}
+  \item[2.35.2] What value is stored at \texttt{0x10000000} on a
+        little-endian machine?
+\end{enumerate}
+
+\problembreak
+
+%-----------------------------------------------------------------------------
+\subsection{[5] Create 32-bit Constant}
+\hypertarget{prob-2.36}{}
+\noindent$\langle$\S2.10$\rangle$\medskip
+
+\noindent Write the MIPS assembly code that creates the 32-bit constant
+\texttt{0x0000FACE} and stores that value to register \texttt{\$t1}.
+
+\problembreak
+
+%-----------------------------------------------------------------------------
+\subsection{[10] Atomic Set-Max with \texttt{ll/sc}}
+\hypertarget{prob-2.37}{}
+\noindent$\langle$\S2.11$\rangle$\medskip
+
+\noindent Write the MIPS assembly code to implement the following C code as an
+atomic ``set max'' operation using the \texttt{ll} and \texttt{sc}
+instructions. Hint: the argument \texttt{x} contains the address of a shared
+variable, which should be replaced by \texttt{s} if \texttt{s} is greater
+than the value it points to:
+\begin{verbatim}
+    void setmax(int* x, int s) {
+        // Begin critical section
+        if (s > *x)
+            *x = s;
+        // End of critical section
+    }
+\end{verbatim}
+
+\problembreak
+
+%-----------------------------------------------------------------------------
+\subsection{[5] Concurrent Critical Section}
+\hypertarget{prob-2.38}{}
+\noindent$\langle$\S2.11$\rangle$\medskip
+
+\noindent Using your code from Exercise 2.37 as an example, explain what
+happens when two processors begin to execute the critical section at the same
+time, assuming that each processor executes exactly one instruction per cycle.
+
+\problembreak
+
+%-----------------------------------------------------------------------------
+\subsection{[5] New Arithmetic Instructions}
+\hypertarget{prob-2.39}{}
+\noindent$\langle$\S2.14, 2.13$\rangle$\medskip
+
+\noindent Assume for a given processor the CPI of arithmetic instructions is
+1, the CPI of load/store instructions is 10, and the CPI of branch
+instructions is 3. Assume a program has the following instruction breakdown:
+500 million arithmetic instructions, 300 million load/store instructions,
+100 million branch instructions.
+
+\begin{enumerate}
+  \phantomsection\addcontentsline{toc}{subsubsection}{2.39.1}
+  \item[2.39.1] Suppose that new, more powerful arithmetic instructions are
+        added to the instruction set. On average, through the use of these
+        more powerful arithmetic instructions, we can reduce the number of
+        arithmetic instructions needed to execute a program by 25\%, and the
+        cost of increasing the clock cycle time by 10\%. Is this a good
+        design choice? Why?
+  \phantomsection\addcontentsline{toc}{subsubsection}{2.39.2}
+  \item[2.39.2] Suppose that we find a way to double the performance of
+        arithmetic instructions. What is the overall speedup of our machine?
+        What if we find a way to improve the performance of arithmetic
+        instructions by 10 times?
+\end{enumerate}
+
+\problembreak
+
+%-----------------------------------------------------------------------------
+\subsection{[5] CPI and Instruction Mix}
+\hypertarget{prob-2.40}{}
+\noindent$\langle$\S2.14, 2.13$\rangle$\medskip
+
+\noindent Assume that for a given program 70\% of the executed instructions
+are arithmetic, 10\% are load/store, and 20\% are branch.
+
+\begin{enumerate}
+  \phantomsection\addcontentsline{toc}{subsubsection}{2.40.1}
+  \item[2.40.1] Given the instruction mix and the assumption that an
+        arithmetic instruction requires 2 cycles, a load/store instruction
+        takes 6 cycles, and a branch instruction takes 3 cycles, find the
+        average CPI.
+  \phantomsection\addcontentsline{toc}{subsubsection}{2.40.2}
+  \item[2.40.2] For a 25\% improvement in performance, how many cycles, on
+        average, may an arithmetic instruction take if load/store and branch
+        instructions are not improved at all?
+  \phantomsection\addcontentsline{toc}{subsubsection}{2.40.3}
+  \item[2.40.3] For a 50\% improvement in performance, how many cycles, on
+        average, may an arithmetic instruction take if load/store and branch
+        instructions are not improved at all?
+\end{enumerate}
+
+\problembreak
+
+%-----------------------------------------------------------------------------
+\subsection{[10] Scaled Offset for Exercise 2.4}
+\hypertarget{prob-2.41}{}
+\noindent$\langle$\S2.21$\rangle$\medskip
+
+\noindent Suppose the MIPS ISA included a scaled offset addressing mode
+similar to the x86 one described in Section 2.19 (Figure 2.35). Describe how
+you would use scaled offset loads to further reduce the number of assembly
+instructions needed to carry out the function given in Exercise 2.4.
+
+\problembreak
+
+%-----------------------------------------------------------------------------
+\subsection{[10] Scaled Offset for Exercise 2.7}
+\hypertarget{prob-2.42}{}
+\noindent$\langle$\S2.21$\rangle$\medskip
+
+\noindent Suppose the MIPS ISA included a scaled offset addressing mode
+similar to the x86 one described in Section 2.19 (Figure 2.35). Describe how
+you would use scaled offset loads to further reduce the number of assembly
+instructions needed to implement the C code given in Exercise 2.7.

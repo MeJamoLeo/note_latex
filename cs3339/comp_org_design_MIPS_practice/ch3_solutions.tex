@@ -1,0 +1,1919 @@
+%=============================================================================
+% Chapter 3 Solutions
+%=============================================================================
+\newpage
+\section*{Chapter 3 Solutions}
+\addcontentsline{toc}{section}{Chapter 3 Solutions}
+
+%-----------------------------------------------------------------------------
+\subsection*{3.1: Unsigned Hex Subtraction}
+\addcontentsline{toc}{subsection}{3.1: Unsigned Hex Subtraction}
+\hypertarget{sol-3.1}{}
+\markright{3.1}
+
+Compute $\texttt{5ED4} - \texttt{07A4}$ as unsigned 16-bit hex:
+
+\begin{align*}
+  \texttt{5ED4}_{16} &= 5 \times 16^3 + 14 \times 16^2 + 13 \times 16 + 4
+                      = 24{,}276 \\
+  \texttt{07A4}_{16} &= 0 \times 16^3 + 7 \times 16^2 + 10 \times 16 + 4
+                      = 1{,}956
+\end{align*}
+
+Subtract column by column from right to left:
+\begin{itemize}
+  \item Ones: $4 - 4 = 0$
+  \item Sixteens: $D - A = 13 - 10 = 3$
+  \item $16^2$: $E - 7 = 14 - 7 = 7$
+  \item $16^3$: $5 - 0 = 5$
+\end{itemize}
+
+Result:
+\[ \texttt{5ED4} - \texttt{07A4} = \textbf{\texttt{5730}} \]
+
+Verification:
+\[ 24{,}276 - 1{,}956 = 22{,}320 = 5 \times 16^3 + 7 \times 16^2
++ 3 \times 16 + 0 = \texttt{5730}_{16} \checkmark \]
+
+%-----------------------------------------------------------------------------
+\subsection*{3.2: Signed Hex Subtraction (Sign-Magnitude)}
+\addcontentsline{toc}{subsection}{3.2: Signed Hex Subtraction (Sign-Magnitude)}
+\hypertarget{sol-3.2}{}
+\markright{3.2}
+
+In 16-bit sign-magnitude, the MSB (bit 15) is the sign bit. For both values:
+\begin{itemize}
+  \item $\texttt{5ED4} = \texttt{0101\,1110\,1101\,0100}_2$.
+        Sign bit $= 0$ (positive), magnitude $= \texttt{5ED4}_{16} = 24{,}276$.
+        So the value is $+24{,}276$.
+  \item $\texttt{07A4} = \texttt{0000\,0111\,1010\,0100}_2$.
+        Sign bit $= 0$ (positive), magnitude $= \texttt{07A4}_{16} = 1{,}956$.
+        So the value is $+1{,}956$.
+\end{itemize}
+
+Subtraction:
+\[ +24{,}276 - (+1{,}956) = +22{,}320 \]
+
+The result is positive. In sign-magnitude: sign bit $= 0$, magnitude:
+\[ 22{,}320 = \texttt{5730}_{16} \]
+
+Result: $\textbf{\texttt{5730}}$ (same as unsigned since both operands are
+positive and the result is positive).
+
+%-----------------------------------------------------------------------------
+\subsection*{3.3: Hex to Binary Conversion}
+\addcontentsline{toc}{subsection}{3.3: Hex to Binary Conversion}
+\hypertarget{sol-3.3}{}
+\markright{3.3}
+
+Each hex digit maps to exactly 4 binary bits:
+
+\begin{center}
+\begin{tabular}{cccc}
+\toprule
+\texttt{5} & \texttt{E} & \texttt{D} & \texttt{4} \\
+\midrule
+\texttt{0101} & \texttt{1110} & \texttt{1101} & \texttt{0100} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\[ \texttt{5ED4}_{16} = \texttt{0101\,1110\,1101\,0100}_2 \]
+
+\medskip\noindent\textbf{Why hex is attractive for computers:}
+
+Hexadecimal is attractive because each hex digit corresponds to exactly 4 binary
+bits (since $16 = 2^4$). This makes conversion between hex and binary trivial --
+no arithmetic is required, just a direct substitution of each digit. It provides
+a compact, human-readable representation: a 32-bit value requires only 8 hex
+digits instead of 32 binary digits. This is far more practical than decimal, where
+the conversion to/from binary requires repeated division.
+
+%-----------------------------------------------------------------------------
+\subsection*{3.4: Unsigned Octal Subtraction}
+\addcontentsline{toc}{subsection}{3.4: Unsigned Octal Subtraction}
+\hypertarget{sol-3.4}{}
+\markright{3.4}
+
+Compute $4365_8 - 3412_8$ as unsigned 16-bit octal numbers.
+
+Subtract column by column from right to left (base 8):
+\begin{itemize}
+  \item Ones: $5 - 2 = 3$
+  \item Eights: $6 - 1 = 5$
+  \item $8^2$: $3 - 4$. Since $3 < 4$, borrow 1 from the next column:
+        $(3 + 8) - 4 = 7$, carry $= 1$.
+  \item $8^3$: $4 - 3 - 1(\text{borrow}) = 0$
+\end{itemize}
+
+Result:
+\[ 4365_8 - 3412_8 = \mathbf{0753_8} \]
+
+Verification:
+\begin{align*}
+  4365_8 &= 4(512) + 3(64) + 6(8) + 5 = 2293 \\
+  3412_8 &= 3(512) + 4(64) + 1(8) + 2 = 1802
+\end{align*}
+\[ 2293 - 1802 = 491 = 7(64) + 5(8) + 3 = 753_8 \checkmark \]
+
+%-----------------------------------------------------------------------------
+\subsection*{3.5: Signed Octal Subtraction (Sign-Magnitude)}
+\addcontentsline{toc}{subsection}{3.5: Signed Octal Subtraction (Sign-Magnitude)}
+\hypertarget{sol-3.5}{}
+\markright{3.5}
+
+In signed 12-bit sign-magnitude, the MSB (bit 11) is the sign bit.
+
+Convert each octal number to binary (each octal digit is 3 bits):
+\begin{itemize}
+  \item $4365_8$: $4 = 100$, $3 = 011$, $6 = 110$, $5 = 101$.
+        So $4365_8 = \texttt{100\,011\,110\,101}_2$ (12 bits).
+        Sign bit (bit 11) $= 1$ (negative).
+        Magnitude (bits 10--0) $= \texttt{00\,011\,110\,101}_2 = 245_{10}$.
+        Value $= -245$.
+  \item $3412_8$: $3 = 011$, $4 = 100$, $1 = 001$, $2 = 010$.
+        So $3412_8 = \texttt{011\,100\,001\,010}_2$ (12 bits).
+        Sign bit (bit 11) $= 0$ (positive).
+        Magnitude (bits 10--0) $= \texttt{11\,100\,001\,010}_2 = 1794_{10}$.
+        Value $= +1794$.
+\end{itemize}
+
+Subtraction:
+\[ -245 - (+1794) = -2039 \]
+
+Check range: 12-bit sign-magnitude range is $[-(2^{11}-1),\; +(2^{11}-1)] =
+[-2047,\; +2047]$. Since $|-2039| = 2039 \le 2047$, no overflow.
+
+Encode $-2039$: sign bit $= 1$, magnitude $= 2039$.
+\[ 2039_{10} = \texttt{11111110111}_2 \quad\text{(11 bits)} \]
+
+Prepend the sign bit to form the full 12-bit representation:
+\[ \texttt{1\,11111110111}_2 \]
+
+Group into 3-bit chunks from the right and convert to octal:
+\[ \underbrace{111}_{7}\;\underbrace{111}_{7}\;\underbrace{110}_{6}\;\underbrace{111}_{7} = 7767_8 \]
+
+Result: $\mathbf{7767_8}$ (representing $-2039$ in sign-magnitude).
+
+%-----------------------------------------------------------------------------
+\subsection*{3.6: Unsigned 8-bit Subtraction Overflow}
+\addcontentsline{toc}{subsection}{3.6: Unsigned 8-bit Subtraction Overflow}
+\hypertarget{sol-3.6}{}
+\markright{3.6}
+
+Unsigned 8-bit range: $[0, 255]$.
+
+\[ 185 - 122 = 63 \]
+
+Since $63 \in [0, 255]$ and $185 \ge 122$ (no borrow out), there is
+\textbf{neither overflow nor underflow}.
+
+%-----------------------------------------------------------------------------
+\subsection*{3.7: Signed Sign-Magnitude Subtraction Overflow}
+\addcontentsline{toc}{subsection}{3.7: Signed Sign-Magnitude Subtraction Overflow}
+\hypertarget{sol-3.7}{}
+\markright{3.7}
+
+In signed 8-bit sign-magnitude, bit 7 is the sign, bits 6--0 are the magnitude.
+Range: $[-(2^7-1),\; +(2^7-1)] = [-127,\; +127]$.
+
+Interpret the bit patterns:
+\begin{itemize}
+  \item $185 = 10111001_2$. Sign $= 1$ (negative), magnitude $= 0111001_2 = 57$.
+        Value $= -57$.
+  \item $122 = 01111010_2$. Sign $= 0$ (positive), magnitude $= 1111010_2 = 122$.
+        Value $= +122$.
+\end{itemize}
+
+$185 - 122$ in sign-magnitude means:
+\[ (-57) - (+122) = -179 \]
+
+Since $|-179| = 179 > 127$, this \textbf{overflows} (negative overflow, i.e.,
+the result is more negative than the format can represent).
+
+%-----------------------------------------------------------------------------
+\subsection*{3.8: Signed Sign-Magnitude Addition Overflow}
+\addcontentsline{toc}{subsection}{3.8: Signed Sign-Magnitude Addition Overflow}
+\hypertarget{sol-3.8}{}
+\markright{3.8}
+
+Using the same signed 8-bit sign-magnitude interpretations:
+$185 = -57$, $122 = +122$.
+
+$185 + 122$ in sign-magnitude means:
+\[ (-57) + (+122) = +65 \]
+
+Since $65 \in [-127, +127]$, there is \textbf{no overflow}.
+
+%-----------------------------------------------------------------------------
+\subsection*{3.9: Two's Complement Saturating Addition}
+\addcontentsline{toc}{subsection}{3.9: Two's Complement Saturating Addition}
+\hypertarget{sol-3.9}{}
+\markright{3.9}
+
+In signed 8-bit two's complement, the bit pattern for a decimal value $d$
+(where $0 \le d \le 255$) is interpreted as:
+\begin{itemize}
+  \item $151_{10} = 10010111_2$. Since MSB $= 1$: value $= 151 - 256 = -105$.
+  \item $214_{10} = 11010110_2$. Since MSB $= 1$: value $= 214 - 256 = -42$.
+\end{itemize}
+
+True sum:
+\[ (-105) + (-42) = -147 \]
+
+Signed 8-bit two's complement range: $[-128, +127]$.  Since $-147 < -128$,
+overflow occurs (negative overflow).
+
+With \textbf{saturating arithmetic}, the result clamps to the most negative
+representable value: $\mathbf{-128}$.
+
+%-----------------------------------------------------------------------------
+\subsection*{3.10: Two's Complement Saturating Subtraction}
+\addcontentsline{toc}{subsection}{3.10: Two's Complement Saturating Subtraction}
+\hypertarget{sol-3.10}{}
+\markright{3.10}
+
+Same interpretations: $151 \to -105$, $214 \to -42$.
+
+\[ 151 - 214 \;\text{ means }\; (-105) - (-42) = -105 + 42 = -63 \]
+
+Since $-63 \in [-128, +127]$, no overflow occurs. Saturating arithmetic has no
+effect.
+
+Result: $\mathbf{-63}$.
+
+%-----------------------------------------------------------------------------
+\subsection*{3.11: Unsigned Saturating Addition}
+\addcontentsline{toc}{subsection}{3.11: Unsigned Saturating Addition}
+\hypertarget{sol-3.11}{}
+\markright{3.11}
+
+Unsigned 8-bit range: $[0, 255]$.
+
+\[ 151 + 214 = 365 \]
+
+Since $365 > 255$, overflow occurs. With saturating arithmetic, the result
+clamps to the maximum: $\mathbf{255}$.
+%-----------------------------------------------------------------------------
+\subsection*{3.12: Multiplication Table (6-bit, Fig.~3.3)}
+\addcontentsline{toc}{subsection}{3.12: Multiplication Table (6-bit, Fig.~3.3)}
+\hypertarget{sol-3.12}{}
+\markright{3.12}
+
+Multiply unsigned 6-bit octal values: $62_8 \times 12_8$.
+
+Convert:
+\[
+  62_8 = 110\,010_2 = 50_{10} \quad(\text{multiplicand}), \qquad
+  12_8 = 001\,010_2 = 10_{10} \quad(\text{multiplier}).
+\]
+Expected product:
+\[
+  50 \times 10 = 500 = 764_8.
+\]
+
+\medskip\noindent\textbf{Algorithm (Fig.~3.3 -- first multiplier version):}
+The multiplicand register is 12 bits wide (double width). The product register
+is 12 bits, initialized to 0. The multiplier register is 6 bits. Each iteration:
+
+\begin{enumerate}
+  \item Test multiplier bit 0.
+  \item If 1: add multiplicand to product. If 0: do nothing.
+  \item Shift multiplicand left 1 bit.
+  \item Shift multiplier right 1 bit.
+  \item Repeat for 6 iterations (one per multiplier bit).
+\end{enumerate}
+
+\begin{center}
+\begin{tabular}{clll}
+\toprule
+\textbf{Step} & \textbf{Multiplicand} & \textbf{Multiplier} & \textbf{Product} \\
+\midrule
+Init & \texttt{000000\,110010} & \texttt{001010} & \texttt{000000000000} \\
+1 & (bit 0 = 0, no add) & & \\
+  & \texttt{000001\,100100} & \texttt{000101} & \texttt{000000000000} \\
+2 & (bit 0 = 1, add) & & \\
+  & \texttt{000011\,001000} & \texttt{000010} & \texttt{000001100100} \\
+3 & (bit 0 = 0, no add) & & \\
+  & \texttt{000110\,010000} & \texttt{000001} & \texttt{000001100100} \\
+4 & (bit 0 = 1, add) & & \\
+  & \texttt{001100\,100000} & \texttt{000000} & \texttt{000111110100} \\
+5 & (bit 0 = 0, no add) & & \\
+  & \texttt{011001\,000000} & \texttt{000000} & \texttt{000111110100} \\
+6 & (bit 0 = 0, no add) & & \\
+  & \texttt{110010\,000000} & \texttt{000000} & \texttt{000111110100} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Product:
+\[
+  \texttt{000111110100}_2 = 500_{10} = \mathbf{764_8} \checkmark
+\]
+
+%-----------------------------------------------------------------------------
+\subsection*{3.13: Multiplication Table (8-bit, Fig.~3.5)}
+\addcontentsline{toc}{subsection}{3.13: Multiplication Table (8-bit, Fig.~3.5)}
+\hypertarget{sol-3.13}{}
+\markright{3.13}
+
+The problem says ``octal unsigned 8-bit integers 62 and 12,'' so we use the same
+decimal values:
+\[
+  \text{multiplicand} = 62_8 = 50_{10}, \qquad
+  \text{multiplier} = 12_8 = 10_{10}.
+\]
+As 8-bit values: multiplicand $= 00110010_2$, multiplier $= 00001010_2$.
+
+\medskip\noindent\textbf{Algorithm (Fig.~3.5 -- optimized multiplier):}
+The multiplicand register is 8 bits. The product register is 16 bits, with the
+multiplier initially placed in the right half. Each iteration:
+\begin{enumerate}
+  \item Test product bit 0 (rightmost bit of multiplier portion).
+  \item If 1: add multiplicand to left half of product.
+  \item Shift entire product register right 1 bit.
+  \item Repeat for 8 iterations.
+\end{enumerate}
+
+\begin{center}
+\begin{tabular}{cll}
+\toprule
+\textbf{Step} & \textbf{Multiplicand} & \textbf{Product [HI $|$ LO/Multiplier]} \\
+\midrule
+Init & \texttt{00110010} & \texttt{00000000\,00001010} \\
+1 & (bit 0 = 0, no add; shift right) & \texttt{00000000\,00000101} \\
+2 & (bit 0 = 1, add \& shift) & add: \texttt{00110010\,00000101}; shift: \texttt{00011001\,00000010} \\
+3 & (bit 0 = 0, no add; shift right) & \texttt{00001100\,10000001} \\
+4 & (bit 0 = 1, add \& shift) & add: \texttt{00111110\,10000001}; shift: \texttt{00011111\,01000000} \\
+5 & (bit 0 = 0, no add; shift right) & \texttt{00001111\,10100000} \\
+6 & (bit 0 = 0, no add; shift right) & \texttt{00000111\,11010000} \\
+7 & (bit 0 = 0, no add; shift right) & \texttt{00000011\,11101000} \\
+8 & (bit 0 = 0, no add; shift right) & \texttt{00000001\,11110100} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Product:
+\[
+  \texttt{0000000111110100}_2 = 500_{10} = \mathbf{764_8} \checkmark
+\]
+
+%-----------------------------------------------------------------------------
+\subsection*{3.14: Multiply Time Calculation}
+\addcontentsline{toc}{subsection}{3.14: Multiply Time Calculation}
+\hypertarget{sol-3.14}{}
+\markright{3.14}
+
+8-bit integer, 4 time units per step. Each iteration has 3 steps: (1a) test and
+conditionally add, (1b) shift multiplicand/product, (1c) shift multiplier.
+
+For an 8-bit multiply, there are 8 iterations.
+
+\medskip\noindent\textbf{Hardware (simultaneous shifts):}
+Each iteration: 1 add + 1 shift step (two shifts done simultaneously) $= 2$ steps
+$\times\, 4 = 8$ time units per iteration.
+\[
+  \text{Total} = 8 \times 8 = \mathbf{64} \text{ time units.}
+\]
+
+\medskip\noindent\textbf{Software (sequential shifts):}
+Each iteration: 1 add + 2 shift steps (done sequentially) $= 3$ steps
+$\times\, 4 = 12$ time units per iteration.
+\[
+  \text{Total} = 8 \times 12 = \mathbf{96} \text{ time units.}
+\]
+
+\medskip\noindent Both Fig.~3.3 and Fig.~3.5 have the same number of iterations
+(equal to the bit width), so the times are the same for each approach.
+
+%-----------------------------------------------------------------------------
+\subsection*{3.15: Multiply Time with Stacked Adders}
+\addcontentsline{toc}{subsection}{3.15: Multiply Time with Stacked Adders}
+\hypertarget{sol-3.15}{}
+\markright{3.15}
+
+For an 8-bit multiply with a combinational array of adders: there are 7 rows of
+adders (the first partial product needs no addition; partial products 2 through 8
+each need one row of addition). However, the text says 31 adders for a 32-bit
+multiplier, so for 8-bit this would be 7 adders stacked vertically.
+
+Each adder takes 4 time units, and they are connected in series (the output of
+one feeds the next).
+\[
+  \text{Total} = 7 \times 4 = \mathbf{28} \text{ time units.}
+\]
+
+This is significantly faster than the iterative approach because all partial
+products are computed simultaneously in combinational logic.
+
+%-----------------------------------------------------------------------------
+\subsection*{3.16: Multiply Time (Fig.~3.7)}
+\addcontentsline{toc}{subsection}{3.16: Multiply Time (Fig.~3.7)}
+\hypertarget{sol-3.16}{}
+\markright{3.16}
+
+Fig.~3.7 shows the Wallace tree multiplier approach, which uses a tree of
+carry-save adders to reduce partial products in parallel.
+
+For an 8-bit multiplier, there are 8 partial products. A Wallace tree reduces
+$n$ partial products using $\lceil \log_{1.5} n \rceil$ levels of carry-save
+adders, plus one final carry-propagate adder.
+
+For $n = 8$: the number of reduction levels is
+\[
+  \lceil \log_{1.5}(8) \rceil = \lceil 5.13 \rceil = 4
+\]
+carry-save adder levels (each taking roughly 2 time units for a carry-save add
+since there is no carry propagation, but the problem states each adder takes 4
+time units).
+
+With each reduction level taking 4 time units, plus one final
+carry-propagate add of 4 time units:
+\[
+  \text{Total} \approx (4 + 1) \times 4 = \mathbf{20} \text{ time units.}
+\]
+
+Alternatively, if using a balanced binary tree of standard adders:
+\[
+  \lceil \log_2 8 \rceil = 3 \text{ levels, each 4 time units} = 12 \text{ time units.}
+\]
+The exact answer depends on interpretation, but the key point is that the tree
+structure achieves $O(\log n)$ depth vs.\ $O(n)$ for the sequential approach.
+
+%-----------------------------------------------------------------------------
+\subsection*{3.17: Shift-and-Add Multiplication}
+\addcontentsline{toc}{subsection}{3.17: Shift-and-Add Multiplication}
+\hypertarget{sol-3.17}{}
+\markright{3.17}
+
+Compute $\texttt{0x33} \times \texttt{0x55}$ using shifts and adds. Convert:
+\[
+  \texttt{0x33} = 51_{10} = 00110011_2, \qquad
+  \texttt{0x55} = 85_{10} = 01010101_2.
+\]
+
+We decompose one operand into powers of 2. Using $51 = 2^6 - 2^4 + 2^2 - 2^0$
+requires 3 shifts and 3 add/subtracts (6 operations).
+
+A more efficient factoring uses $51 = 3 \times 17 = (2 + 1)(16 + 1)$:
+
+\begin{verbatim}
+    t1 = 0x55 + (0x55 << 4)   # 0x55 * 17  = 0x0595
+    t2 = t1 + (t1 << 1)       # 0x55 * 51  = 0x10EF
+\end{verbatim}
+
+This uses only 2 shifts and 2 adds (4 operations total), which is optimal.
+
+Verification:
+\[
+  51 \times 85 = 4335 = \texttt{0x10EF} \checkmark
+\]
+
+%-----------------------------------------------------------------------------
+\subsection*{3.18: Division Table (Fig.~3.8)}
+\addcontentsline{toc}{subsection}{3.18: Division Table (Fig.~3.8)}
+\hypertarget{sol-3.18}{}
+\markright{3.18}
+
+Divide $74 \div 21$ using the first division algorithm (Fig.~3.8). Both are
+unsigned 8-bit integers.
+\[
+  74 = 01001010_2, \qquad 21 = 00010101_2.
+\]
+Expected:
+\[
+  74 \div 21 = 3 \text{ remainder } 11 \qquad (74 = 21 \times 3 + 11).
+\]
+
+\medskip\noindent\textbf{Algorithm (Fig.~3.8):}
+The divisor starts in the left half of a 16-bit register. The remainder register
+is 16 bits, initialized with the dividend in the right half. The quotient is 8
+bits, initialized to 0.
+
+Each iteration (9 iterations for 8-bit, since we start with a subtract):
+\begin{enumerate}
+  \item Subtract divisor from remainder.
+  \item If remainder $\ge 0$: shift quotient left, set new bit to 1.
+  \item If remainder $< 0$: restore remainder (add divisor back), shift quotient
+        left, set new bit to 0.
+  \item Shift divisor right 1 bit.
+\end{enumerate}
+
+After 9 iterations, the quotient register holds the quotient and the left half
+of the remainder register holds the remainder.
+
+Final result:
+\[
+  \text{Quotient} = 3 = 00000011_2, \qquad \text{Remainder} = 11 = 00001011_2.
+\]
+\[
+  \mathbf{74 \div 21 = 3} \text{ remainder } \mathbf{11}
+\]
+
+%-----------------------------------------------------------------------------
+\subsection*{3.19: Division Table (Fig.~3.11)}
+\addcontentsline{toc}{subsection}{3.19: Division Table (Fig.~3.11)}
+\hypertarget{sol-3.19}{}
+\markright{3.19}
+
+Divide $74 \div 21$ using the optimized division hardware (Fig.~3.11).
+
+In Fig.~3.11, the remainder and quotient share a single register (similar to how
+Fig.~3.5 optimizes multiplication). The divisor is 8 bits. The
+remainder/quotient register is 16 bits.
+
+\medskip\noindent\textbf{Algorithm:}
+Initialize the 16-bit remainder register with the dividend in the right half
+(bits 7--0), left half zero. The divisor is in an 8-bit register.
+
+\begin{enumerate}
+  \item Shift the remainder register left 1 bit.
+  \item Subtract the divisor from the left half of the remainder register.
+  \item If the result $\ge 0$: set the rightmost bit (bit 0) of the remainder
+        register to 1.
+  \item If the result $< 0$: restore the left half (add divisor back), set bit 0
+        to 0.
+  \item Repeat for 8 iterations.
+  \item After the loop, the left half contains the remainder (but shifted left by
+        1 too many times). Shift the left half right by 1 to correct.
+\end{enumerate}
+
+After all steps: the right half holds the quotient, and the left half (after
+correction) holds the remainder.
+
+Final result:
+\[
+  \text{Quotient} = \mathbf{3}, \qquad \text{Remainder} = \mathbf{11}.
+\]
+
+Verification:
+\[
+  21 \times 3 + 11 = 63 + 11 = 74 \checkmark
+\]
+
+%-----------------------------------------------------------------------------
+\subsection*{3.20: Bit Pattern as Integer}
+\addcontentsline{toc}{subsection}{3.20: Bit Pattern as Integer}
+\hypertarget{sol-3.20}{}
+\markright{3.20}
+
+$\texttt{0x0C000000}$ in binary:
+\[
+  \texttt{0000\,1100\,0000\,0000\,0000\,0000\,0000\,0000}_2
+\]
+
+\noindent\textbf{As unsigned integer:}
+\[
+  2^{27} + 2^{26} = 134{,}217{,}728 + 67{,}108{,}864 = \mathbf{201{,}326{,}592}
+\]
+
+\noindent\textbf{As two's complement signed integer:}
+The MSB (bit 31) is 0, so the number is positive. The value is the same:
+\[
+  \mathbf{+201{,}326{,}592}
+\]
+
+%-----------------------------------------------------------------------------
+\subsection*{3.21: Bit Pattern as MIPS Instruction}
+\addcontentsline{toc}{subsection}{3.21: Bit Pattern as MIPS Instruction}
+\hypertarget{sol-3.21}{}
+\markright{3.21}
+
+$\texttt{0x0C000000} = \texttt{0000\,1100\,0000\,0000\,0000\,0000\,0000\,0000}_2$.
+
+Extract the opcode (bits 31--26):
+\[
+  \texttt{000011}_2 = 3_{10}
+\]
+
+Opcode 3 in MIPS is \texttt{jal} (jump and link), which uses J-type format:
+\begin{verbatim}
+  000011 00000000000000000000000000
+  op=3   target address = 0
+\end{verbatim}
+
+The 26-bit target address field is all zeros. The full jump target is formed by:
+\[
+  \text{target} = \{\text{PC}[31{:}28],\; \texttt{00\,0000\,0000\,0000\,0000\,0000\,0000},\; 00\}
+\]
+
+The instruction is: \textbf{\texttt{jal 0x00000000}} (jump and link to address 0,
+within the current 256 MB region defined by the upper 4 bits of PC+4).
+
+%-----------------------------------------------------------------------------
+\subsection*{3.22: Bit Pattern as Floating Point}
+\addcontentsline{toc}{subsection}{3.22: Bit Pattern as Floating Point}
+\hypertarget{sol-3.22}{}
+\markright{3.22}
+
+$\texttt{0x0C000000} = \texttt{0\;00011000\;00000000000000000000000}_2$.
+
+IEEE 754 single precision fields:
+\begin{itemize}
+  \item Sign: $s = 0$ (positive).
+  \item Exponent: $\texttt{00011000}_2 = 24_{10}$.
+        Biased exponent with bias 127:
+        \[ E = 24 - 127 = -103 \]
+  \item Mantissa: $\texttt{00000000000000000000000}_2 = 0$.
+        With hidden 1: significand $= 1.0$.
+\end{itemize}
+
+Value (since the exponent field is nonzero, this is a normal number):
+\[
+  (-1)^0 \times 1.0 \times 2^{-103} \approx \mathbf{9.8607613 \times 10^{-32}}
+\]
+
+This is a very small positive float.
+
+%-----------------------------------------------------------------------------
+\subsection*{3.23: IEEE 754 Single Precision Encoding}
+\addcontentsline{toc}{subsection}{3.23: IEEE 754 Single Precision Encoding}
+\hypertarget{sol-3.23}{}
+\markright{3.23}
+
+Convert $63.25$ to IEEE 754 single precision.
+
+\noindent\textbf{Step 1:} Convert to binary.
+\begin{align*}
+  63 &= 111111_2 \\
+  0.25 &= 0.01_2 \\
+  63.25 &= 111111.01_2
+\end{align*}
+
+\noindent\textbf{Step 2:} Normalize.
+\[
+  111111.01_2 = 1.1111101_2 \times 2^5
+\]
+
+\noindent\textbf{Step 3:} Extract fields.
+\begin{itemize}
+  \item Sign: $s = 0$ (positive).
+  \item Exponent: $E = 5$, biased $= 5 + 127 = 132 = 10000100_2$.
+  \item Mantissa: $1111101\underbrace{0000000000000000}_{16\text{ zeros}}$
+        (23 bits, drop the leading 1).
+\end{itemize}
+
+Binary representation:
+\[
+  \boxed{\texttt{0\;10000100\;11111010000000000000000}}
+\]
+
+Group into nibbles:
+\[
+  \texttt{0100\,0010\,0111\,1101\,0000\,0000\,0000\,0000} = \boxed{\texttt{0x427D0000}}
+\]
+
+%-----------------------------------------------------------------------------
+\subsection*{3.24: IEEE 754 Double Precision Encoding}
+\addcontentsline{toc}{subsection}{3.24: IEEE 754 Double Precision Encoding}
+\hypertarget{sol-3.24}{}
+\markright{3.24}
+
+Same value $63.25 = 1.1111101_2 \times 2^5$.
+
+\begin{itemize}
+  \item Sign: $s = 0$.
+  \item Exponent: $E = 5$, biased $= 5 + 1023 = 1028 = 10000000100_2$ (11 bits).
+  \item Mantissa: $1111101$ followed by 45 zeros (52 bits total).
+\end{itemize}
+
+Binary representation:
+\[
+  \boxed{\texttt{0\;10000000100\;1111101}\underbrace{\texttt{000\ldots0}}_{45}}
+\]
+
+In hex:
+\[
+  \boxed{\texttt{0x404FA00000000000}}
+\]
+
+Grouping: $\texttt{0100\,0000\,0100\,1111\,1010\,0000\,\ldots\,0000}$.
+
+%-----------------------------------------------------------------------------
+\subsection*{3.25: IEEE 754 Negative Value Encoding}
+\addcontentsline{toc}{subsection}{3.25: IEEE 754 Negative Value Encoding}
+\hypertarget{sol-3.25}{}
+\markright{3.25}
+
+\[
+  -1.5625 \times 10^{-1} = -0.15625
+\]
+
+\noindent\textbf{Step 1:} Convert to binary.
+\[
+  0.15625 = 0.00101_2 \quad\text{since } 2^{-3} + 2^{-5} = 0.125 + 0.03125 = 0.15625
+\]
+
+\noindent\textbf{Step 2:} Normalize.
+\[
+  0.00101_2 = 1.01_2 \times 2^{-3}
+\]
+
+\noindent\textbf{Step 3:} IEEE 754 single precision fields.
+\begin{itemize}
+  \item Sign: $s = 1$ (negative).
+  \item Exponent: $E = -3$, biased $= -3 + 127 = 124 = 01111100_2$.
+  \item Mantissa: $01\underbrace{000\ldots0}_{21}$ (23 bits).
+\end{itemize}
+
+Bit pattern:
+\[
+  \boxed{\texttt{1\;01111100\;01000000000000000000000}}
+\]
+
+Group into nibbles:
+\[
+  \texttt{1011\,1110\,0010\,0000\,\ldots\,0000} = \boxed{\texttt{0xBE200000}}
+\]
+
+%-----------------------------------------------------------------------------
+\subsection*{3.26: DEC PDP-8 Floating Point Format}
+\addcontentsline{toc}{subsection}{3.26: DEC PDP-8 Floating Point Format}
+\hypertarget{sol-3.26}{}
+\markright{3.26}
+
+\[
+  -0.15625 = -0.625 \times 2^{-2}
+\]
+
+The DEC PDP-8 format uses 36 bits total:
+\begin{itemize}
+  \item Bits 35--24: 12-bit exponent in two's complement.
+  \item Bits 23--0: 24-bit fraction in two's complement. No hidden 1.
+\end{itemize}
+
+The number is represented as $\text{fraction} \times 2^{\text{exponent}}$, where the
+fraction is a two's complement fixed-point value with the binary point immediately
+after the sign bit. The fraction is normalized so that $0.5 \le |f| < 1$.
+
+Normalizing: $-0.15625 = -\tfrac{5}{32} = -\tfrac{5}{8} \times 2^{-2} = -0.625 \times 2^{-2}$.
+
+\noindent\textbf{Exponent:} $-2$ in 12-bit two's complement:
+\[
+  \texttt{111111111110}_2
+\]
+
+\noindent\textbf{Fraction:} $-0.625$ in 24-bit two's complement with the binary point
+after the sign bit. The representation is $b_{23}.b_{22}b_{21}\ldots b_0$, where the
+value is $-b_{23} + \sum_{i=0}^{22} b_i \cdot 2^{i-23}$.
+
+For $-0.625$: the sign bit is 1, so we need $-1 + x = -0.625$, giving $x = 0.375 = 0.011_2$.
+The 24 bits are therefore:
+\[
+  \texttt{101100000000000000000000}_2
+\]
+
+\medskip\noindent\textbf{36-bit pattern:}
+\[
+  \underbrace{\texttt{111111111110}}_{\text{exponent} = -2}\;
+  \underbrace{\texttt{101100000000000000000000}}_{\text{fraction} = -0.625}
+\]
+
+\medskip\noindent\textbf{Comparison with IEEE 754:}
+\begin{itemize}
+  \item \textbf{Range:} The PDP-8 has a 12-bit two's complement exponent, giving
+        a range of $2^{-2048}$ to $2^{+2047}$, far exceeding IEEE 754 single's
+        $2^{-126}$ to $2^{+127}$.
+  \item \textbf{Accuracy:} The PDP-8 has 24 fraction bits including the sign, so
+        effectively 23 bits of magnitude --- comparable to IEEE 754 single (23-bit
+        mantissa + hidden 1 = 24 bits of precision). The PDP-8 has slightly less
+        precision since it lacks the hidden-1 optimization.
+  \item The PDP-8 uses 36 bits total vs.\ IEEE 754 single's 32 bits.
+\end{itemize}
+
+%-----------------------------------------------------------------------------
+\subsection*{3.27: IEEE 754-2008 Half Precision Format}
+\addcontentsline{toc}{subsection}{3.27: IEEE 754-2008 Half Precision Format}
+\hypertarget{sol-3.27}{}
+\markright{3.27}
+
+Format: 1 sign + 5-bit exponent (excess-16 bias) + 10-bit mantissa + hidden 1.
+Total: 16 bits.
+
+\[
+  -0.15625 = -1.01_2 \times 2^{-3}
+\]
+
+\begin{itemize}
+  \item Sign: $s = 1$.
+  \item Exponent: $E = -3$, biased $= -3 + 16 = 13 = 01101_2$.
+  \item Mantissa: $0100000000$ (10 bits, hidden 1 dropped).
+\end{itemize}
+
+Bit pattern:
+\[
+  \boxed{\texttt{1\;01101\;0100000000}}
+\]
+
+In hex:
+\[
+  1\,01101\,01\,00000000 = 10110101\,00000000 = \boxed{\texttt{0xB500}}
+\]
+
+\medskip\noindent\textbf{Comparison with IEEE 754 single:}
+\begin{itemize}
+  \item \textbf{Range:} Excess-16 gives exponents $-16$ to $+15$ (excluding
+        special values), so the range is roughly $2^{-16}$ to $2^{+15} \approx
+        6.1 \times 10^{-5}$ to $3.3 \times 10^{4}$. IEEE 754 single has range
+        $\approx 1.2 \times 10^{-38}$ to $3.4 \times 10^{+38}$.
+        The half precision range is \emph{much} smaller.
+  \item \textbf{Accuracy:} 10-bit mantissa + hidden 1 = 11 bits of precision
+        ($\approx 3.3$ decimal digits). IEEE 754 single has 24 bits ($\approx
+        7.2$ decimal digits). Half precision is much less accurate.
+\end{itemize}
+
+%-----------------------------------------------------------------------------
+\subsection*{3.28: HP 2114 Floating Point Format}
+\addcontentsline{toc}{subsection}{3.28: HP 2114 Floating Point Format}
+\hypertarget{sol-3.28}{}
+\markright{3.28}
+
+Format (32 bits total):
+\begin{itemize}
+  \item Bits 31--16: 16-bit two's complement fraction.
+  \item Bits 15--8: 8-bit extension of fraction (total 24-bit fraction).
+  \item Bits 7--0: 8-bit exponent in sign-magnitude with sign bit on the far
+        right (bit 0).
+\end{itemize}
+No hidden 1.
+
+Normalize so that $0.5 \le |f| < 1$:
+\[
+  -0.15625 = -0.625 \times 2^{-2}
+\]
+
+\noindent\textbf{Fraction:} $-0.625$ in 24-bit two's complement with the binary point
+after the sign bit (same calculation as Problem 3.26):
+\[
+  -0.625 = \texttt{1011\,0000\,0000\,0000\,0000\,0000}_2 \quad\text{(24 bits)}
+\]
+
+First 16 bits (bits 31--16): $\texttt{1011\,0000\,0000\,0000}$.
+Next 8 bits (bits 15--8): $\texttt{0000\,0000}$.
+
+\noindent\textbf{Exponent:} $-2$ in sign-magnitude with sign bit on the far
+right (bit 0 of the exponent byte).
+Magnitude $= 2 = 0000010_2$ (7 bits). Sign $= 1$ (negative).
+\[
+  \text{8-bit exponent field: } \texttt{0000010\,1}_2 = \texttt{00000101}_2
+\]
+
+\noindent\textbf{32-bit pattern:}
+\[
+  \underbrace{\texttt{1011\,0000\,0000\,0000}}_{\text{fraction hi-16}}\;
+  \underbrace{\texttt{0000\,0000}}_{\text{fraction lo-8}}\;
+  \underbrace{\texttt{0000\,0101}}_{\text{exponent (sign-mag, sign on right)}}
+\]
+
+Hex:
+\[
+  \boxed{\texttt{0xB0000005}}
+\]
+
+\medskip\noindent\textbf{Comparison with IEEE 754 single:}
+\begin{itemize}
+  \item \textbf{Range:} 7-bit magnitude exponent gives range $2^{-127}$ to
+        $2^{+127}$, roughly matching IEEE 754 single ($2^{-126}$ to $2^{+127}$).
+  \item \textbf{Accuracy:} 24-bit two's complement fraction without hidden 1
+        gives 23 bits of magnitude precision. IEEE 754 single has 23 mantissa
+        bits + hidden 1 = 24 bits. The HP format has slightly less precision
+        due to the lack of hidden 1 (effectively $\sim$23 vs.\ 24 bits).
+  \item Both formats are 32 bits, so the HP format trades the hidden-1 trick
+        for a slightly different exponent representation.
+\end{itemize}
+%-----------------------------------------------------------------------------
+\subsection*{3.29: Half Precision Addition}
+\addcontentsline{toc}{subsection}{3.29: Half Precision Addition}
+\hypertarget{sol-3.29}{}
+\markright{3.29}
+
+Add $A = 2.6125 \times 10^{1} = 26.125$ and $B = 4.150390625 \times 10^{-1}
+= 0.4150390625$ in 16-bit half precision (Ex.\ 3.27: 1 sign, 5-bit exponent
+with excess-16 bias, 10-bit mantissa, hidden 1).
+
+\noindent\textbf{Step 1: Convert to half precision.}
+\begin{itemize}
+  \item $26.125 = 11010.001_2 = 1.1010001_2 \times 2^4$.
+    \[
+      \text{Sign} = 0,\quad
+      \text{Exp} = 4 + 16 = 20 = 10100_2,\quad
+      \text{Mantissa} = 1010001000
+    \]
+  \item $0.4150390625 = 0.0110101_2 = 1.10101_2 \times 2^{-2}$.
+    \[
+      \text{Sign} = 0,\quad
+      \text{Exp} = -2 + 16 = 14 = 01110_2,\quad
+      \text{Mantissa} = 1010100000
+    \]
+\end{itemize}
+
+\noindent\textbf{Step 2: Align exponents.}
+
+Shift $B$'s significand right by $4 - (-2) = 6$ positions to match $A$'s
+exponent of $4$:
+\begin{align*}
+  A &= 1.1010001000 \times 2^4 \\
+  B &= 0.0000011010\;1\underbrace{00}_{\text{guard, round}} \times 2^4
+       \quad(\text{sticky} = 0)
+\end{align*}
+
+\noindent\textbf{Step 3: Add significands.}
+\[
+  1.1010001000 + 0.0000011010 = 1.1010100010
+\]
+Guard $= 1$, round $= 0$, sticky $= 0$.
+
+\noindent\textbf{Step 4: Normalize.}
+
+Already normalized (leading 1 before the binary point).
+
+\noindent\textbf{Step 5: Round.}
+
+GRS $= 100$, which is exactly halfway. The LSB of the retained mantissa is $0$.
+Round-to-nearest-even keeps LSB $= 0$, so we do \emph{not} round up.
+
+Result mantissa: $1010100010$ (10 bits after hidden 1).
+
+\noindent\textbf{Result:}
+\[
+  \text{Sign} = 0,\quad
+  \text{Exp} = 10100_2,\quad
+  \text{Mantissa} = 1010100010
+\]
+
+Bit pattern:
+\[
+  \texttt{0\,10100\,1010100010}
+  = \texttt{01010010\,10100010}
+  = \texttt{0x52A2}
+\]
+
+Decimal value:
+\[
+  1.1010100010_2 \times 2^4
+  = 11010.100010_2
+  = 26.53125
+\]
+
+The exact result is $26.125 + 0.4150390625 = 26.5400390625$. The half
+precision result $26.53125$ has a small rounding error due to limited precision.
+
+%-----------------------------------------------------------------------------
+\subsection*{3.30: Half Precision Multiplication}
+\addcontentsline{toc}{subsection}{3.30: Half Precision Multiplication}
+\hypertarget{sol-3.30}{}
+\markright{3.30}
+
+Multiply $A = -8.0546875$ and $B = -0.179931640625$ in half precision.
+
+\noindent\textbf{Step 1: Convert to half precision.}
+
+\medskip\noindent\emph{Convert $A = 8.0546875$:}
+\[
+  8.0546875 = 1000.0000111_2 = 1.0000000111_2 \times 2^3
+\]
+\[
+  \text{Sign} = 1,\quad
+  \text{Exp} = 3 + 16 = 19 = 10011_2,\quad
+  \text{Mantissa} = 0000000111
+\]
+
+\medskip\noindent\emph{Convert $B = 0.179931640625$} using repeated doubling:
+
+\begin{center}
+\begin{tabular}{rll}
+\toprule
+\textbf{Step} & \textbf{Computation} & \textbf{Bit} \\
+\midrule
+1  & $0.179931640625 \times 2 = 0.35986328125$  & 0 \\
+2  & $0.35986328125  \times 2 = 0.7197265625$   & 0 \\
+3  & $0.7197265625   \times 2 = 1.439453125$    & 1 \\
+4  & $0.439453125    \times 2 = 0.87890625$     & 0 \\
+5  & $0.87890625     \times 2 = 1.7578125$      & 1 \\
+6  & $0.7578125      \times 2 = 1.515625$       & 1 \\
+7  & $0.515625       \times 2 = 1.03125$        & 1 \\
+8  & $0.03125        \times 2 = 0.0625$         & 0 \\
+9  & $0.0625         \times 2 = 0.125$          & 0 \\
+10 & $0.125          \times 2 = 0.25$           & 0 \\
+11 & $0.25           \times 2 = 0.5$            & 0 \\
+12 & $0.5            \times 2 = 1.0$            & 1 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\[
+  0.179931640625 = 0.001011100001_2 = 1.011100001_2 \times 2^{-3}
+\]
+\[
+  \text{Sign} = 1,\quad
+  \text{Exp} = -3 + 16 = 13 = 01101_2,\quad
+  \text{Mantissa} = 0111000010
+\]
+
+\noindent\textbf{Step 2: Determine result sign.}
+\[
+  \text{Negative} \times \text{Negative} = \text{Positive} \implies \text{Sign} = 0
+\]
+
+\noindent\textbf{Step 3: Add exponents.}
+\[
+  E_{\text{biased}} = E_A + E_B - \text{bias} = 19 + 13 - 16 = 16 = 10000_2
+\]
+Equivalently, unbiased: $3 + (-3) = 0$, so biased result $= 0 + 16 = 16$.
+
+\noindent\textbf{Step 4: Multiply significands.}
+\[
+  1.0000000111 \times 1.0111000010
+\]
+
+Computing the exact decimal product:
+\[
+  8.0546875 \times 0.179931640625 = 1.449462890625
+\]
+
+Converting to binary:
+\[
+  1.449462890625 \approx 1.0111001011\ldots_2 \times 2^0
+\]
+
+\noindent\textbf{Step 5: Normalize and round.}
+
+The product is already normalized (starts with $1.\ldots$). Truncate and round
+to 10-bit mantissa:
+\[
+  1.0111001011_2 \times 2^0
+\]
+
+\noindent\textbf{Step 6: Check overflow/underflow.}
+
+Biased exponent $= 16$, which is in range $[1, 30]$. No overflow or underflow.
+
+\noindent\textbf{Result:}
+\[
+  \text{Sign} = 0,\quad
+  \text{Exp} = 10000_2,\quad
+  \text{Mantissa} = 0111001011
+\]
+
+Bit pattern:
+\[
+  \texttt{0\,10000\,0111001011} = \texttt{0x41CB}
+\]
+
+Decimal value:
+\[
+  1.0111001011_2 \times 2^0 \approx 1.44921875
+\]
+
+Exact product: $8.0546875 \times 0.179931640625 = 1.449462890625$.
+Half precision result: $1.44921875$. Relative error $\approx 0.017\%$.
+
+%-----------------------------------------------------------------------------
+\subsection*{3.31: Half Precision Division}
+\addcontentsline{toc}{subsection}{3.31: Half Precision Division}
+\hypertarget{sol-3.31}{}
+\markright{3.31}
+
+Divide $A = 86.25$ by $B = -4.875$ in half precision.
+
+\noindent\textbf{Step 1: Convert to half precision.}
+\begin{itemize}
+  \item $86.25 = 1010110.01_2 = 1.01011001_2 \times 2^6$.
+    \[
+      \text{Sign} = 0,\quad
+      \text{Exp} = 6 + 16 = 22 = 10110_2,\quad
+      \text{Mantissa} = 0101100100
+    \]
+  \item $4.875 = 100.111_2 = 1.00111_2 \times 2^2$.
+    \[
+      \text{Sign} = 1,\quad
+      \text{Exp} = 2 + 16 = 18 = 10010_2,\quad
+      \text{Mantissa} = 0011100000
+    \]
+\end{itemize}
+
+\noindent\textbf{Step 2: Determine result sign.}
+\[
+  \text{Positive} \div \text{Negative} = \text{Negative} \implies \text{Sign} = 1
+\]
+
+\noindent\textbf{Step 3: Subtract exponents.}
+\[
+  E_{\text{biased}} = E_A - E_B + \text{bias} = 22 - 18 + 16 = 20 = 10100_2
+\]
+Equivalently, unbiased: $6 - 2 = 4$, so biased result $= 4 + 16 = 20$.
+
+\noindent\textbf{Step 4: Divide significands.}
+
+The exact decimal quotient is:
+\[
+  86.25 \div 4.875 = 17.6923076923\ldots
+\]
+
+Converting to binary:
+\[
+  17.6923\ldots \approx 10001.1011_2 = 1.00011011_2 \times 2^4
+\]
+The exponent from Step~3 is already $4$, so the significand quotient is
+$\approx 1.0001101100_2$.
+
+\noindent\textbf{Step 5: Normalize and round.}
+
+Already normalized. Rounding the 11-bit significand to 10-bit mantissa
+with round-to-nearest-even gives:
+\[
+  1.0001101100_2 \times 2^4
+\]
+
+\noindent\textbf{Result:}
+\[
+  \text{Sign} = 1,\quad
+  \text{Exp} = 10100_2 = 20,\quad
+  \text{Mantissa} = 0001101100
+\]
+
+Bit pattern:
+\[
+  \texttt{1\,10100\,0001101100}
+  = \texttt{1101\,0000\,0110\,1100}
+  = \texttt{0xD06C}
+\]
+
+Decimal value:
+\[
+  -1.0001101100_2 \times 2^4
+  = -10001.101100_2
+  = -(16 + 1 + 0.5 + 0.125 + 0.0625)
+  = -17.6875
+\]
+
+Exact quotient: $86.25 / 4.875 = 17.6923\ldots$, represented as $-17.6875$.
+Relative error: $|17.6923 - 17.6875| / 17.6923 \approx 0.027\%$.
+
+%-----------------------------------------------------------------------------
+\subsection*{3.32: FP Addition Associativity (Left)}
+\addcontentsline{toc}{subsection}{3.32: FP Addition Associativity (Left)}
+\hypertarget{sol-3.32}{}
+\markright{3.32}
+
+Compute $(3.984375 \times 10^{-1} + 3.4375 \times 10^{-1}) + 1.771 \times 10^{3}$
+in half precision.
+
+\noindent\textbf{First addition:} $0.3984375 + 0.34375$.
+
+Convert both values:
+\begin{align*}
+  0.3984375 &= 0.0110011_2 = 1.10011_2 \times 2^{-2} \\
+  &\quad \text{Sign} = 0,\; \text{Exp} = -2 + 16 = 14 = 01110_2,\;
+    \text{Mantissa} = 1001100000 \\[4pt]
+  0.34375 &= 0.01011_2 = 1.011_2 \times 2^{-2} \\
+  &\quad \text{Sign} = 0,\; \text{Exp} = 14 = 01110_2,\;
+    \text{Mantissa} = 0110000000
+\end{align*}
+
+Exponents match, so add directly:
+\[
+  1.1001100000 + 1.0110000000 = 10.1111100000
+\]
+
+Normalize:
+\[
+  10.1111100000 \times 2^{-2}
+  = 1.01111100000 \times 2^{-1}
+\]
+Exponent becomes $-1 + 16 = 15$. Mantissa $= 0111110000$ (fits in 10 bits).
+GRS $= 000$, no rounding needed.
+
+Intermediate result:
+\[
+  1.0111110000 \times 2^{-1} = 0.10111110000_2 = 0.7421875
+\]
+
+\noindent\textbf{Second addition:} $0.7421875 + 1771$.
+
+Convert $1771$:
+\[
+  1771 = 11011101011_2 = 1.1011101011_2 \times 2^{10}
+\]
+\[
+  \text{Sign} = 0,\quad
+  \text{Exp} = 10 + 16 = 26 = 11010_2,\quad
+  \text{Mantissa} = 1011101011
+\]
+
+Align: shift the smaller number right by $10 - (-1) = 11$ positions:
+\[
+  1.0111110000 \times 2^{-1} \to 0.00000000001\;01111\ldots \times 2^{10}
+\]
+
+After shifting 11 places, the significand is essentially 0 at 10-bit precision
+(all shifted bits become guard/round/sticky). Sticky bit $= 1$ from shifted-out
+bits.
+
+Sum:
+\[
+  \approx 1.1011101011 \times 2^{10}
+\]
+
+GRS $= 001$: round down since $< 0.5$ ULP.
+
+\noindent\textbf{Result:}
+\[
+  1.1011101011 \times 2^{10},\quad
+  \text{Sign} = 0,\quad
+  \text{Exp} = 11010_2,\quad
+  \text{Mantissa} = 1011101011
+\]
+
+Bit pattern: $\texttt{0\,11010\,1011101011}$.
+
+Decimal: $\mathbf{1771.0}$ (the small value was lost).
+
+%-----------------------------------------------------------------------------
+\subsection*{3.33: FP Addition Associativity (Right)}
+\addcontentsline{toc}{subsection}{3.33: FP Addition Associativity (Right)}
+\hypertarget{sol-3.33}{}
+\markright{3.33}
+
+Compute $3.984375 \times 10^{-1} + (3.4375 \times 10^{-1} + 1.771 \times 10^{3})$
+in half precision.
+
+\noindent\textbf{First addition:} $0.34375 + 1771$.
+
+\[
+  0.34375 = 1.011_2 \times 2^{-2},\qquad
+  1771 = 1.1011101011_2 \times 2^{10}
+\]
+
+Align: shift $0.34375$ right by $10 - (-2) = 12$ positions to match exponent
+$2^{10}$. The entire significand is shifted out, so the value is lost.
+
+Result:
+\[
+  \approx 1.1011101011 \times 2^{10} = 1771.0
+\]
+
+\noindent\textbf{Second addition:} $0.3984375 + 1771$.
+
+\[
+  0.3984375 = 1.10011_2 \times 2^{-2}
+\]
+
+Align: shift right by $10 - (-2) = 12$ positions. Again, the entire significand
+is shifted out and the value is lost.
+
+Result:
+\[
+  \approx 1.1011101011 \times 2^{10} = 1771.0
+\]
+
+\noindent\textbf{Final result:} $\mathbf{1771.0}$, same as Problem~3.32.
+
+%-----------------------------------------------------------------------------
+\subsection*{3.34: FP Addition Associativity Check}
+\addcontentsline{toc}{subsection}{3.34: FP Addition Associativity Check}
+\hypertarget{sol-3.34}{}
+\markright{3.34}
+
+\textbf{Yes}, in this case the results of 3.32 and 3.33 agree: both give
+$1771.0$.
+
+However, this is somewhat coincidental. Both small values are completely
+swamped by the large value due to the limited 11-bit significand. In general,
+floating-point addition is \textbf{not associative}. A different set of values
+could produce different results depending on grouping, since rounding occurs at
+each step.
+
+If computed exactly:
+\[
+  0.3984375 + 0.34375 + 1771 = 1771.7421875
+\]
+This differs from $1771.0$. The loss of the small addends demonstrates the
+precision limitations of half-precision floating point.
+%-----------------------------------------------------------------------------
+\subsection*{3.35: FP Multiply Associativity (Left)}
+\addcontentsline{toc}{subsection}{3.35: FP Multiply Associativity (Left)}
+\hypertarget{sol-3.35}{}
+\markright{3.35}
+
+Compute $(3.41796875 \times 10^{-3} \times 6.34765625 \times 10^{-3})
+\times 1.05625 \times 10^{2}$ in half precision (1 sign, 5-bit exponent with
+excess-16 bias, 10-bit mantissa, hidden~1).
+
+\medskip\noindent\textbf{Step 1: Convert each value to half precision.}
+
+\begin{itemize}
+  \item $A = 0.00341796875$.
+        Multiply by $2^{9}$: $0.00341796875 \times 512 = 1.75 = 1.11_2$.
+        So $A = 1.1100000000_2 \times 2^{-9}$.
+        Sign $= 0$, biased exponent $= -9 + 16 = 7 = 00111_2$,
+        mantissa $= 1100000000$.
+  \item $B = 0.00634765625$.
+        Multiply by $2^{8}$: $0.00634765625 \times 256 = 1.625 = 1.101_2$.
+        So $B = 1.1010000000_2 \times 2^{-8}$.
+        Sign $= 0$, biased exponent $= -8 + 16 = 8 = 01000_2$,
+        mantissa $= 1010000000$.
+  \item $C = 105.625 = 1101001.101_2 = 1.1010011010_2 \times 2^{6}$.
+        Sign $= 0$, biased exponent $= 6 + 16 = 22 = 10110_2$,
+        mantissa $= 1010011010$.
+\end{itemize}
+
+\noindent\textbf{Step 2: First multiplication $A \times B$.}
+
+Result sign: positive.  Exponent sum: $(-9) + (-8) = -17$.
+
+Multiply significands:
+\begin{verbatim}
+        1.1100
+      x 1.1010
+      --------
+        1.1100      (1.11 x 1)
+    +   0.1110 0    (1.11 x 0.1)
+    +   0.0011 10   (1.11 x 0.001)
+    ----------------
+       10.1101 10
+\end{verbatim}
+
+\noindent So the product is $10.110110_2 \times 2^{-17}$.  Normalize:
+\[
+  1.0110110000_2 \times 2^{-16}.
+\]
+Biased exponent $= -16 + 16 = 0$.  Since biased~0 is reserved for
+denormals/zero, this is an \textbf{underflow}.
+
+Represent as a denormalized number (biased exponent~$= 0$, implied leading~0,
+effective exponent $= 1 - 16 = -15$):
+\[
+  1.011011_2 \times 2^{-16} = 0.1011011000_2 \times 2^{-15}.
+\]
+Denormal mantissa bits (no hidden~1): $1011011000$.  GRS $= 000$ (exact fit),
+so no rounding is needed.
+
+Stored value: $\texttt{0\;00000\;1011011000}$.
+\[
+  A \times B = 0.1011011_2 \times 2^{-15}
+  = \frac{91}{128} \times 2^{-15}
+  \approx 2.170 \times 10^{-5}.
+\]
+
+\noindent\textbf{Step 3: Second multiplication $(A \times B) \times C$.}
+
+The first product is denormalized with significand $0.1011011000$ and effective
+exponent $-15$.  Multiply by $C = 1.1010011010_2 \times 2^{6}$:
+\[
+  \text{Exponent: } {-15} + 6 = -9.
+\]
+Significand product (using exact arithmetic on the stored bits):
+\[
+  \frac{91}{128} \times \frac{845}{512}
+  = \frac{76895}{65536}
+  = 1.0010110001011111_2.
+\]
+This is already normalized ($1 \le 1.0010\ldots < 2$), so the exponent remains
+$-9$.  Biased exponent $= -9 + 16 = 7 = 00111_2$.
+
+Extract the 10-bit mantissa with GRS:
+\[
+  1.\underbrace{0010110001}_{10\text{ bits}}\underbrace{0\;1\;1}_{\text{G R S}}111\ldots
+\]
+GRS $= 011$ (less than halfway) $\Rightarrow$ truncate.
+Mantissa $= 0010110001$.
+
+\medskip\noindent\textbf{Result:}
+
+\[
+  \boxed{\texttt{0\;00111\;0010110001}}
+\]
+
+Decimal value:
+\[
+  \bigl(1 + 177/1024\bigr) \times 2^{-9}
+  = \frac{1201}{1024} \times \frac{1}{512}
+  \approx \mathbf{0.002291} .
+\]
+
+Exact answer: $0.00341796875 \times 0.00634765625 \times 105.625
+= 0.0022916\ldots$
+
+%-----------------------------------------------------------------------------
+\subsection*{3.36: FP Multiply Associativity (Right)}
+\addcontentsline{toc}{subsection}{3.36: FP Multiply Associativity (Right)}
+\hypertarget{sol-3.36}{}
+\markright{3.36}
+
+Compute $3.41796875 \times 10^{-3} \times (6.34765625 \times 10^{-3}
+\times 1.05625 \times 10^{2})$ in half precision.
+
+From 3.35, the half-precision representations are:
+$A = 1.1100000000_2 \times 2^{-9}$,\;
+$B = 1.1010000000_2 \times 2^{-8}$,\;
+$C = 1.1010011010_2 \times 2^{6}$.
+
+\medskip\noindent\textbf{Step 1: First multiplication $B \times C$.}
+
+Result sign: positive.  Exponent sum: $(-8) + 6 = -2$.
+
+Multiply significands:
+\[
+  \frac{13}{8} \times \frac{845}{512}
+  = \frac{10985}{4096}
+  = 2.681884765625.
+\]
+In binary: $10985_{10} = 10101011101001_2$, so
+\[
+  \frac{10985}{4096} = 10.101011101001_2.
+\]
+Normalize: $1.0101011101001_2 \times 2^{-1}$.
+Biased exponent $= -1 + 16 = 15 = 01111_2$.
+
+Extract 10-bit mantissa with GRS:
+\[
+  1.\underbrace{0101011101}_{10}\underbrace{0\;0\;1}_{\text{G R S}}.
+\]
+GRS $= 001$ (less than halfway) $\Rightarrow$ truncate.
+Mantissa $= 0101011101$.
+
+Stored $B \times C$: $\texttt{0\;01111\;0101011101}$.
+\[
+  B \times C = 1.0101011101_2 \times 2^{-1}
+  = \frac{1373}{2048}
+  = 0.67041015625.
+\]
+
+\noindent\textbf{Step 2: Second multiplication $A \times (B \times C)$.}
+
+Exponent sum: $(-9) + (-1) = -10$.
+
+Multiply significands:
+\[
+  \frac{7}{4} \times \frac{1373}{1024}
+  = \frac{9611}{4096}
+  = 2.346435546875.
+\]
+In binary: $9611_{10} = 10010110001011_2$, so
+\[
+  \frac{9611}{4096} = 10.010110001011_2.
+\]
+Normalize: $1.0010110001011_2 \times 2^{-9}$.
+Biased exponent $= -9 + 16 = 7 = 00111_2$.
+
+Extract 10-bit mantissa with GRS:
+\[
+  1.\underbrace{0010110001}_{10}\underbrace{0\;1\;1}_{\text{G R S}}.
+\]
+GRS $= 011$ (less than halfway) $\Rightarrow$ truncate.
+Mantissa $= 0010110001$.
+
+\medskip\noindent\textbf{Result:}
+
+\[
+  \boxed{\texttt{0\;00111\;0010110001}}
+\]
+
+Decimal value:
+\[
+  \bigl(1 + 177/1024\bigr) \times 2^{-9}
+  = \frac{1201}{524288}
+  \approx \mathbf{0.002291}.
+\]
+
+%-----------------------------------------------------------------------------
+\subsection*{3.37: FP Multiply Associativity Check}
+\addcontentsline{toc}{subsection}{3.37: FP Multiply Associativity Check}
+\hypertarget{sol-3.37}{}
+\markright{3.37}
+
+\textbf{Yes}, for these particular values the results of 3.35 and 3.36
+\textbf{agree}: both produce $\texttt{0\;00111\;0010110001} \approx 0.002291$.
+
+This happens because the intermediate product $A \times B$ in 3.35, despite
+underflowing to a denormalized number, is \emph{exactly} representable (GRS
+$= 000$, no rounding). Therefore no precision is lost in the denormal step, and
+both orderings produce the same final rounded result.
+
+In general, however, floating-point multiplication is \textbf{not associative}.
+If the denormal representation had required rounding, or if different
+intermediate results triggered different rounding decisions, the two orderings
+would produce different answers.
+
+The exact result is $0.00341796875 \times 0.00634765625 \times 105.625
+= 0.0022916\ldots$, while both half-precision computations give
+$\approx 0.002291$.
+
+%-----------------------------------------------------------------------------
+\subsection*{3.38: FP Distributivity (Factored Form)}
+\addcontentsline{toc}{subsection}{3.38: FP Distributivity (Factored Form)}
+\hypertarget{sol-3.38}{}
+\markright{3.38}
+
+Compute $1.666015625 \times (19760 + (-19744))$ in half precision.
+
+\medskip\noindent\textbf{Step 1: Convert to half precision.}
+
+\begin{itemize}
+  \item $19760 = 100110100110000_2 = 1.00110100110000_2 \times 2^{14}$.
+        Biased exponent $= 14 + 16 = 30 = 11110_2$.
+        10-bit mantissa: $0011010011$ (remaining bits $0000$; GRS $= 000$, exact).
+  \item $19744 = 100110100100000_2 = 1.00110100100000_2 \times 2^{14}$.
+        Biased exponent $= 30 = 11110_2$.
+        10-bit mantissa: $0011010010$ (exact fit).
+  \item $1.666015625 = 1.1010101010_2 \times 2^{0}$.
+        Biased exponent $= 0 + 16 = 16 = 10000_2$.
+        Mantissa: $1010101010$ (exact).
+\end{itemize}
+
+\noindent\textbf{Step 2: Subtract inside the parentheses.}
+
+Both operands share exponent $2^{14}$.  Subtract significands directly:
+\[
+  1.0011010011_2 - 1.0011010010_2 = 0.0000000001_2 \times 2^{14}.
+\]
+Normalize: $1.0000000000_2 \times 2^{4}$.
+Biased exponent $= 4 + 16 = 20 = 10100_2$, mantissa $= 0000000000$.
+GRS $= 000$; no rounding.  The subtraction is \textbf{exact}: $19760 - 19744 = 16$.
+
+\medskip\noindent\textbf{Step 3: Multiply $1.666015625 \times 16$.}
+
+\[
+  1.1010101010_2 \times 2^{0} \;\times\; 1.0000000000_2 \times 2^{4}.
+\]
+Exponent sum: $0 + 4 = 4$.  Significand product:
+\[
+  1.1010101010 \times 1.0 = 1.1010101010.
+\]
+Already normalized.  Biased exponent $= 4 + 16 = 20 = 10100_2$.
+Mantissa $= 1010101010$.  GRS $= 000$; no rounding needed.
+
+\medskip\noindent\textbf{Result:}
+\[
+  \boxed{\texttt{0\;10100\;1010101010}}
+\]
+Decimal:
+\[
+  1.1010101010_2 \times 2^4 = 11010.101010_2 = \mathbf{26.65625}.
+\]
+
+The exact answer is $1.666015625 \times 16 = 26.65625$, so the half-precision
+result is \textbf{exact}.
+
+%-----------------------------------------------------------------------------
+\subsection*{3.39: FP Distributivity (Expanded Form)}
+\addcontentsline{toc}{subsection}{3.39: FP Distributivity (Expanded Form)}
+\hypertarget{sol-3.39}{}
+\markright{3.39}
+
+Compute $(1.666015625 \times 19760) + (1.666015625 \times (-19744))$ in half
+precision.
+
+Using the representations from 3.38:
+$P = 1.1010101010_2 \times 2^{0}$,
+$Q = 1.0011010011_2 \times 2^{14}$ (for 19760),
+$R = 1.0011010010_2 \times 2^{14}$ (for 19744).
+
+\medskip\noindent\textbf{Step 1: First product $P \times Q = 1.666015625 \times
+19760$.}
+
+Exponent sum: $0 + 14 = 14$.  Significand product:
+\[
+  \frac{853}{512} \times \frac{1235}{1024}
+  = \frac{1{,}053{,}455}{524{,}288}
+  = 2.009305\ldots
+\]
+Normalize: $1.00000010011000011110\ldots_2 \times 2^{15}$.
+Biased exponent $= 15 + 16 = 31 = 11111_2$.
+
+10-bit mantissa: $0000000100$.
+GRS from remaining bits ($1100001111\ldots$): $\text{G}=1,\;\text{R}=1,\;
+\text{S}=1$.
+Round up: mantissa $= 0000000101$.
+
+If biased exponent 31 is valid (simple excess-16), the stored value is:
+\[
+  \texttt{0\;11111\;0000000101}, \quad
+  \text{value} = \bigl(1 + \tfrac{5}{1024}\bigr) \times 2^{15} = 32{,}928.
+\]
+(The exact product is $32{,}920.46875$, so rounding error $\approx 7.5$.)
+
+\medskip\noindent\textbf{Step 2: Second product $P \times R = 1.666015625 \times
+19744$.}
+
+Exponent sum: $0 + 14 = 14$.  Significand product:
+\[
+  \frac{853}{512} \times \frac{617}{512}
+  = \frac{526{,}301}{262{,}144}
+  = 2.007678\ldots
+\]
+Normalize: $1.00000000111110111010\ldots_2 \times 2^{15}$.
+Biased exponent $= 31$.
+
+10-bit mantissa: $0000000011$.
+GRS $= 111$.
+Round up: mantissa $= 0000000100$.
+
+Stored value:
+\[
+  \texttt{1\;11111\;0000000100}, \quad
+  \text{value} = -\bigl(1 + \tfrac{4}{1024}\bigr) \times 2^{15} = -32{,}896.
+\]
+(The exact product is $-32{,}893.8125$.)
+
+\medskip\noindent\textbf{Step 3: Add the two products.}
+
+Both magnitudes share exponent $2^{15}$.  Subtract significands:
+\[
+  1.0000000101 - 1.0000000100 = 0.0000000001 \times 2^{15}.
+\]
+Normalize: $1.0 \times 2^{5}$.
+Biased exponent $= 5 + 16 = 21 = 10101_2$, mantissa $= 0000000000$.
+
+\medskip\noindent\textbf{Result:}
+\[
+  \boxed{\texttt{0\;10101\;0000000000}}
+\]
+Decimal:
+\[
+  1.0 \times 2^5 = \mathbf{32.0}.
+\]
+The exact answer is $26.65625$, so the half-precision result has large error
+($\approx 20\%$).
+
+\medskip\noindent\textbf{Why the error is so large.}
+The two intermediate products ($\approx 32{,}920$ and $\approx 32{,}894$)
+are close in magnitude, so their difference is small.  At exponent $2^{15}$,
+the spacing between consecutive half-precision values is
+$2^{15}/2^{10} = 32$, which is \emph{larger} than the true difference of
+$26.65625$.  The individual rounding errors ($+7.53$ and $-2.19$) do not cancel;
+instead they dominate the result.  This is \textbf{catastrophic cancellation}.
+
+\medskip\noindent\textit{Note:} If biased exponent 31 is reserved for
+$\infty$/NaN (following IEEE 754 conventions), both products overflow to
+$\pm\infty$ and the sum is $+\infty + (-\infty) = \text{NaN}$---an even worse
+outcome.
+
+%-----------------------------------------------------------------------------
+\subsection*{3.40: FP Distributivity Check}
+\addcontentsline{toc}{subsection}{3.40: FP Distributivity Check}
+\hypertarget{sol-3.40}{}
+\markright{3.40}
+
+\textbf{No}, the results of 3.38 and 3.39 do \textbf{not} agree.
+
+\begin{itemize}
+  \item 3.38 (factored form): $1.666015625 \times 16 = 26.65625$ (\textbf{exact}).
+        Bit pattern: $\texttt{0\;10100\;1010101010}$.
+  \item 3.39 (expanded form): $32{,}928 + (-32{,}896) = 32.0$
+        (\textbf{$\approx 20\%$ error}).
+        Bit pattern: $\texttt{0\;10101\;0000000000}$.
+\end{itemize}
+
+This is a classic demonstration that the \textbf{distributive law does not hold}
+for floating-point arithmetic.  The expanded form computes two large
+intermediate products ($\approx 32{,}900$) whose difference is small
+($\approx 27$).  Because the 10-bit mantissa cannot represent both the large
+magnitude and the fine detail simultaneously, the rounding errors in the two
+products are comparable to the true difference.  Subtracting the rounded values
+produces \textbf{catastrophic cancellation}.
+
+The factored form avoids this by computing the small difference ($19760 -
+19744 = 16$) first---an exact operation---and then multiplying, preserving full
+precision throughout.
+
+%-----------------------------------------------------------------------------
+\subsection*{3.41: IEEE 754 Representation of $-1/4$}
+\addcontentsline{toc}{subsection}{3.41: IEEE 754 Representation of $-1/4$}
+\hypertarget{sol-3.41}{}
+\markright{3.41}
+
+\[
+  -\frac{1}{4} = -0.25 = -0.01_2 = -1.0_2 \times 2^{-2}
+\]
+
+IEEE 754 single precision:
+\begin{itemize}
+  \item Sign: $1$.
+  \item Exponent:
+    \[
+      -2 + 127 = 125 = 01111101_2
+    \]
+  \item Mantissa: $00000000000000000000000$ (all zeros; the hidden 1 provides
+        the $1.0$).
+\end{itemize}
+
+Bit pattern:
+\[
+  \boxed{\texttt{1\;01111101\;00000000000000000000000}}
+\]
+Hex: $\texttt{0xBE800000}$.
+
+\textbf{Yes}, $-1/4$ can be represented \textbf{exactly} in IEEE 754. It is
+a negative power of 2, so it has an exact binary representation with a finite
+number of bits.
+
+%-----------------------------------------------------------------------------
+\subsection*{3.42: Repeated Addition vs Multiplication}
+\addcontentsline{toc}{subsection}{3.42: Repeated Addition vs Multiplication}
+\hypertarget{sol-3.42}{}
+\markright{3.42}
+
+\noindent\textbf{Adding $-1/4$ to itself 4 times:}
+\begin{align*}
+  &(-1/4) + (-1/4) = -1/2 \quad\text{(exact)} \\
+  &(-1/2) + (-1/4) = -3/4 \quad\text{(exact)} \\
+  &(-3/4) + (-1/4) = -1   \quad\text{(exact)}
+\end{align*}
+
+All intermediate results are exact in IEEE 754 (they are all dyadic rationals
+with small denominators).
+
+\noindent\textbf{$-1/4 \times 4$:}
+\[
+  -\frac{1}{4} \times 4 = -1 \quad\text{(exact, since 4 is a power of 2)}
+\]
+
+\textbf{Yes}, they are the same: both give $\mathbf{-1}$, which is also the
+mathematically correct answer.
+
+In this case, all values involved are exactly representable and all operations
+produce exact results. This is a special case --- for most values, repeated
+addition and multiplication would not agree due to accumulated rounding errors.
+
+%-----------------------------------------------------------------------------
+\subsection*{3.43: Binary Fraction of $1/3$}
+\addcontentsline{toc}{subsection}{3.43: Binary Fraction of $1/3$}
+\hypertarget{sol-3.43}{}
+\markright{3.43}
+
+$1/3$ in binary (24 bits):
+\[
+  \frac{1}{3} = 0.\overline{01}_2 = 0.010101010101010101010101\ldots_2
+\]
+
+The pattern $01$ repeats forever. With 24 bits:
+\[
+  \texttt{010101010101010101010101}_2
+\]
+
+This representation is \textbf{not exact}. The value $1/3$ is a repeating
+fraction in binary (just as $1/3 = 0.\overline{3}$ repeats in decimal). No
+finite number of binary digits can represent it exactly.
+
+The 24-bit approximation gives:
+\[
+  \sum_{k=1}^{12} 2^{-2k}
+  = \frac{1}{4}\cdot\frac{1-(1/4)^{12}}{1-1/4}
+  = \frac{1}{3}\bigl(1 - 4^{-12}\bigr)
+  \approx 0.33333325
+\]
+
+%-----------------------------------------------------------------------------
+\subsection*{3.44: BCD Fraction of $1/3$}
+\addcontentsline{toc}{subsection}{3.44: BCD Fraction of $1/3$}
+\hypertarget{sol-3.44}{}
+\markright{3.44}
+
+In BCD (Binary Coded Decimal), each decimal digit uses 4 bits. With 24 bits,
+we can store $24/4 = 6$ decimal digits.
+\[
+  \frac{1}{3} = 0.\overline{3}_{10} = 0.333333\ldots_{10}
+\]
+
+With 6 BCD digits: $\texttt{0011\,0011\,0011\,0011\,0011\,0011}$ (each
+$\texttt{0011}$ encodes the digit 3).
+
+This represents $0.333333$, which is \textbf{not exact}. The value $1/3$ is a
+repeating fraction in base 10, so no finite number of BCD digits can represent
+it exactly.
+
+%-----------------------------------------------------------------------------
+\subsection*{3.45: Base-16 Fraction of $1/3$}
+\addcontentsline{toc}{subsection}{3.45: Base-16 Fraction of $1/3$}
+\hypertarget{sol-3.45}{}
+\markright{3.45}
+
+In base 16, each digit uses 4 bits. With 24 bits, we have $24/4 = 6$
+hexadecimal digit positions.
+
+$1/3$ in base 16: $1/3 = 0.\overline{5}_{16}$. Verify:
+\[
+  5 \times \bigl(16^{-1} + 16^{-2} + 16^{-3} + \cdots\bigr)
+  = 5 \times \frac{1/16}{1 - 1/16}
+  = \frac{5}{15}
+  = \frac{1}{3} \quad\checkmark
+\]
+
+With 6 hex digits (24 bits): $\texttt{0101\,0101\,0101\,0101\,0101\,0101}$.
+
+This represents $0.555555_{16}$:
+\[
+  5\bigl(16^{-1} + 16^{-2} + \cdots + 16^{-6}\bigr)
+  = 5 \times \frac{1/16 - 16^{-7}}{15/16}
+  = \frac{1}{3}\bigl(1 - 16^{-6}\bigr)
+\]
+
+This is \textbf{not exact}. The digit 5 repeats infinitely in base 16, just
+as it does in other bases that are not multiples of 3.
+
+%-----------------------------------------------------------------------------
+\subsection*{3.46: Base-30 Fraction of $1/3$}
+\addcontentsline{toc}{subsection}{3.46: Base-30 Fraction of $1/3$}
+\hypertarget{sol-3.46}{}
+\markright{3.46}
+
+In base 30, each digit requires $\lceil \log_2 30 \rceil = 5$ bits. With 20
+bits, we have $20/5 = 4$ base-30 digit positions.
+
+$1/3$ in base 30:
+\[
+  \frac{1}{3} = \frac{10}{30} = 0.\text{A}_{30}
+\]
+where A represents the digit 10. This is \textbf{exact} in a single base-30
+digit, since $10/30 = 1/3$ exactly.
+
+With 20 bits (4 digit positions): $\texttt{01010\,00000\,00000\,00000}$
+(digit 10 = $01010_2$ followed by three zero digits).
+
+This representation \textbf{is exact}. This works because 30 is divisible by 3,
+so $1/3$ has a terminating representation in base 30.
+
+In general, a fraction $p/q$ has a terminating representation in base $b$ if and
+only if all prime factors of $q$ are also factors of $b$. Since $3 \mid 30$, the
+fraction $1/3$ terminates in base 30.
+
+%-----------------------------------------------------------------------------
+\subsection*{3.47: SIMD FIR Filter Implementation}
+\addcontentsline{toc}{subsection}{3.47: SIMD FIR Filter Implementation}
+\hypertarget{sol-3.47}{}
+\markright{3.47}
+
+The 4-tap FIR filter computes:
+\begin{verbatim}
+    sig_out[i] = sig_in[i-3]*f[0] + sig_in[i-2]*f[1]
+               + sig_in[i-1]*f[2] + sig_in[i]*f[3]
+\end{verbatim}
+with coefficients $f = \{-1, 2, -1, 2\}$ and 16-bit values.
+
+\medskip\noindent\textbf{SIMD strategy with 128-bit registers:}
+
+Each 128-bit register can hold $128/16 = 8$ values of 16-bit data.
+
+\begin{enumerate}
+  \item \textbf{Load coefficient vectors.} Create four 128-bit registers, each
+        containing 8 copies of one coefficient:
+        \begin{itemize}
+          \item \texttt{vf0} $= \{-1, -1, -1, -1, -1, -1, -1, -1\}$
+          \item \texttt{vf1} $= \{2, 2, 2, 2, 2, 2, 2, 2\}$
+          \item \texttt{vf2} $= \{-1, -1, -1, -1, -1, -1, -1, -1\}$
+          \item \texttt{vf3} $= \{2, 2, 2, 2, 2, 2, 2, 2\}$
+        \end{itemize}
+
+  \item \textbf{Process 8 outputs at a time.} For each block of 8 output
+        positions $i, i+1, \ldots, i+7$:
+        \begin{itemize}
+          \item Load \texttt{v0} $= \{\text{sig\_in}[i-3], \ldots,
+                \text{sig\_in}[i+4]\}$ (8 values starting at $i-3$).
+          \item Load \texttt{v1} $= \{\text{sig\_in}[i-2], \ldots,
+                \text{sig\_in}[i+5]\}$ (8 values starting at $i-2$).
+          \item Load \texttt{v2} $= \{\text{sig\_in}[i-1], \ldots,
+                \text{sig\_in}[i+6]\}$ (8 values starting at $i-1$).
+          \item Load \texttt{v3} $= \{\text{sig\_in}[i], \ldots,
+                \text{sig\_in}[i+7]\}$ (8 values starting at $i$).
+        \end{itemize}
+
+  \item \textbf{SIMD multiply-accumulate.} Use packed 16-bit multiply and add
+        instructions:
+\begin{verbatim}
+    vr  = pmul(v0, vf0)       # 8 parallel multiplies
+    vr  = pmadd(v1, vf1, vr)  # 8 parallel multiply-adds
+    vr  = pmadd(v2, vf2, vr)  # 8 parallel multiply-adds
+    vr  = pmadd(v3, vf3, vr)  # 8 parallel multiply-adds
+\end{verbatim}
+
+  \item \textbf{Store result.} Write the 8 results to
+        \texttt{sig\_out[i..i+7]} with a single 128-bit store.
+
+  \item \textbf{Advance.} Increment $i$ by 8 and repeat until all 125 outputs
+        ($i = 3$ to $127$) are computed.
+\end{enumerate}
+
+\medskip\noindent\textbf{Assumptions:}
+\begin{itemize}
+  \item The processor supports packed 16-bit integer multiply (\texttt{pmul})
+        and multiply-accumulate (\texttt{pmadd}) operating on 128-bit registers.
+  \item Unaligned loads are supported (or alignment is handled), since \texttt{v0}
+        through \texttt{v3} overlap with offsets of 2 bytes (one 16-bit element).
+  \item Overflow is handled by saturating arithmetic or by using 32-bit
+        accumulators (some SIMD ISAs widen the multiply result).
+\end{itemize}
+
+\medskip\noindent\textbf{Benefits:}
+\begin{itemize}
+  \item 8$\times$ parallelism per SIMD instruction reduces the loop iteration
+        count from 125 to $\lceil 125/8 \rceil = 16$.
+  \item The number of memory operations is minimized: 4 loads + 1 store per
+        8 outputs, and consecutive iterations share most of the loaded data (the
+        windows overlap by 7 elements, so data can be reused via register
+        shifting).
+  \item For further optimization, a sliding window approach can reuse previously
+        loaded data by shifting registers rather than reloading, reducing memory
+        bandwidth.
+\end{itemize}

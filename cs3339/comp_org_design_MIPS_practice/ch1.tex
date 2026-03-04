@@ -1,0 +1,387 @@
+%=============================================================================
+% Chapter 1 Exercises
+%=============================================================================
+\section{Chapter 1 Exercises}
+
+%-----------------------------------------------------------------------------
+\subsection{[2] Types of Computers}
+\hypertarget{prob-1.1}{}
+\noindent$\langle$\S1.1$\rangle$\medskip
+
+\noindent List and describe three types of computers.
+
+\problembreak % next [5] → 2+5=7 ≥ 5
+
+%-----------------------------------------------------------------------------
+\subsection{[5] Seven Great Ideas Matching}
+\hypertarget{prob-1.2}{}
+\noindent$\langle$\S1.2$\rangle$\medskip
+
+\noindent The seven great ideas in computer architecture are similar to ideas from other
+fields. Match the seven ideas from computer architecture, ``Use Abstraction to
+Simplify Design'', ``Make the Common Case Fast'', ``Performance via
+Parallelism'', ``Performance via Pipelining'', ``Performance via Prediction'',
+``Hierarchy of Memories'', and ``Dependability via Redundancy'' to the
+following ideas from other fields:
+
+\begin{enumerate}
+  \item[a.] Assembly lines in automobile manufacturing
+  \item[b.] Suspension bridge cables
+  \item[c.] Aircraft and marine navigation systems that incorporate wind
+        information
+  \item[d.] Express elevators in buildings
+  \item[e.] Library reserve desk
+  \item[f.] Increasing the gate area on a CMOS transistor to decrease its
+        switching time
+  \item[g.] Self-driving cars whose control systems primarily rely on
+        existing sensor systems already installed into the base vehicle,
+        such as heated destination systems with driver and front-seat controls
+\end{enumerate}
+
+\problembreak % [5] ≥ 5
+
+%-----------------------------------------------------------------------------
+\subsection{[2] High-Level Language to Machine Code}
+\hypertarget{prob-1.3}{}
+\noindent$\langle$\S1.3$\rangle$\medskip
+
+\noindent Describe the steps that transform a program written in a high-level language
+such as C into a representation that is directly executed by a computer
+processor.
+
+\ifprintversion\vfill\else\bigskip\fi % grouped with 1.4: 2+2=4 < 5
+
+%-----------------------------------------------------------------------------
+\subsection{[2] Color Display Frame Buffer}
+\hypertarget{prob-1.4}{}
+\noindent$\langle$\S1.4$\rangle$\medskip
+
+\noindent Assume a color display using 8 bits for each of the primary colors (red,
+green, blue) per pixel and a frame size of $640 \times 480$.
+
+\begin{enumerate}
+  \item[a.] What is the minimum size in bytes of the frame buffer to store a
+        frame?
+  \item[b.] How long would it take, at a minimum, for the frame to be sent
+        over a 100 Mbit/s network?
+\end{enumerate}
+
+\problembreak % next [4] → 4+4=8 ≥ 5
+
+%-----------------------------------------------------------------------------
+\subsection{[4] Comparing Three Processors}
+\hypertarget{prob-1.5}{}
+\noindent$\langle$\S1.6$\rangle$\medskip
+
+\noindent Consider three different processors P1, P2, and P3 executing the same
+instruction set. P1 has a 3 GHz clock rate and a CPI of 1.5. P2 has a 2.5
+GHz clock rate and a CPI of 1.0. P3 has a 4.0 GHz clock rate and a CPI of
+2.2.
+
+\begin{enumerate}
+  \item[a.] Which processor has the highest performance expressed in
+        instructions per second?
+  \item[b.] If the processors each execute a program in 10 seconds, find the
+        number of cycles and the number of instructions.
+  \item[c.] We are trying to reduce the execution time by 30\% but this leads
+        to an increase of 20\% in the CPI. What clock rate should we have to
+        get this time reduction?
+\end{enumerate}
+
+\problembreak % next [5] → 4+5=9 ≥ 5
+
+%-----------------------------------------------------------------------------
+\subsection{[5] Intel Processor Performance Trends}
+\hypertarget{prob-1.6}{}
+\medskip
+
+\noindent Consider the table given next, which tracks several performance indicators for
+Intel desktop processors since 2010. The ``Tech'' column shows the minimum
+feature size of each processor's fabrication process. Assume that the die size
+has remained relatively constant and the number of transistors that comprise
+each processor scales at $(1/T)^2$, where $T$ = the minimum feature size. For
+each performance indicator, calculate the average rate of improvement from
+2010 to 2019, as well as the number of years required to double each at that
+corresponding rate.
+
+\begin{center}
+\begin{tabular}{lccccccc}
+\toprule
+\textbf{Desktop} & \textbf{Year} & \textbf{Tech} & \textbf{Clock} &
+\textbf{Integer} & \textbf{Cores} & \textbf{Max.\ DRAM} &
+\textbf{DRAM BW} \\
+\textbf{Processor} & & \textbf{(nm)} & \textbf{(GHz)} &
+\textbf{IPC/Core} & & \textbf{Capacity} & \textbf{(GB/s)} \\
+\midrule
+Core i7 870      & 2010 & 45  & 2.93 & 1.0 & 4  & 16 GB & 21  \\
+Core i7 4770     & 2013 & 22  & 3.40 & 1.3 & 4  & 32 GB & 25.6 \\
+Core i7 6700K    & 2015 & 14  & 4.00 & 1.5 & 4  & 64 GB & 34.1 \\
+Core i7 8700K    & 2017 & 14  & 3.70 & 1.5 & 6  & 64 GB & 38.4 \\
+Core i9 9900K    & 2019 & 14  & 3.60 & 1.5 & 8  & 128 GB & 41.6 \\
+\midrule
+\textbf{Imp/year} & & & & & & & \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\problembreak % [5] ≥ 5
+
+%-----------------------------------------------------------------------------
+\subsection{[20] Two ISA Implementations Compared}
+\hypertarget{prob-1.7}{}
+\noindent$\langle$\S1.6$\rangle$\medskip
+
+\noindent Consider two different implementations of the same instruction set
+architecture. The instructions can be divided into four classes according to
+their CPI (columns A, B, C, and D). P1 has a clock rate of 2.5 GHz and CPIs
+of 1, 2, 3, and 3. P2 with a clock rate of 3 GHz and CPI of 2, 2, 2, and 2.
+
+Given a program with a dynamic instruction count of $1.0 \times 10^6$
+instructions divided into classes as follows: 10\% class A, 20\% class B,
+50\% class C, and 20\% class D, which is faster: P1 or P2?
+
+\begin{enumerate}
+  \item[a.] Which is faster: P1 or P2?
+  \item[b.] Find the clock cycles required in both cases.
+\end{enumerate}
+
+\problembreak % [20] ≥ 5
+
+%-----------------------------------------------------------------------------
+\subsection{[5] Compiler Impact on Performance}
+\hypertarget{prob-1.8}{}
+\noindent$\langle$\S1.6$\rangle$\medskip
+
+\noindent Compilers can have a profound impact on the performance of an application.
+Assume that for a program, compiler A results in a dynamic instruction count
+of $1.0 \times 10^9$ that has an execution time of 1.1 s, while compiler B
+results in a dynamic instruction count of $1.2 \times 10^9$ and an execution
+time of 1.5 s.
+
+\begin{enumerate}
+  \item[a.] Find the average CPI for each program given that the processor has
+        a clock cycle time of 1 ns.
+  \item[b.] Assume the compiled programs run on two different processors. If
+        the execution times on the two processors are the same, how much is
+        the clock of the processor running compiler A's code versus the clock
+        of the processor running compiler B's code?
+  \item[c.] A new compiler is developed that uses only $6.0 \times 10^8$
+        instructions and has an average CPI of 1.1. What is the speedup of
+        using this new compiler versus using compilers A or B on the original
+        processor?
+\end{enumerate}
+
+\problembreak % [5] ≥ 5
+
+%-----------------------------------------------------------------------------
+\subsection{[5] Processor Power and Capacitance}
+\hypertarget{prob-1.9}{}
+\noindent$\langle$\S1.7$\rangle$\medskip
+
+\noindent The Pentium 4 Prescott processor, released in 2004, had a clock rate of 3.6
+GHz and voltage of 1.25 V. Assume that, on average, it consumed 10 W of
+static power and 90 W of dynamic power.
+
+The Core i5 Ivy Bridge, released in 2012, had a clock rate of 3.4 GHz and
+voltage of 0.9 V. Assume that, on average, it consumed 30 W of static power
+and 40 W of dynamic power.
+
+\begin{enumerate}
+  \phantomsection\addcontentsline{toc}{subsubsection}{1.9.1}
+  \item[1.9.1] For each processor find the average capacitance.
+  \phantomsection\addcontentsline{toc}{subsubsection}{1.9.2}
+  \item[1.9.2] Find the percentage of the total dissipated power comprised by
+        static power and the ratio of static power to dynamic power for each
+        technology.
+  \phantomsection\addcontentsline{toc}{subsubsection}{1.9.3}
+  \item[1.9.3] If the total dissipated power is to be reduced by 10\%, how
+        much should the voltage be reduced to maintain the same leakage
+        current? Note: power is defined as the product of voltage and current.
+\end{enumerate}
+
+\problembreak % [5] ≥ 5
+
+%-----------------------------------------------------------------------------
+\subsection{[10] Multiprocessor Execution Speedup}
+\hypertarget{prob-1.10}{}
+\noindent$\langle$\S1.10$\rangle$\medskip
+
+\noindent Assume arithmetic, load/store, and branch instructions; a processor has CPIs
+of 1, 12, and 5, respectively. Also assume that on a single processor a
+program requires the execution of $2.56 \times 10^9$ arithmetic instructions,
+$1.28 \times 10^9$ load/store instructions, and 256 million branch
+instructions.
+
+\begin{enumerate}
+  \phantomsection\addcontentsline{toc}{subsubsection}{1.10.1}
+  \item[1.10.1] Find the total execution time for this program on a 1, 2, and
+        8 processor system. Also find the relative speedup of the 2 and 8
+        processor system over the single processor.
+  \phantomsection\addcontentsline{toc}{subsubsection}{1.10.2}
+  \item[1.10.2] If the time for the arithmetic instructions was reduced by
+        half, what is the overall speedup and the percentage of execution time
+        due to arithmetic instructions?
+\end{enumerate}
+
+\problembreak % [10] ≥ 5
+
+%-----------------------------------------------------------------------------
+\subsection{[5] Wafer Yield and Cost per Die}
+\hypertarget{prob-1.11}{}
+\noindent$\langle$\S1.5$\rangle$\medskip
+
+\noindent A 15 cm diameter wafer has a cost of \$12, contains 84 dies, and has 0.020
+defects/cm$^2$. Assume a 20 cm diameter wafer has a cost of \$15, contains
+100 dies, and has 0.031 defects/cm$^2$.
+
+\begin{enumerate}
+  \phantomsection\addcontentsline{toc}{subsubsection}{1.11.1}
+  \item[1.11.1] Find the yield for both wafers.
+  \phantomsection\addcontentsline{toc}{subsubsection}{1.11.2}
+  \item[1.11.2] Find the cost per die for both wafers.
+  \phantomsection\addcontentsline{toc}{subsubsection}{1.11.3}
+  \item[1.11.3] If the number of dies per wafer is increased by 10\% and the
+        defects per area unit increases by 15\%, find the die area.
+  \phantomsection\addcontentsline{toc}{subsubsection}{1.11.4}
+  \item[1.11.4] Assume a fabrication process improves the yield from 0.92 to
+        0.95. Find the defect density for each yield.
+\end{enumerate}
+
+\problembreak % [5] ≥ 5
+
+%-----------------------------------------------------------------------------
+\subsection{[5] SPEC CPU2006 Benchmark Analysis}
+\hypertarget{prob-1.12}{}
+\noindent$\langle$\S1.6$\rangle$\medskip
+
+\noindent The results of the SPEC CPU2006 benchmark running on an AMD Barcelona has an
+instruction count of $2.389 \times 10^{12}$, an execution time of 750 s, and
+a reference time of 9650.
+
+\begin{enumerate}
+  \phantomsection\addcontentsline{toc}{subsubsection}{1.12.1}
+  \item[1.12.1] Find the CPI if the clock cycle time is 0.333 ns.
+  \phantomsection\addcontentsline{toc}{subsubsection}{1.12.2}
+  \item[1.12.2] Find the SPECratio.
+  \phantomsection\addcontentsline{toc}{subsubsection}{1.12.3}
+  \item[1.12.3] Suppose that we are developing a new version of the AMD
+        Barcelona processor with a 4 GHz clock rate. We have added some
+        additional instructions to the instruction set in such a way that the
+        number of instructions has been reduced by 15\%. The execution time is
+        reduced to 700 ps and the new SPECratio is 13.7. Find the new CPI.
+  \phantomsection\addcontentsline{toc}{subsubsection}{1.12.4}
+  \item[1.12.4] Find the increase in CPU time if the number of instructions
+        of the benchmark is increased by 10\% without affecting the CPI.
+  \phantomsection\addcontentsline{toc}{subsubsection}{1.12.5}
+  \item[1.12.5] Find the increase in CPU time if the number of instructions
+        of the benchmark is increased by 10\% and the CPI is reduced by 15\%
+        and the CPU time by 20\%.
+  \phantomsection\addcontentsline{toc}{subsubsection}{1.12.6}
+  \item[1.12.6] Find the change in the clock rate if the CPI is reduced by
+        15\% and the CPU time is reduced by 20\% while the number of
+        instructions is increased by 10\%.
+\end{enumerate}
+
+\problembreak % [5] ≥ 5
+
+%-----------------------------------------------------------------------------
+\subsection{[5] Performance Equation Pitfall}
+\hypertarget{prob-1.13}{}
+\noindent$\langle$\S1.11$\rangle$\medskip
+
+\noindent Section 1.11 cites as a pitfall the utilization of a subset of the
+performance equation as a performance metric. To illustrate this, consider the
+following: P1 has a clock rate of 4 GHz, average CPI of 0.9, and requires the
+execution of $5.0 \times 10^9$ instructions. P2 has a clock rate of 3 GHz, an
+average CPI of 0.75, and requires the execution of $1.0 \times 10^9$
+instructions.
+
+\begin{enumerate}
+  \phantomsection\addcontentsline{toc}{subsubsection}{1.13.1}
+  \item[1.13.1] One useful fallacy is to consider that the computer with the
+        largest clock rate also has the largest performance. Check if this is
+        true for P1 and P2.
+  \phantomsection\addcontentsline{toc}{subsubsection}{1.13.2}
+  \item[1.13.2] Another fallacy is to consider that the processor executing
+        the largest number of instructions will need a larger CPU time.
+        Considering that processor P1 is executing a sequence of
+        $1.0 \times 10^9$ instructions and that the CPI of processors P1 and
+        P2 do not change, determine the number of instructions that P2 can
+        execute in the same time that P1 needs to execute
+        $1.0 \times 10^9$ instructions.
+  \phantomsection\addcontentsline{toc}{subsubsection}{1.13.3}
+  \item[1.13.3] A common fallacy is to use MIPS (millions of instructions per
+        second) to compare the performance of two different processors, and
+        consider the processor with the largest MIPS as having the largest
+        performance.
+\end{enumerate}
+
+\problembreak % [5] ≥ 5
+
+%-----------------------------------------------------------------------------
+\subsection{[5] Amdahl's Law and Partial Improvement}
+\hypertarget{prob-1.14}{}
+\noindent$\langle$\S1.11$\rangle$\medskip
+
+\noindent Another pitfall cited in Section 1.11 is expecting to improve the overall
+performance of a computer by improving only one aspect of the computer.
+Consider a computer running a program that requires 250 s, with 70 s spent
+executing FP instructions, 85 s executed L/S instructions, and 40 s spent
+executing branch instructions.
+
+\begin{enumerate}
+  \phantomsection\addcontentsline{toc}{subsubsection}{1.14.1}
+  \item[1.14.1] By how much is the total time reduced if the time for FP
+        operations is reduced by 20\%?
+  \phantomsection\addcontentsline{toc}{subsubsection}{1.14.2}
+  \item[1.14.2] By how much is the time for INT operations reduced if the
+        total time is reduced by 20\%?
+  \phantomsection\addcontentsline{toc}{subsubsection}{1.14.3}
+  \item[1.14.3] Can the total time be reduced by 20\% by reducing only the
+        time for branch instructions?
+\end{enumerate}
+
+\problembreak % [5] ≥ 5
+
+%-----------------------------------------------------------------------------
+\subsection{[5] CPI Optimization for Speedup}
+\hypertarget{prob-1.15}{}
+\noindent$\langle$\S1.6$\rangle$\medskip
+
+\noindent A program requires the execution of $50 \times 10^6$ FP instructions,
+$110 \times 10^6$ INT instructions, $80 \times 10^6$ L/S instructions, and
+$16 \times 10^6$ branch instructions. The CPI for each type of instruction is
+1, 1, 4, and 2, respectively. Assume that the processor has a 2 GHz clock.
+
+\begin{enumerate}
+  \phantomsection\addcontentsline{toc}{subsubsection}{1.15.1}
+  \item[1.15.1] By how much must we improve the CPI of FP instructions if we
+        want the program to run two times faster?
+  \phantomsection\addcontentsline{toc}{subsubsection}{1.15.2}
+  \item[1.15.2] By how much must we improve the CPI of L/S instructions to
+        make the program run two times faster?
+  \phantomsection\addcontentsline{toc}{subsubsection}{1.15.3}
+  \item[1.15.3] By how much is the execution time of the program improved if
+        the CPI of INT and FP instructions is reduced by 40\% and the CPI of
+        L/S and Branch is reduced by 30\%?
+\end{enumerate}
+
+\problembreak % [5] ≥ 5
+
+%-----------------------------------------------------------------------------
+\subsection{[5] Parallel Overhead and Speedup}
+\hypertarget{prob-1.16}{}
+\noindent$\langle$\S1.8$\rangle$\medskip
+
+\noindent When a program is adapted to run on multiple processors in a multiprocessor
+system, the execution time on each processor is comprised of computing time
+and the overhead time required for locked critical sections and/or to send
+data from one processor to another.
+
+Assume a program requires $t = 100$ s of execution time on one processor.
+When run on $p$ processors, each processor requires $t/p$ s, as well as an
+additional 4 s of overhead, irrespective of the number of processors. Compute
+the per-processor execution time for 2, 4, 8, 16, 32, 64, and 128
+processors. For each case, list the corresponding speedup relative to a single
+processor and the ratio between actual speedup versus ideal speedup (speedup
+if there was no overhead).

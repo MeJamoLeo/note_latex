@@ -1,0 +1,60 @@
+\documentclass[10pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath, amssymb}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{fancyhdr}
+
+% Print version flag (false = normal compact version)
+\newif\ifprintversion\printversionfalse
+
+% Page break in print version, bigskip in normal version
+\newcommand{\problembreak}{\ifprintversion\vfill\newpage\else\bigskip\fi}
+
+% Show subsections in the table of contents
+\setcounter{tocdepth}{3}
+
+% --- Header navigation links ---
+\newcommand{\headerlinkprefix}{sol}
+\newcommand{\headerrightlabel}{Solution}
+\renewcommand{\sectionmark}[1]{}
+\renewcommand{\subsectionmark}[1]{\markright{\thesubsection}}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\hyperlink{toc}{\S\rightmark}}
+\fancyhead[R]{\small\hyperlink{\headerlinkprefix-\rightmark}%
+  {\textrightarrow~\headerrightlabel}}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0pt}
+
+\title{Computer Organization and Design --- Practice Problems}
+\author{Reo Tajiri}
+\date{\today}
+
+\begin{document}
+\maketitle
+\pagestyle{plain}
+\hypertarget{toc}{}
+\tableofcontents
+\newpage
+\pagestyle{fancy}
+
+%--- Problems (front half) ---
+\input{ch1}
+\input{ch2}
+\input{ch3}
+\input{ch4}
+
+%--- Solutions (back half) ---
+\renewcommand{\headerlinkprefix}{prob}
+\renewcommand{\headerrightlabel}{Problem}
+\input{ch1_solutions}
+\input{ch2_solutions}
+\input{ch3_solutions}
+\input{ch4_solutions}
+
+\end{document}

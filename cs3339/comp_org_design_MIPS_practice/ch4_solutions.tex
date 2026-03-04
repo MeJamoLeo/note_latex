@@ -1,0 +1,3672 @@
+%=============================================================================
+% Chapter 4 Solutions
+%=============================================================================
+\newpage
+\section*{Chapter 4 Solutions}
+\addcontentsline{toc}{section}{Chapter 4 Solutions}
+
+%-----------------------------------------------------------------------------
+\subsection*{4.1 --- Control Signals for \texttt{lw2}}
+\hypertarget{sol-4.1}{}
+\markright{4.1}
+\addcontentsline{toc}{subsection}{4.1 --- Control Signals for \texttt{lw2}}
+
+The instruction \texttt{lw2 \$t1, \$s1, \$s2} performs
+\texttt{\$t1 = Mem[\$s1 + Mem[\$s2]]}.
+This requires \emph{two} data-memory reads in a single cycle, which the
+standard single-cycle datapath (Figure 4.10/4.17) cannot support---it has
+only one data-memory port.
+
+Because \texttt{lw2} is not a standard MIPS instruction, there is no valid
+opcode the existing control unit can decode to produce the correct behavior.
+If we assume the instruction is encoded in an R-type format (three register
+fields: rs = \texttt{\$s1}, rt = \texttt{\$s2}, rd = \texttt{\$t1}), the
+control unit would generate R-type signals.  We analyze the instruction
+under that assumption.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.1.1}
+\medskip\noindent\textbf{4.1.1}
+If the control unit treats \texttt{lw2} as an R-type instruction, it
+generates:
+
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Signal} & \textbf{R-type value} & \textbf{Value needed for lw2} \\
+\midrule
+RegDst   & 1  & 1 (write to rd = \texttt{\$t1}) \\
+ALUSrc   & 0  & 0 first, then 1 (two ALU uses) \\
+MemtoReg & 0  & 1 (result comes from memory) \\
+RegWrite & 1  & 1 (write to \texttt{\$t1}) \\
+MemRead  & 0  & 1 (need two memory reads) \\
+MemWrite & 0  & 0 \\
+Branch   & 0  & 0 \\
+ALUOp    & 10 & 00 (addition for address calc) \\
+Jump     & 0  & 0 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The existing control unit \emph{cannot} produce the correct signals for this
+instruction.  In particular, MemRead and MemtoReg would be 0 (R-type
+defaults), but the instruction needs them to be 1.  Furthermore, two
+separate memory reads are required, and the single-cycle datapath provides
+only one data-memory access per cycle.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.1.2}
+\medskip\noindent\textbf{4.1.2}
+The following resources perform a useful function for \texttt{lw2}:
+
+\begin{itemize}
+  \item \textbf{PC / Instruction Memory} --- fetches the instruction.
+  \item \textbf{Register File (read)} --- reads \texttt{\$s1} and
+        \texttt{\$s2}.
+  \item \textbf{Sign-extend} --- not needed (R-type format has no
+        immediate), so it does \emph{not} perform a useful function.
+  \item \textbf{ALU} --- needed to compute \texttt{\$s1 + Mem[\$s2]}, but
+        would also be needed for the first address (just \texttt{\$s2}).
+        In the existing datapath only one ALU operation can occur.
+  \item \textbf{Data Memory} --- needed for both reads, but only one can
+        occur.
+  \item \textbf{Register File (write)} --- writes the final result to
+        \texttt{\$t1}.
+  \item \textbf{PC adder} --- computes PC+4 for the next instruction.
+\end{itemize}
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.1.3}
+\medskip\noindent\textbf{4.1.3}
+\begin{itemize}
+  \item \textbf{Produces no output:} The sign-extend unit receives the
+        16-bit immediate field, which is the shamt/funct portion of an
+        R-type encoding.  It still produces an output (sign-extends those
+        bits), but the output is meaningless for this instruction.
+  \item \textbf{Produces output that is not used:}
+    \begin{itemize}
+      \item The \textbf{branch adder} (PC + sign-extended offset) computes a
+            branch target, but its output is not selected because Branch = 0.
+      \item The \textbf{sign-extend} unit produces output, but ALUSrc = 0
+            means the mux does not select it.
+      \item Under R-type control signals, the \textbf{Data Memory} has
+            MemRead = 0, so it produces no useful read output, even though
+            \texttt{lw2} needs two memory reads.
+    \end{itemize}
+\end{itemize}
+
+The fundamental problem is that the single-cycle datapath cannot perform
+two memory reads in one cycle.  Implementing \texttt{lw2} would require
+either a multi-cycle design or a second data-memory port.
+
+%-----------------------------------------------------------------------------
+\subsection*{4.2 --- Don't Cares in Control}
+\hypertarget{sol-4.2}{}
+\markright{4.2}
+\addcontentsline{toc}{subsection}{4.2 --- Don't Cares in Control}
+
+The ``don't cares'' (X) in the control signal truth table (Figure 4.18)
+occur when a signal's value has no effect on the instruction's result,
+because the controlled hardware either is not used or its output is
+ignored.
+
+\begin{enumerate}
+  \item \textbf{RegDst --- X for sw, beq, j.}
+        These instructions do not write to the register file (RegWrite = 0).
+        Since no register is written, it does not matter which field
+        (rt or rd) is selected as the write-register number.
+
+  \item \textbf{ALUSrc --- X for j.}
+        The jump instruction does not use the ALU at all.  The jump target
+        is formed from the upper bits of PC and the 26-bit address field,
+        bypassing the ALU entirely.  Therefore, it does not matter whether
+        the ALU's second input comes from a register or the sign-extended
+        immediate.
+
+  \item \textbf{MemtoReg --- X for sw, beq, j.}
+        These instructions do not write to the register file (RegWrite = 0).
+        Since no value is written back to a register, the mux that selects
+        between the ALU result and the memory output can be in any state.
+
+  \item \textbf{ALUOp --- XX for j.}
+        The jump instruction does not use the ALU, so the ALU operation
+        is irrelevant.  Whatever the ALU computes is ignored.
+\end{enumerate}
+
+\noindent In each case, the don't care arises because a downstream mux or
+write-enable signal prevents the controlled value from affecting any
+architectural state.
+
+%-----------------------------------------------------------------------------
+\subsection*{4.3 --- Instruction Mix Resource Usage}
+\hypertarget{sol-4.3}{}
+\markright{4.3}
+\addcontentsline{toc}{subsection}{4.3 --- Instruction Mix Resource Usage}
+
+Given instruction mix: R-type 24\%, I-type (non-lw) 28\%, Load 25\%,
+Store 10\%, Branch 11\%, Jump 2\%.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.3.1}
+\medskip\noindent\textbf{4.3.1}
+The data memory is used by instructions that read from or write to memory:
+\[
+  \text{Fraction using data memory} = \text{Load} + \text{Store}
+  = 25\% + 10\% = \boxed{35\%}
+\]
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.3.2}
+\medskip\noindent\textbf{4.3.2}
+The sign-extend unit is used by all instructions that have an immediate
+field: I-type (non-lw), load, store, and branch.
+\[
+  \text{Fraction using sign extend} = 28\% + 25\% + 10\% + 11\%
+  = \boxed{74\%}
+\]
+
+\noindent Note: R-type (24\%) and jump (2\%) do not use the sign-extended
+immediate, totaling 26\%.  As a check: $74\% + 26\% = 100\%$. \checkmark
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.3.3}
+\medskip\noindent\textbf{4.3.3}
+The sign-extend unit is a purely combinational block; it \emph{always}
+produces an output every cycle, regardless of the instruction type.  During
+cycles when its output is not needed (R-type and jump instructions), the
+sign-extended value is still computed, but it is simply \emph{not selected}
+by the ALUSrc mux.
+
+\begin{itemize}
+  \item For R-type instructions, ALUSrc = 0, so the mux selects the
+        register value (Read Data 2) rather than the sign-extended immediate.
+  \item For jump instructions, the ALU result is ignored entirely.
+\end{itemize}
+
+The sign-extend unit consumes a small amount of power during these cycles
+but does not affect correctness---the unwanted output is gated off by the
+mux.
+
+%-----------------------------------------------------------------------------
+\subsection*{4.4 --- Stuck-at-0 Fault Analysis}
+\hypertarget{sol-4.4}{}
+\markright{4.4}
+\addcontentsline{toc}{subsection}{4.4 --- Stuck-at-0 Fault Analysis}
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.4.1}
+\medskip\noindent\textbf{4.4.1}
+\textbf{RegDst stuck at 0:}
+
+In the normal control table, RegDst = 1 only for R-type instructions.
+When RegDst = 1, the write-register number comes from bits [15:11] (the
+\texttt{rd} field).  When RegDst = 0, it comes from bits [20:16] (the
+\texttt{rt} field).
+
+If RegDst is stuck at 0:
+\begin{itemize}
+  \item \textbf{R-type instructions fail.}  They need RegDst = 1 to write
+        to the \texttt{rd} register.  With RegDst stuck at 0, the result is
+        written to \texttt{rt} instead of \texttt{rd}.  For example,
+        \texttt{add \$s0, \$s1, \$s2} would write the sum to \texttt{\$s2}
+        (rt) instead of \texttt{\$s0} (rd).
+  \item \textbf{lw instructions are unaffected.}  They already require
+        RegDst = 0 (write to \texttt{rt}).
+  \item \textbf{sw, beq, j are unaffected.}  RegDst is a don't-care for
+        these instructions because they do not write to the register file
+        (RegWrite = 0).
+\end{itemize}
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.4.2}
+\medskip\noindent\textbf{4.4.2}
+\textbf{ALUSrc stuck at 0:}
+
+ALUSrc controls the second input to the ALU.  When ALUSrc = 0, the ALU
+receives Read Data 2 (a register value).  When ALUSrc = 1, it receives the
+sign-extended immediate.
+
+If ALUSrc is stuck at 0:
+\begin{itemize}
+  \item \textbf{lw and sw instructions fail.}  Both need ALUSrc = 1 so the
+        ALU computes \texttt{base + offset} using the sign-extended
+        immediate.  With ALUSrc = 0, the ALU receives the value of
+        \texttt{rt} instead of the immediate, producing an incorrect memory
+        address.
+  \item \textbf{I-type ALU instructions (e.g., addi, andi, ori) also fail.}
+        They need ALUSrc = 1 to use the immediate operand.  With ALUSrc = 0,
+        the ALU uses a register value instead.
+  \item \textbf{R-type instructions are unaffected.}  They already require
+        ALUSrc = 0.
+  \item \textbf{beq is unaffected.}  It requires ALUSrc = 0 (subtracts
+        two registers to compare).
+  \item \textbf{j is unaffected.}  ALUSrc is a don't-care for jumps.
+\end{itemize}
+
+%-----------------------------------------------------------------------------
+\subsection*{4.5 --- Trace Instruction Through Datapath}
+\hypertarget{sol-4.5}{}
+\markright{4.5}
+\addcontentsline{toc}{subsection}{4.5 --- Trace Instruction Through Datapath}
+
+Instruction: \texttt{add \$s0, \$s1, \$s2}
+
+Encoding (R-type):
+\begin{verbatim}
+    opcode = 000000  (R-type)
+    rs     = 10001   ($s1 = register 17)
+    rt     = 10010   ($s2 = register 18)
+    rd     = 10000   ($s0 = register 16)
+    shamt  = 00000
+    funct  = 100000  (add)
+\end{verbatim}
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.5.1}
+\medskip\noindent\textbf{4.5.1}
+The control unit decodes opcode = \texttt{000000} (R-type) and generates:
+
+\begin{center}
+\begin{tabular}{lc}
+\toprule
+\textbf{Signal} & \textbf{Value} \\
+\midrule
+RegDst   & 1 \\
+ALUSrc   & 0 \\
+MemtoReg & 0 \\
+RegWrite & 1 \\
+MemRead  & 0 \\
+MemWrite & 0 \\
+Branch   & 0 \\
+ALUOp    & 10 \\
+Jump     & 0 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The ALU control unit receives ALUOp = 10 and funct = \texttt{100000},
+producing ALU control = \texttt{0010} (addition).
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.5.2}
+\medskip\noindent\textbf{4.5.2}
+The new PC value is:
+\[
+  \text{PC}_{\text{new}} = \text{PC} + 4
+\]
+
+Path: The current PC feeds the instruction memory \emph{and} the top adder,
+which computes PC + 4.  Since Branch = 0 and Jump = 0, the branch-target
+mux selects PC + 4, and the jump mux also selects that value.  The result
+is written to the PC register on the next rising clock edge.
+
+No branch is taken because Branch AND Zero = $0 \text{ AND } (\cdot) = 0$.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.5.3}
+\medskip\noindent\textbf{4.5.3}
+There are three main muxes in the datapath:
+
+\begin{center}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Mux} & \textbf{Input 0} & \textbf{Input 1} & \textbf{Select} & \textbf{Output} \\
+\midrule
+RegDst mux   & rt = 18 & rd = 16 & 1 & 16 (\texttt{\$s0}) \\
+ALUSrc mux   & Read Data 2 = [\texttt{\$s2}] & Sign-ext imm & 0 & [\texttt{\$s2}] \\
+MemtoReg mux & ALU result & Mem read data & 0 & ALU result \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Additionally, the PC-source mux:
+\begin{itemize}
+  \item Input 0 = PC + 4, Input 1 = branch target (PC + 4 + offset$\times$4).
+  \item Select = Branch AND Zero = 0.  Output = PC + 4.
+\end{itemize}
+
+And the Jump mux:
+\begin{itemize}
+  \item Input 0 = output of PC-source mux = PC + 4.
+        Input 1 = jump target.
+  \item Select = Jump = 0.  Output = PC + 4.
+\end{itemize}
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.5.4}
+\medskip\noindent\textbf{4.5.4}
+\textbf{Register File read outputs:}
+\begin{itemize}
+  \item Read Register 1 = rs = 17 $\Rightarrow$ Read Data 1 = contents of \texttt{\$s1}
+  \item Read Register 2 = rt = 18 $\Rightarrow$ Read Data 2 = contents of \texttt{\$s2}
+\end{itemize}
+
+\textbf{ALU inputs:}
+\begin{itemize}
+  \item Input A = Read Data 1 = contents of \texttt{\$s1}
+  \item Input B = output of ALUSrc mux = Read Data 2 = contents of \texttt{\$s2}
+        (since ALUSrc = 0)
+  \item ALU control = \texttt{0010} (add)
+  \item ALU result = \texttt{\$s1} + \texttt{\$s2}
+  \item Zero flag = 1 if the result is zero, 0 otherwise (not used by this
+        instruction)
+\end{itemize}
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.5.5}
+\medskip\noindent\textbf{4.5.5}
+The Register File write inputs are:
+
+\begin{center}
+\begin{tabular}{lc}
+\toprule
+\textbf{Input} & \textbf{Value} \\
+\midrule
+Write Register & 16 (from RegDst mux, selecting rd = \texttt{\$s0}) \\
+Write Data     & ALU result = \texttt{\$s1} + \texttt{\$s2} \\
+               & (from MemtoReg mux, selecting ALU result) \\
+RegWrite       & 1 (write is enabled) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+At the next rising clock edge, the value \texttt{\$s1} + \texttt{\$s2} is
+written into register \texttt{\$s0} (register 16).
+%-----------------------------------------------------------------------------
+\subsection*{4.6 --- Adding I-type Instructions}
+\hypertarget{sol-4.6}{}
+\markright{4.6}
+\addcontentsline{toc}{subsection}{4.6 --- Adding I-type Instructions}
+
+Section 4.1 discusses R-type, load, store, branch, and jump instructions
+but omits I-type ALU instructions such as \texttt{addi}, \texttt{andi},
+\texttt{ori}, and \texttt{slti}.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.6.1}
+\medskip\noindent\textbf{4.6.1}
+No new logic blocks are needed for most I-type ALU instructions.  The
+existing single-cycle datapath (Figure~4.17) already contains every
+component required:
+
+\begin{itemize}
+  \item The \textbf{sign-extend unit} produces the 32-bit immediate from the
+        16-bit field in the instruction.
+  \item The \textbf{ALUSrc mux} can already select the sign-extended
+        immediate as the second ALU input.
+  \item The \textbf{RegDst mux} can already select \texttt{rt}
+        (bits [20:16]) as the write register.
+  \item The ALU already supports add, subtract, AND, OR, and set-on-less-than
+        operations.
+\end{itemize}
+
+\noindent\textbf{Exception:} For \texttt{andi} and \texttt{ori}, the
+immediate must be \emph{zero-extended} rather than sign-extended.  To support
+this we need either:
+\begin{enumerate}
+  \item A \textbf{zero-extend unit} and a \textbf{mux} to select between
+        sign-extension and zero-extension, controlled by a new signal
+        (e.g.\ \texttt{ExtOp}), or
+  \item Modify the existing sign-extend unit to accept a control input that
+        chooses between sign- and zero-extension.
+\end{enumerate}
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.6.2}
+\medskip\noindent\textbf{4.6.2}
+Control signal values for representative I-type instructions:
+
+\begin{center}
+\begin{tabular}{lccccccccc}
+\toprule
+\textbf{Signal} & \textbf{addi} & \textbf{andi} & \textbf{ori} & \textbf{slti} \\
+\midrule
+RegDst   & 0  & 0  & 0  & 0  \\
+ALUSrc   & 1  & 1  & 1  & 1  \\
+MemtoReg & 0  & 0  & 0  & 0  \\
+RegWrite & 1  & 1  & 1  & 1  \\
+MemRead  & 0  & 0  & 0  & 0  \\
+MemWrite & 0  & 0  & 0  & 0  \\
+Branch   & 0  & 0  & 0  & 0  \\
+ALUOp    & 00 & 11 & 11 & 11 \\
+Jump     & 0  & 0  & 0  & 0  \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Reasoning for each signal:
+\begin{itemize}
+  \item \textbf{RegDst = 0}: The destination register is \texttt{rt}
+        (bits [20:16]), not \texttt{rd} (bits [15:11]).
+  \item \textbf{ALUSrc = 1}: The second ALU operand is the immediate field
+        (sign- or zero-extended), not a register value.
+  \item \textbf{MemtoReg = 0}: The result written to the register file comes
+        from the ALU output, not from data memory.
+  \item \textbf{RegWrite = 1}: The instruction writes a result to a register.
+  \item \textbf{MemRead = 0}: No data memory read is performed.
+  \item \textbf{MemWrite = 0}: No data memory write is performed.
+  \item \textbf{Branch = 0}: This is not a branch instruction.
+  \item \textbf{ALUOp}: For \texttt{addi}, ALUOp = 00 (addition).  For
+        \texttt{andi}, \texttt{ori}, and \texttt{slti}, ALUOp must encode a
+        value that causes the ALU control to select the correct operation
+        (AND, OR, or SLT).  Since the existing 2-bit ALUOp only encodes
+        R-type (10), load/store (00), and branch (01), a new encoding such
+        as 11 can be used, with the \texttt{funct}-equivalent operation
+        determined by the opcode bits.
+  \item \textbf{Jump = 0}: This is not a jump instruction.
+\end{itemize}
+
+\noindent There are no true ``don't care'' signals for I-type ALU
+instructions---every control signal has a well-defined required value.
+
+%-----------------------------------------------------------------------------
+\subsection*{4.7 --- Instruction Latencies}
+\hypertarget{sol-4.7}{}
+\markright{4.7}
+\addcontentsline{toc}{subsection}{4.7 --- Instruction Latencies}
+
+We trace the critical path through the single-cycle datapath for each
+instruction type using the given latencies:
+
+\begin{center}
+\begin{tabular}{ccccccccc}
+\toprule
+\textbf{I-Mem} & \textbf{Mux} & \textbf{ALU} & \textbf{Adder} &
+\textbf{Gate} & \textbf{Reg} & \textbf{Reg File} &
+\textbf{Sign ext.} & \textbf{Ctrl} \\
+\midrule
+200ps & 30ps & 120ps & 150ps & 5ps & 90ps & 150ps & 10ps & 50ps \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Note: ``Reg'' (90\,ps) is the register setup time (data must be
+stable before the clock edge).  ``Reg File'' (150\,ps) is the register read
+time (output delay after clock edge).  We assume data memory has the same
+latency as instruction memory (200\,ps).
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.7.1}
+\medskip\noindent\textbf{4.7.1}
+\textbf{R-type critical path:}
+\[
+  \underbrace{200}_{\text{I-Mem}} +
+  \underbrace{\max(150,\,50)}_{\text{max(Reg read, Ctrl)}} +
+  \underbrace{30}_{\text{Mux (ALUSrc)}} +
+  \underbrace{120}_{\text{ALU}} +
+  \underbrace{30}_{\text{Mux (MemtoReg)}} +
+  \underbrace{90}_{\text{Reg setup}}
+\]
+\[
+  = 200 + 150 + 30 + 120 + 30 + 90 = \boxed{620\text{\,ps}}
+\]
+
+The parallel paths after instruction fetch are:
+\begin{itemize}
+  \item Control path: Ctrl (50\,ps) $\to$ mux select signals
+  \item Data path: Reg File read (150\,ps)
+\end{itemize}
+Since $150 > 50$, the register file read is on the critical path.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.7.2}
+\medskip\noindent\textbf{4.7.2}
+\textbf{\texttt{lw} critical path:}
+\[
+  \underbrace{200}_{\text{I-Mem}} +
+  \underbrace{150}_{\text{Reg read}} +
+  \underbrace{30}_{\text{Mux (ALUSrc)}} +
+  \underbrace{120}_{\text{ALU}} +
+  \underbrace{200}_{\text{D-Mem}} +
+  \underbrace{30}_{\text{Mux (MemtoReg)}} +
+  \underbrace{90}_{\text{Reg setup}}
+\]
+\[
+  = 200 + 150 + 30 + 120 + 200 + 30 + 90 = \boxed{820\text{\,ps}}
+\]
+
+This is longer than R-type because \texttt{lw} must also access data memory
+(200\,ps) between the ALU and the write-back mux.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.7.3}
+\medskip\noindent\textbf{4.7.3}
+\textbf{I-type (non-load) critical path} (e.g.\ \texttt{addi}):
+
+The path is identical to R-type.  Although the immediate passes through the
+sign-extend unit (10\,ps) and then the ALUSrc mux, this path
+(Ctrl 50\,ps + Sign-ext 10\,ps = 60\,ps) is still shorter than the register
+read path (150\,ps).  Therefore:
+\[
+  200 + 150 + 30 + 120 + 30 + 90 = \boxed{620\text{\,ps}}
+\]
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.7.4}
+\medskip\noindent\textbf{4.7.4}
+The minimum clock period must accommodate the slowest instruction.  We also
+check the remaining instruction types:
+
+\textbf{\texttt{sw} critical path:}
+\[
+  200\;(\text{I-Mem}) + 150\;(\text{Reg read}) + 30\;(\text{Mux}) +
+  120\;(\text{ALU}) + 200\;(\text{D-Mem write}) = 700\text{\,ps}
+\]
+(\texttt{sw} does not write back to the register file.)
+
+\textbf{\texttt{beq} critical path:}
+\[
+  200\;(\text{I-Mem}) + 150\;(\text{Reg read}) + 30\;(\text{Mux}) +
+  120\;(\text{ALU}) + 5\;(\text{AND gate}) + 30\;(\text{Mux for PC})
+  = 535\text{\,ps}
+\]
+
+\textbf{\texttt{j} critical path:}
+The jump target is computed from the instruction word (shift and concatenate),
+requiring no ALU or memory access:
+$200 + 30 = 230$\,ps.
+
+\medskip
+\begin{center}
+\begin{tabular}{lc}
+\toprule
+\textbf{Instruction Type} & \textbf{Latency} \\
+\midrule
+R-type      & 620\,ps \\
+I-type (non-load) & 620\,ps \\
+\texttt{lw} & 820\,ps \\
+\texttt{sw} & 700\,ps \\
+\texttt{beq} & 535\,ps \\
+\texttt{j}  & 230\,ps \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The minimum clock period is determined by the longest latency:
+\[
+  \text{Minimum clock period} = \max(620, 620, 820, 700, 535, 230)
+  = \boxed{820\text{\,ps}}
+\]
+
+%-----------------------------------------------------------------------------
+\subsection*{4.8 --- Variable Clock Cycle Speedup}
+\hypertarget{sol-4.8}{}
+\markright{4.8}
+\addcontentsline{toc}{subsection}{4.8 --- Variable Clock Cycle Speedup}
+
+If each instruction type could use its own (variable) clock cycle time, the
+average clock cycle would be the weighted average over the instruction mix:
+
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Instruction Type} & \textbf{Latency} & \textbf{Fraction} \\
+\midrule
+R-type            & 620\,ps & 24\% \\
+I-type (non-lw)   & 620\,ps & 28\% \\
+Load (\texttt{lw})& 820\,ps & 25\% \\
+Store (\texttt{sw})& 700\,ps & 10\% \\
+Branch            & 535\,ps & 11\% \\
+Jump              & 230\,ps & 2\% \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\[
+  \text{Avg cycle} = 0.24(620) + 0.28(620) + 0.25(820) + 0.10(700) +
+                     0.11(535) + 0.02(230)
+\]
+\begin{align*}
+  &= 148.8 + 173.6 + 205.0 + 70.0 + 58.85 + 4.6 \\
+  &= 660.85\text{\,ps}
+\end{align*}
+
+The fixed-clock CPU must use $820$\,ps (the \texttt{lw} latency) for every
+instruction.  For a program of $N$ instructions:
+\[
+  \text{Speedup} = \frac{820}{660.85} \approx \boxed{1.24}
+\]
+
+The variable-clock CPU is approximately 24\% faster, primarily because it
+avoids paying the full \texttt{lw} latency for the 75\% of instructions that
+do not access data memory.
+
+%-----------------------------------------------------------------------------
+\subsection*{4.9 --- Multiplier Addition to CPU}
+\hypertarget{sol-4.9}{}
+\markright{4.9}
+\addcontentsline{toc}{subsection}{4.9 --- Multiplier Addition to CPU}
+
+Adding a multiplier increases the ALU latency by 300\,ps (from 120\,ps to
+420\,ps) but reduces the instruction count by 5\%.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.9.1}
+\medskip\noindent\textbf{4.9.1}
+The clock cycle time is determined by the critical path (\texttt{lw}):
+
+\textbf{Without improvement:}
+\[
+  200 + 150 + 30 + 120 + 200 + 30 + 90 = \boxed{820\text{\,ps}}
+\]
+
+\textbf{With improvement} (ALU latency = $120 + 300 = 420$\,ps):
+\[
+  200 + 150 + 30 + 420 + 200 + 30 + 90 = \boxed{1120\text{\,ps}}
+\]
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.9.2}
+\medskip\noindent\textbf{4.9.2}
+Let $N$ be the original instruction count.  The new instruction count is
+$0.95N$.
+
+\[
+  \text{Speedup} = \frac{\text{Old execution time}}{\text{New execution time}}
+  = \frac{820 \times N}{1120 \times 0.95N}
+  = \frac{820}{1064} \approx \boxed{0.771}
+\]
+
+Since the speedup is less than 1, this is actually a \textbf{slowdown} of
+approximately $1/0.771 \approx 1.30\times$.  The 36.6\% increase in clock
+cycle time far outweighs the 5\% reduction in instruction count.  This
+improvement should \textbf{not} be made.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.9.3}
+\medskip\noindent\textbf{4.9.3}
+Let $x$ be the additional latency added to the ALU (so the new ALU latency is
+$120 + x$).  For the improvement to yield a net performance gain:
+\[
+  \text{Old time} > \text{New time}
+\]
+\[
+  820 \times N > \bigl(200 + 150 + 30 + (120 + x) + 200 + 30 + 90\bigr)
+  \times 0.95N
+\]
+\[
+  820 > (820 + x) \times 0.95
+\]
+\[
+  \frac{820}{0.95} > 820 + x
+\]
+\[
+  863.16 > 820 + x
+\]
+\[
+  x < 43.16\text{\,ps}
+\]
+
+The new ALU can be at most $120 + 43 = 163$\,ps, which means the multiplier
+can add at most approximately \boxed{43\text{\,ps}} to the ALU latency and
+still yield improved performance.
+
+%-----------------------------------------------------------------------------
+\subsection*{4.10 --- Register File Expansion Cost}
+\hypertarget{sol-4.10}{}
+\markright{4.10}
+\addcontentsline{toc}{subsection}{4.10 --- Register File Expansion Cost}
+
+Doubling the register file from 32 to 64 registers has three effects:
+\begin{enumerate}
+  \item Reduces the number of \texttt{lw} and \texttt{sw} instructions
+        executed by 12\%.
+  \item Increases register file read latency from 150\,ps to 160\,ps.
+  \item Doubles the register file cost from 200 to 400.
+\end{enumerate}
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.10.1}
+\medskip\noindent\textbf{4.10.1}
+\textbf{Old clock cycle} (determined by \texttt{lw} critical path, Reg File
+read = 150\,ps):
+\[
+  200 + 150 + 30 + 120 + 200 + 30 + 90 = 820\text{\,ps}
+\]
+
+\textbf{New clock cycle} (Reg File read = 160\,ps):
+\[
+  200 + 160 + 30 + 120 + 200 + 30 + 90 = 830\text{\,ps}
+\]
+
+From the instruction mix, \texttt{lw} and \texttt{sw} together account for
+$25\% + 10\% = 35\%$ of instructions.  Reducing these by 12\% gives a new
+instruction count:
+\[
+  N_{\text{new}} = N \times \bigl(1 - 0.12 \times 0.35\bigr)
+  = N \times (1 - 0.042) = 0.958N
+\]
+
+Execution times:
+\begin{align*}
+  T_{\text{old}} &= 820 \times N \\
+  T_{\text{new}} &= 830 \times 0.958N = 795.14N
+\end{align*}
+
+\[
+  \text{Speedup} = \frac{820N}{795.14N}
+  = \frac{820}{795.14} \approx \boxed{1.031}
+\]
+
+The improvement yields approximately a \textbf{3.1\% speedup}.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.10.2}
+\medskip\noindent\textbf{4.10.2}
+\textbf{Performance change:} $+3.1\%$.
+
+\textbf{Cost change:} The register file cost doubles from 200 to 400,
+an increase of $\Delta = 200$.  If the total CPU cost is approximately
+1000 (as given in the textbook's cost table), then:
+\[
+  \text{Cost increase} = \frac{400 - 200}{1000} = 20\%
+\]
+
+The cost/performance ratio:
+\[
+  \frac{\text{Cost increase}}{\text{Performance increase}}
+  = \frac{20\%}{3.1\%} \approx 6.5
+\]
+
+The cost increases by about 6.5$\times$ more (in percentage terms) than the
+performance improves.  This is a \textbf{poor} cost/performance tradeoff.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.10.3}
+\medskip\noindent\textbf{4.10.3}
+\textbf{When more registers make sense:}
+\begin{itemize}
+  \item In \textbf{embedded systems} or systems with slow memory where
+        reducing memory accesses is critical.  If the program is
+        register-starved (many spills to stack), doubling registers could
+        eliminate far more than 12\% of loads/stores, making the tradeoff
+        worthwhile.
+  \item In \textbf{deeply pipelined or out-of-order processors} where
+        register renaming benefits from a larger physical register file,
+        and where the register file latency increase is hidden by other
+        pipeline stages.
+\end{itemize}
+
+\textbf{When more registers do not make sense:}
+\begin{itemize}
+  \item In \textbf{cost-sensitive designs} (e.g., low-power
+        microcontrollers) where the 20\% cost increase is not justified by
+        the modest 3\% performance gain.
+  \item In \textbf{workloads with good cache behavior} and few register
+        spills, where the 12\% reduction in \texttt{lw}/\texttt{sw} is
+        optimistic and the actual benefit would be even smaller.
+  \item When the increased register file size forces \textbf{wider
+        instruction encodings} (more bits for register specifiers), which
+        increases code size and may degrade instruction cache performance.
+\end{itemize}
+%-----------------------------------------------------------------------------
+\subsection*{4.11 --- Load With Increment Instruction}
+\hypertarget{sol-4.11}{}
+\markright{4.11}
+\addcontentsline{toc}{subsection}{4.11 --- Load With Increment Instruction}
+
+The proposed instruction is:
+\begin{verbatim}
+    lwi $t1, 0($s1)    # $t1 = Mem[$s1]; $s1 = $s1 + 4
+\end{verbatim}
+
+This instruction performs two operations simultaneously: (1) load a word from
+memory at address \texttt{\$s1} into \texttt{\$t1}, and (2) increment the base
+register \texttt{\$s1} by 4.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.11.1}
+\medskip\noindent\textbf{4.11.1}
+We need \textbf{one new adder} to compute \texttt{\$s1 + 4}. The existing ALU
+is already occupied computing the memory address \texttt{\$s1 + offset}
+(which in this case is \texttt{\$s1 + 0}). Since both computations must happen
+in the same cycle, we cannot reuse the ALU for the increment. The new adder
+takes the value of \texttt{\$s1} (from Read Data~1 of the Register File) and
+the constant~4 as inputs, and produces \texttt{\$s1 + 4} as output.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.11.2}
+\medskip\noindent\textbf{4.11.2}
+The \textbf{Register File} must be modified to support \textbf{two simultaneous
+writes} in a single clock cycle. In the original design the Register File has
+one write port (Write Register, Write Data, RegWrite). For \texttt{lwi}, we
+must write both:
+\begin{itemize}
+  \item \texttt{\$t1} $\leftarrow$ the loaded data from memory, and
+  \item \texttt{\$s1} $\leftarrow$ \texttt{\$s1 + 4} from the new adder.
+\end{itemize}
+This requires adding a \textbf{second write port} (Write Register~2, Write
+Data~2, RegWrite2) to the Register File.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.11.3}
+\medskip\noindent\textbf{4.11.3}
+The following new data paths are needed:
+\begin{enumerate}
+  \item A path carrying the \textbf{constant~4} to one input of the new adder.
+  \item A path from \textbf{Read Data~1} (the value of \texttt{\$s1}) to the
+        other input of the new adder.
+  \item A path from the \textbf{new adder's output} to the second write data
+        port (Write Data~2) of the Register File.
+  \item A path from the \textbf{rs field} of the instruction (bits [25:21]) to
+        the second write register port (Write Register~2) of the Register File,
+        so the incremented value is written back to \texttt{\$s1}.
+\end{enumerate}
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.11.4}
+\medskip\noindent\textbf{4.11.4}
+The following new control signals are needed:
+\begin{itemize}
+  \item \textbf{RegWrite2}: Enables the second write port of the Register File.
+        Asserted only for \texttt{lwi}; deasserted for all other instructions.
+  \item \textbf{WriteRegSrc2}: Selects which register number is sent to Write
+        Register~2 (the \texttt{rs} field for \texttt{lwi}).
+\end{itemize}
+No additional ALU control is needed because the new adder is a dedicated
+add-by-4 unit (hardwired), not a general-purpose ALU.
+
+%-----------------------------------------------------------------------------
+\subsection*{4.12 --- Swap Instruction}
+\hypertarget{sol-4.12}{}
+\markright{4.12}
+\addcontentsline{toc}{subsection}{4.12 --- Swap Instruction}
+
+The proposed instruction is:
+\begin{verbatim}
+    swap $s1, $s2       # temp = $s1; $s1 = $s2; $s2 = temp
+\end{verbatim}
+
+This instruction atomically exchanges the contents of two registers.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.12.1}
+\medskip\noindent\textbf{4.12.1}
+\textbf{No new functional blocks} are needed. The existing Register File can
+already read both registers simultaneously (via Read Register~1 and Read
+Register~2). No ALU computation or memory access is required --- the swap is
+purely a register-to-register data movement.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.12.2}
+\medskip\noindent\textbf{4.12.2}
+The \textbf{Register File} must be modified to support \textbf{two simultaneous
+writes}. In the original single-cycle datapath, the Register File has only one
+write port. For \texttt{swap}, we must write:
+\begin{itemize}
+  \item \texttt{\$s1} $\leftarrow$ old value of \texttt{\$s2} (from Read
+        Data~2), and
+  \item \texttt{\$s2} $\leftarrow$ old value of \texttt{\$s1} (from Read
+        Data~1).
+\end{itemize}
+This requires a \textbf{second write port} (Write Register~2, Write Data~2,
+RegWrite2).
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.12.3}
+\medskip\noindent\textbf{4.12.3}
+The following new data paths are needed:
+\begin{enumerate}
+  \item \textbf{Read Data~2 $\to$ Write Data~1}: The value read from
+        \texttt{\$s2} must be routed to the first write data port so it can
+        be written into \texttt{\$s1}. (A mux is needed at Write Data~1 to
+        select between the normal write-back sources and Read Data~2.)
+  \item \textbf{Read Data~1 $\to$ Write Data~2}: The value read from
+        \texttt{\$s1} must be routed to the second write data port so it can
+        be written into \texttt{\$s2}.
+  \item \textbf{Instruction fields to Write Register~2}: The \texttt{rt} field
+        (bits [20:16]) goes to Write Register~1, and the \texttt{rs} field
+        (bits [25:21]) goes to Write Register~2 (or vice versa), so each port
+        targets the correct register.
+\end{enumerate}
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.12.4}
+\medskip\noindent\textbf{4.12.4}
+The following new control signals are needed:
+\begin{itemize}
+  \item \textbf{Swap}: When asserted, enables both write ports and activates
+        the cross-connected data routing (Read Data~1 $\to$ Write Data~2 and
+        Read Data~2 $\to$ Write Data~1).
+  \item \textbf{RegWrite2}: Enables the second write port. Can be tied to the
+        Swap signal.
+  \item \textbf{WriteDataSrc}: A mux select signal on the first write data
+        port to choose between the normal write-back data (ALU result or
+        memory data) and Read Data~2.
+\end{itemize}
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.12.5}
+\medskip\noindent\textbf{4.12.5}
+Modifications to Figure 4.21:
+\begin{enumerate}
+  \item Add a \textbf{second write port} to the Register File with inputs
+        Write Register~2, Write Data~2, and RegWrite2.
+  \item Add a \textbf{mux} before Write Data~1. Inputs: (0) normal write-back
+        data (from the MemtoReg mux), (1) Read Data~2. Select signal: Swap.
+  \item Connect \textbf{Read Data~1} directly to \textbf{Write Data~2}.
+  \item Connect the \textbf{rs field} (instruction bits [25:21]) to Write
+        Register~1 and the \textbf{rt field} (bits [20:16]) to Write
+        Register~2 when Swap is asserted. This requires a mux on each Write
+        Register input controlled by the Swap signal.
+  \item The control unit decodes the \texttt{swap} opcode and asserts
+        \textbf{Swap}, \textbf{RegWrite}, and \textbf{RegWrite2}, while
+        deasserting MemRead, MemWrite, and Branch.
+\end{enumerate}
+
+%-----------------------------------------------------------------------------
+\subsection*{4.13 --- Store Sum Instruction}
+\hypertarget{sol-4.13}{}
+\markright{4.13}
+\addcontentsline{toc}{subsection}{4.13 --- Store Sum Instruction}
+
+The proposed instruction is:
+\begin{verbatim}
+    ss $s1, $s2, 100($s3)  # Mem[$s3+100] = $s1 + $s2
+\end{verbatim}
+
+This instruction adds the contents of two registers and stores the result to a
+memory address computed from a third register plus an offset.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.13.1}
+\medskip\noindent\textbf{4.13.1}
+We need \textbf{one new ALU (or adder)}. The existing ALU must compute the sum
+\texttt{\$s1 + \$s2} (the data to be stored). Simultaneously, we need to
+compute the memory address \texttt{\$s3 + sign\_ext(100)}. Since a single ALU
+cannot perform both computations in the same cycle, a second ALU or dedicated
+adder is required for the address calculation.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.13.2}
+\medskip\noindent\textbf{4.13.2}
+The \textbf{Register File} must be modified to support \textbf{three
+simultaneous reads}. The standard MIPS Register File has two read ports, but
+\texttt{ss} requires reading three registers: \texttt{\$s1}, \texttt{\$s2},
+and \texttt{\$s3}. A third read port (Read Register~3, Read Data~3) must be
+added.
+
+Additionally, the instruction encoding must accommodate three register
+specifiers and an immediate field, which is challenging in the standard 32-bit
+MIPS format.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.13.3}
+\medskip\noindent\textbf{4.13.3}
+The following new data paths are needed:
+\begin{enumerate}
+  \item A path from the \textbf{third read port} (Read Data~3, carrying
+        \texttt{\$s3}) to one input of the \textbf{new adder/ALU}.
+  \item A path from the \textbf{sign-extended immediate} to the other input
+        of the new adder/ALU (for computing the address).
+  \item A path from the \textbf{existing ALU output} (\texttt{\$s1 + \$s2})
+        to the \textbf{Write Data} input of Data Memory.
+  \item A path from the \textbf{new adder/ALU output}
+        (\texttt{\$s3 + sign\_ext(100)}) to the \textbf{Address} input of
+        Data Memory.
+\end{enumerate}
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.13.4}
+\medskip\noindent\textbf{4.13.4}
+The following new control signals are needed:
+\begin{itemize}
+  \item \textbf{AddrSrc}: A mux select signal on the Data Memory address input
+        to choose between the existing ALU output (for normal lw/sw) and the
+        new adder output (for \texttt{ss}).
+  \item \textbf{WriteDataSrc}: A mux select signal on the Data Memory write
+        data input to choose between Read Data~2 (for normal \texttt{sw}) and
+        the existing ALU output (for \texttt{ss}).
+  \item \textbf{ALUSrc} must be deasserted so the existing ALU receives both
+        register values (\texttt{\$s1} and \texttt{\$s2}) rather than a
+        register and an immediate.
+\end{itemize}
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.13.5}
+\medskip\noindent\textbf{4.13.5}
+Modifications to Figure 4.21:
+\begin{enumerate}
+  \item Add a \textbf{third read port} to the Register File. The third
+        register specifier comes from a new instruction field.
+  \item Add a \textbf{second ALU/adder}. Its inputs are Read Data~3 and the
+        sign-extended immediate. Its output is the memory address.
+  \item Add a \textbf{mux before the Data Memory address} input:
+        input~0 = existing ALU result (normal lw/sw), input~1 = new
+        adder output (for \texttt{ss}). Select signal: AddrSrc.
+  \item Add a \textbf{mux before the Data Memory write data} input:
+        input~0 = Read Data~2 (normal \texttt{sw}),
+        input~1 = existing ALU result (for \texttt{ss}).
+        Select signal: WriteDataSrc.
+  \item The control unit decodes the \texttt{ss} opcode and asserts
+        MemWrite, AddrSrc, and WriteDataSrc, while deasserting RegWrite,
+        MemRead, and Branch. ALUSrc~=~0 so the main ALU adds the two register
+        values. ALUOp is set to ``add.''
+\end{enumerate}
+
+%-----------------------------------------------------------------------------
+\subsection*{4.14 --- Imm Gen Block Critical Path}
+\hypertarget{sol-4.14}{}
+\markright{4.14}
+\addcontentsline{toc}{subsection}{4.14 --- Imm Gen Block Critical Path}
+
+We must determine whether the Imm Gen (sign-extend) block lies on the critical
+path for any instruction. Recall the latencies:
+
+\begin{center}
+\begin{tabular}{ccccccccc}
+\toprule
+\textbf{I-Mem} & \textbf{Mux} & \textbf{ALU} & \textbf{Adder} &
+\textbf{Gate} & \textbf{Reg} & \textbf{Reg File} &
+\textbf{Sign ext.} & \textbf{Ctrl} \\
+\midrule
+200ps & 30ps & 120ps & 150ps & 5ps & 90ps & 150ps & 10ps & 50ps \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+After the instruction is fetched from I-Mem (200\,ps), two operations begin in
+parallel:
+\begin{enumerate}
+  \item \textbf{Register File read}: 150\,ps
+  \item \textbf{Sign-extend}: 10\,ps (possibly also waiting for Control at
+        50\,ps if the extension type depends on the opcode, but standard MIPS
+        sign-extend is a fixed operation)
+\end{enumerate}
+
+The sign-extend completes in at most $10\,\text{ps}$ after I-Mem, while the
+Register File read takes $150\,\text{ps}$. Both feed into the ALU input mux
+(ALUSrc), so the mux cannot proceed until the \emph{slower} of the two
+finishes. Since $150\,\text{ps} \gg 10\,\text{ps}$, the sign-extend result is
+always ready long before the register read completes.
+
+Let us verify by computing the critical paths for each instruction type:
+
+\medskip\noindent\textbf{R-type:}
+\[
+  \underbrace{200}_{\text{I-Mem}} +
+  \underbrace{150}_{\text{Reg File}} +
+  \underbrace{30}_{\text{Mux}} +
+  \underbrace{120}_{\text{ALU}} +
+  \underbrace{30}_{\text{Mux}} +
+  \underbrace{90}_{\text{Reg setup}}
+  = 620\,\text{ps}
+\]
+Sign-extend is not used at all.
+
+\medskip\noindent\textbf{Load (\texttt{lw}):}
+\[
+  \underbrace{200}_{\text{I-Mem}} +
+  \underbrace{150}_{\text{Reg File}} +
+  \underbrace{30}_{\text{Mux}} +
+  \underbrace{120}_{\text{ALU}} +
+  \underbrace{200}_{\text{D-Mem}} +
+  \underbrace{30}_{\text{Mux}} +
+  \underbrace{90}_{\text{Reg setup}}
+  = 820\,\text{ps}
+\]
+Sign-extend feeds the ALUSrc mux, but it arrives at time $200 + 10 = 210$\,ps,
+while the register value arrives at $200 + 150 = 350$\,ps. The mux waits for
+the register value, so sign-extend is \emph{not} on the critical path.
+
+\medskip\noindent\textbf{Store (\texttt{sw}):}
+The address path is identical to \texttt{lw}; sign-extend is again dominated
+by the register read.
+
+\medskip\noindent\textbf{Branch (\texttt{beq}):}
+Sign-extend feeds the branch target adder, arriving at $200 + 10 = 210$\,ps.
+The PC+4 value from the other adder arrives at $200 + 150 = 350$\,ps (or the
+register read finishes at 350\,ps for the comparator). Again, sign-extend is
+not the bottleneck.
+
+\medskip\noindent\textbf{Conclusion:} The Imm Gen (sign-extend) block is
+\textbf{not on the critical path for any instruction}. Its 10\,ps latency is
+always completely hidden by the much longer Register File read latency
+(150\,ps) that operates in parallel on the same stage of the datapath.
+
+%-----------------------------------------------------------------------------
+\subsection*{4.15 --- No-Offset Load/Store Redesign}
+\hypertarget{sol-4.15}{}
+\markright{4.15}
+\addcontentsline{toc}{subsection}{4.15 --- No-Offset Load/Store Redesign}
+
+If \texttt{lw} and \texttt{sw} are modified to have no offset, the address is
+taken directly from the \texttt{rs} register, and the ALU is bypassed for
+memory instructions.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.15.1}
+\medskip\noindent\textbf{4.15.1}
+We compute the critical path for each instruction type under the new design.
+
+\medskip\noindent\textit{R-type} (unchanged):
+\[
+  \underbrace{200}_{\text{I-Mem}} +
+  \underbrace{150}_{\text{Reg File}} +
+  \underbrace{30}_{\text{Mux}} +
+  \underbrace{120}_{\text{ALU}} +
+  \underbrace{30}_{\text{Mux}} +
+  \underbrace{90}_{\text{Reg setup}}
+  = 620\,\text{ps}
+\]
+
+\medskip\noindent\textit{Load (no-offset \texttt{lw}):}
+The ALU is no longer on the load path. The register value goes directly to the
+Data Memory address input:
+\[
+  \underbrace{200}_{\text{I-Mem}} +
+  \underbrace{150}_{\text{Reg File}} +
+  \underbrace{200}_{\text{D-Mem}} +
+  \underbrace{30}_{\text{Mux}} +
+  \underbrace{90}_{\text{Reg setup}}
+  = 670\,\text{ps}
+\]
+
+\medskip\noindent\textit{Store (no-offset \texttt{sw}):}
+\[
+  \underbrace{200}_{\text{I-Mem}} +
+  \underbrace{150}_{\text{Reg File}} +
+  \underbrace{200}_{\text{D-Mem}}
+  = 550\,\text{ps}
+\]
+
+\medskip\noindent\textit{Branch} (unchanged):
+\[
+  \underbrace{200}_{\text{I-Mem}} +
+  \underbrace{150}_{\text{Reg File}} +
+  \underbrace{30}_{\text{Mux}} +
+  \underbrace{120}_{\text{ALU}} +
+  \underbrace{5}_{\text{Gate}}
+  = 505\,\text{ps}
+\]
+
+The new clock cycle time is determined by the longest path:
+\[
+  \text{New clock} = \max(620,\; 670,\; 550,\; 505) = \boxed{670\,\text{ps}}
+\]
+
+This is a reduction from the original 820\,ps (set by \texttt{lw} with offset).
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.15.2}
+\medskip\noindent\textbf{4.15.2}
+Using the instruction mix from Exercise~4.3:
+
+\begin{center}
+\begin{tabular}{cccccc}
+\toprule
+\textbf{R-type} & \textbf{I-type (non-lw)} & \textbf{Load} &
+\textbf{Store} & \textbf{Branch} & \textbf{Jump} \\
+\midrule
+24\% & 28\% & 25\% & 10\% & 11\% & 2\% \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+On the \textbf{original CPU}: every instruction takes one cycle of 820\,ps.
+For $N$ instructions:
+\[
+  T_{\text{old}} = N \times 820\,\text{ps}
+\]
+
+On the \textbf{new CPU}: each \texttt{lw} or \texttt{sw} that previously used
+an offset must be replaced by two instructions (an \texttt{add}/\texttt{addi}
+to compute the address, then the no-offset \texttt{lw}/\texttt{sw}). Load + Store
+= $25\% + 10\% = 35\%$ of instructions. The new instruction count is:
+\[
+  N_{\text{new}} = N \times (1 + 0.35) = 1.35N
+\]
+
+Each instruction now takes one cycle of 670\,ps:
+\[
+  T_{\text{new}} = 1.35N \times 670\,\text{ps} = 904.5N\,\text{ps}
+\]
+
+Comparing:
+\[
+  \frac{T_{\text{new}}}{T_{\text{old}}}
+  = \frac{904.5N}{820N}
+  = 1.103
+\]
+
+The program runs approximately \textbf{10.3\% slower} on the new CPU.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.15.3}
+\medskip\noindent\textbf{4.15.3}
+The primary factor is the \textbf{fraction of \texttt{lw}/\texttt{sw}
+instructions that actually use a non-zero offset}. If most memory instructions
+already use the register directly (offset~=~0), then very few extra
+instructions are needed and the faster clock cycle dominates, yielding a net
+speedup. Conversely, if most memory instructions use non-zero offsets (as is
+typical), the instruction count increase outweighs the clock improvement.
+
+A secondary factor is the overall fraction of load/store instructions in the
+program. Programs with few memory operations benefit more from the faster
+clock because they add fewer extra instructions.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.15.4}
+\medskip\noindent\textbf{4.15.4}
+The \textbf{original CPU} (Figure 4.21) is generally the better overall design.
+With a typical instruction mix (35\% loads and stores), the new design runs
+about 10\% slower despite its faster clock. The offset field in \texttt{lw}/\texttt{sw}
+is one of the most useful features of the MIPS ISA --- it allows direct access
+to structure fields, stack variables, and array elements without separate
+address arithmetic. Removing it increases code size, instruction count, and
+register pressure, all of which degrade real-world performance.
+
+The no-offset design would only be advantageous in unusual programs where
+memory operations are very rare (less than about 18\% of instructions), making
+the clock cycle reduction worth the extra instructions. For general-purpose
+computing, the original design is superior.
+%-----------------------------------------------------------------------------
+\subsection*{4.16 --- Pipelining and Clock Cycle Time}
+\hypertarget{sol-4.16}{}
+\markright{4.16}
+\addcontentsline{toc}{subsection}{4.16 --- Pipelining and Clock Cycle Time}
+
+The pipeline stage latencies are:
+
+\begin{center}
+\begin{tabular}{ccccc}
+\toprule
+\textbf{IF} & \textbf{ID} & \textbf{EX} & \textbf{MEM} & \textbf{WB} \\
+\midrule
+250ps & 350ps & 150ps & 300ps & 200ps \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Instruction mix: ALU/Logic 40\%, Jump/Branch 20\%, Load 20\%, Store 20\%.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.16.1}
+\medskip\noindent\textbf{4.16.1}
+In a \textbf{pipelined} processor, every stage must fit within one clock cycle,
+so the clock cycle time equals the latency of the slowest stage:
+\[
+  T_{\text{pipe}} = \max(250, 350, 150, 300, 200) = 350\text{ ps (ID stage).}
+\]
+
+In a \textbf{non-pipelined} (single-cycle) processor, the clock cycle must
+accommodate every stage in sequence:
+\[
+  T_{\text{single}} = 250 + 350 + 150 + 300 + 200 = 1250\text{ ps.}
+\]
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.16.2}
+\medskip\noindent\textbf{4.16.2}
+The total latency of a single \texttt{lw} instruction (from fetch to
+completion):
+
+\begin{itemize}
+  \item \textbf{Pipelined:} The instruction passes through all 5 stages, each
+        taking the pipelined clock period:
+        \[
+          5 \times 350 = 1750\text{ ps.}
+        \]
+  \item \textbf{Non-pipelined:} The instruction takes exactly one (single-cycle)
+        clock period:
+        \[
+          250 + 350 + 150 + 300 + 200 = 1250\text{ ps.}
+        \]
+\end{itemize}
+
+\noindent Note: pipelining increases the latency of an individual instruction
+but improves \emph{throughput} (one instruction completes per cycle once the
+pipeline is full).
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.16.3}
+\medskip\noindent\textbf{4.16.3}
+The clock cycle time is set by the slowest stage (ID at 350 ps). To reduce
+it, we should split the ID stage into two stages, each with half the
+latency:
+\[
+  \frac{350}{2} = 175\text{ ps per new stage.}
+\]
+
+The resulting 6-stage pipeline has latencies: 250, 175, 175, 150, 300, 200 ps.
+The new clock cycle time is:
+\[
+  T_{\text{new}} = \max(250, 175, 175, 150, 300, 200) = 300\text{ ps (MEM stage).}
+\]
+
+\noindent Splitting any other stage would not help. For example, splitting
+MEM ($300/2 = 150$ ps) gives latencies 250, 350, 150, 150, 150, 200, and
+the clock is still limited by ID at 350 ps. Therefore, \textbf{split the ID
+stage}; the new clock cycle time is \textbf{300 ps}.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.16.4}
+\medskip\noindent\textbf{4.16.4}
+The data memory is used during the MEM stage. Only \texttt{lw} and
+\texttt{sw} instructions perform a useful data memory access. All other
+instructions pass through MEM but do not read or write data memory.
+
+\[
+  \text{Data memory utilization} = \text{Load} + \text{Store}
+    = 20\% + 20\% = \boxed{40\%.}
+\]
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.16.5}
+\medskip\noindent\textbf{4.16.5}
+The write-register port of the Registers unit is used during the WB stage.
+Only instructions that write a result to a register use this port:
+ALU/Logic instructions and Load instructions. Stores, branches, and jumps
+do not write to a register.
+
+\[
+  \text{Write-register utilization} = \text{ALU/Logic} + \text{Load}
+    = 40\% + 20\% = \boxed{60\%.}
+\]
+
+%-----------------------------------------------------------------------------
+\subsection*{4.17 --- Minimum Cycles for N Instructions}
+\hypertarget{sol-4.17}{}
+\markright{4.17}
+\addcontentsline{toc}{subsection}{4.17 --- Minimum Cycles for N Instructions}
+
+A $k$-stage pipeline requires $k$ cycles to complete the first instruction.
+After that, one instruction completes every cycle (assuming no stalls or
+hazards). For $N$ instructions:
+\[
+  \text{Minimum cycles} = k + (N - 1).
+\]
+
+For a \textbf{4-stage pipeline}:
+\[
+  \text{Minimum cycles} = 4 + (N - 1) = N + 3.
+\]
+
+\noindent\textbf{Justification:} The first instruction enters the pipeline at
+cycle 1 and completes at cycle 4. Each subsequent instruction completes one
+cycle later, so the $N$-th instruction completes at cycle $4 + (N-1) = N+3$.
+
+\begin{verbatim}
+         CC1  CC2  CC3  CC4  CC5  CC6  ...  CC(N+3)
+  I1:    S1   S2   S3   S4
+  I2:         S1   S2   S3   S4
+  I3:              S1   S2   S3   S4
+  ...                             ...
+  IN:                                       S4
+\end{verbatim}
+
+%-----------------------------------------------------------------------------
+\subsection*{4.18 --- Pipeline without Hazard Detection}
+\hypertarget{sol-4.18}{}
+\markright{4.18}
+\addcontentsline{toc}{subsection}{4.18 --- Pipeline without Hazard Detection}
+
+Initial values: \texttt{\$s0} = 11, \texttt{\$s1} = 22.
+
+\begin{verbatim}
+    add $s0, $s0, $s1    # I1
+    add $s2, $s0, $s1    # I2
+\end{verbatim}
+
+Pipeline execution (no hazard detection, no forwarding):
+
+\begin{verbatim}
+         CC1  CC2  CC3  CC4  CC5
+  I1:    IF   ID   EX   MEM  WB
+  I2:         IF   ID   EX   MEM  WB
+\end{verbatim}
+
+\noindent\textbf{Analysis:}
+
+\begin{itemize}
+  \item \textbf{I1} reads \texttt{\$s0} (= 11) and \texttt{\$s1} (= 22) in
+        \textbf{CC2} (ID stage), computes $11 + 22 = 33$, and writes
+        \texttt{\$s0} $\leftarrow$ 33 in \textbf{CC5} (WB stage).
+  \item \textbf{I2} reads \texttt{\$s0} and \texttt{\$s1} in \textbf{CC3}
+        (ID stage). At this point, I1 has not yet written back its result
+        (that happens in CC5). So I2 reads the \emph{old} value of
+        \texttt{\$s0} = 11.
+  \item I2 computes $11 + 22 = 33$ and writes \texttt{\$s2} $\leftarrow$ 33
+        in CC6.
+\end{itemize}
+
+\noindent\textbf{Final register values:}
+
+\begin{center}
+\begin{tabular}{lc}
+\toprule
+\textbf{Register} & \textbf{Value} \\
+\midrule
+\texttt{\$s0} & 33 \\
+\texttt{\$s1} & 22 \\
+\texttt{\$s2} & 33 (incorrect --- should be 55) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Without hazard detection, I2 uses the stale value of \texttt{\$s0},
+producing an incorrect result. The correct value of \texttt{\$s2} should be
+$(11+22) + 22 = 55$.
+
+%-----------------------------------------------------------------------------
+\subsection*{4.19 --- Pipeline with Same-Cycle Forwarding}
+\hypertarget{sol-4.19}{}
+\markright{4.19}
+\addcontentsline{toc}{subsection}{4.19 --- Pipeline with Same-Cycle Forwarding}
+
+Initial values: \texttt{\$s0} = 11, \texttt{\$s1} = 22.
+
+\begin{verbatim}
+    add $s0, $s0, $s1    # I1
+    nop                   # I2
+    nop                   # I3
+    add $s2, $s0, $s1    # I4
+\end{verbatim}
+
+Pipeline execution:
+
+\begin{verbatim}
+         CC1  CC2  CC3  CC4  CC5  CC6  CC7  CC8
+  I1:    IF   ID   EX   MEM  WB
+  nop:        IF   ID   EX   MEM  WB
+  nop:             IF   ID   EX   MEM  WB
+  I4:                   IF   ID   EX   MEM  WB
+\end{verbatim}
+
+\noindent\textbf{Analysis:}
+
+\begin{itemize}
+  \item \textbf{I1} computes \texttt{\$s0} = $11 + 22 = 33$ and writes back
+        in \textbf{CC5} (WB stage).
+  \item \textbf{I4} reads registers in \textbf{CC5} (ID stage).
+  \item With \emph{same-cycle forwarding} (also called WB$\to$ID forwarding),
+        the register file is designed so that a write in the first half of the
+        cycle is available to a read in the second half of the same cycle.
+        Therefore, I4 reads the \emph{new} value \texttt{\$s0} = 33 in CC5.
+  \item I4 computes \texttt{\$s2} = $33 + 22 = 55$.
+\end{itemize}
+
+\noindent\textbf{Final register values:}
+
+\begin{center}
+\begin{tabular}{lc}
+\toprule
+\textbf{Register} & \textbf{Value} \\
+\midrule
+\texttt{\$s0} & 33 \\
+\texttt{\$s1} & 22 \\
+\texttt{\$s2} & 55 (correct) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent The two \texttt{nop} instructions ensure that I1's WB stage and I4's
+ID stage occur in the same cycle, allowing the forwarded value to be used.
+
+%-----------------------------------------------------------------------------
+\subsection*{4.20 --- Adding NOPs for Data Hazards}
+\hypertarget{sol-4.20}{}
+\markright{4.20}
+\addcontentsline{toc}{subsection}{4.20 --- Adding NOPs for Data Hazards}
+
+Original code (no hazard handling, no forwarding):
+
+\begin{verbatim}
+    add $s0, $s1, $s5    # I1: writes $s0
+    add $s2, $s0, $s5    # I2: reads $s0 (from I1)
+    add $s4, $s0, $s1    # I3: reads $s0 (from I1)
+\end{verbatim}
+
+\noindent\textbf{Dependency analysis:}
+\begin{itemize}
+  \item I2 depends on I1 via \texttt{\$s0} (RAW hazard, distance = 1 instruction).
+  \item I3 depends on I1 via \texttt{\$s0} (RAW hazard, distance = 2 instructions).
+  \item I3 does \emph{not} depend on I2 (I3 reads \texttt{\$s0} and
+        \texttt{\$s1}; I2 writes \texttt{\$s2}).
+\end{itemize}
+
+Without forwarding, a result written in the WB stage (cycle $i + 4$) is
+available to a subsequent instruction's ID stage only if there are at least 2
+instructions (or \texttt{nop}s) between the producer and consumer (so that WB
+and ID overlap in the same cycle, assuming same-cycle forwarding in the
+register file).
+
+We need 2 \texttt{nop}s between I1 and I2:
+
+\begin{verbatim}
+    add $s0, $s1, $s5    # I1: writes $s0
+    nop
+    nop
+    add $s2, $s0, $s5    # I2: reads $s0 (now safe)
+    add $s4, $s0, $s1    # I3: reads $s0 (safe -- 4 instr. after I1)
+\end{verbatim}
+
+\noindent\textbf{Verification with pipeline diagram:}
+
+\begin{verbatim}
+         CC1  CC2  CC3  CC4  CC5  CC6  CC7  CC8  CC9
+  I1:    IF   ID   EX   MEM  WB
+  nop:        IF   ID   EX   MEM  WB
+  nop:             IF   ID   EX   MEM  WB
+  I2:                   IF   ID   EX   MEM  WB
+  I3:                        IF   ID   EX   MEM  WB
+\end{verbatim}
+
+\begin{itemize}
+  \item I1 writes \texttt{\$s0} in CC5 (WB). I2 reads \texttt{\$s0} in CC5
+        (ID). With same-cycle register file forwarding, I2 gets the correct
+        value. \checkmark
+  \item I3 reads \texttt{\$s0} in CC6 (ID), well after I1 writes in CC5.
+        \checkmark
+  \item No dependency exists between I2 and I3, so no additional
+        \texttt{nop}s are needed.
+\end{itemize}
+
+\noindent\textbf{Answer:} Insert 2 \texttt{nop}s between the first and second
+instructions. No \texttt{nop}s are needed between the second and third
+instructions.
+
+%-----------------------------------------------------------------------------
+\subsection*{4.21 --- Forwarding Hardware Speedup}
+\hypertarget{sol-4.21}{}
+\markright{4.21}
+\addcontentsline{toc}{subsection}{4.21 --- Forwarding Hardware Speedup}
+
+\noindent\textbf{Given:}
+\begin{itemize}
+  \item Without forwarding: clock cycle = 250 ps, 5\% of instructions are
+        \texttt{nop}s inserted to resolve hazards.
+  \item With forwarding: clock cycle = 300 ps (increased due to forwarding
+        hardware), only 2\% \texttt{nop}s needed.
+\end{itemize}
+
+\medskip\noindent\textbf{Execution time comparison:}
+
+For a program that needs $N$ ``useful'' instructions, the total instructions
+executed (including \texttt{nop}s) and execution times are:
+
+\begin{align*}
+  T_{\text{no fwd}} &= 250 \times N \times 1.05 = 262.5\,N \text{ ps,} \\
+  T_{\text{fwd}}    &= 300 \times N \times 1.02 = 306.0\,N \text{ ps.}
+\end{align*}
+
+\noindent\textbf{Speedup} of the forwarding pipeline over the non-forwarding
+pipeline:
+
+\[
+  \text{Speedup} = \frac{T_{\text{no fwd}}}{T_{\text{fwd}}}
+    = \frac{262.5}{306.0}
+    \approx 0.858.
+\]
+
+Since the speedup is less than 1, the forwarding hardware actually makes the
+processor \textbf{slower}, not faster. The 20\% increase in clock cycle time
+(from 250 to 300 ps) outweighs the reduction in \texttt{nop}s (from 5\% to
+2\%).
+
+\medskip\noindent\textbf{Conclusion:} The forwarding hardware results in a
+\textbf{slowdown of approximately 14.2\%}. In this scenario, adding forwarding
+is not worthwhile because the clock penalty exceeds the benefit of fewer stalls.
+%-----------------------------------------------------------------------------
+\subsection*{4.22 --- Structural Hazard: Unified Memory}
+\hypertarget{sol-4.22}{}
+\markright{4.22}
+\addcontentsline{toc}{subsection}{4.22 --- Structural Hazard: Unified Memory}
+
+With a unified memory, the instruction fetch (IF) stage and the data memory
+access (MEM) stage share a single memory port.  A \emph{structural hazard}
+arises whenever one instruction is in IF while another instruction is in MEM
+during the same clock cycle.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.22.1}
+\medskip\noindent\textbf{4.22.1}
+In the standard 5-stage pipeline the MEM stage of an instruction occurs three
+cycles after its IF stage.  Therefore, the structural hazard occurs between
+an instruction in MEM and the instruction that enters IF three cycles later.
+
+For the given three-instruction sequence, consider what happens when
+additional instructions follow:
+
+\begin{verbatim}
+             CC1  CC2  CC3  CC4  CC5  CC6  CC7  CC8  CC9
+    lw  $s5:  IF   ID   EX  MEM   WB
+    sw  $s4:       IF   ID   EX  MEM   WB
+    add $s2:            IF   ID   EX  MEM   WB
+    nxt1:           stall--> IF   ID   EX  MEM   WB
+    nxt2:                stall--> IF   ID   EX  MEM  WB
+\end{verbatim}
+
+\noindent Explanation:
+\begin{itemize}
+  \item \textbf{CC4}: \texttt{lw} is in MEM (reading data memory).  The 4th
+        instruction (\texttt{nxt1}) would normally begin IF in CC4, but the
+        memory is busy $\Rightarrow$ \textbf{stall}.  \texttt{nxt1} does IF in
+        CC5 instead.
+  \item \textbf{CC5}: \texttt{sw} is in MEM (writing data memory).  The 5th
+        instruction (\texttt{nxt2}) would normally begin IF in CC5, but the
+        memory is again busy $\Rightarrow$ \textbf{stall}.  \texttt{nxt2} does
+        IF in CC6 instead.
+  \item \texttt{add} is in MEM in CC6, but \texttt{add} is an R-type
+        instruction: it does \emph{not} access data memory, so the memory port
+        is free for a subsequent instruction's IF.  No stall.
+\end{itemize}
+
+Among the three given instructions alone, no structural hazard manifests
+(their IF and MEM stages do not overlap with each other).  The stalls affect
+the instructions that \emph{follow} the loads and stores.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.22.2}
+\medskip\noindent\textbf{4.22.2}
+Yes, reordering can reduce (but not always eliminate) these stalls.  The key
+insight is that only \texttt{lw} and \texttt{sw} instructions actually use
+data memory in the MEM stage; R-type and branch instructions do not.  If we
+schedule non-memory instructions so that their MEM stages coincide with the
+IF of later instructions, the structural hazard is avoided.
+
+For example, reordering the code so that a non-memory instruction separates
+two consecutive memory instructions can prevent their MEM stages from
+blocking fetches of nearby instructions.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.22.3}
+\medskip\noindent\textbf{4.22.3}
+This structural hazard \textbf{must} be handled in hardware (via stall logic
+or by providing separate instruction and data memories/caches).  It
+\textbf{cannot} be eliminated purely by adding \texttt{nop} instructions,
+because:
+\begin{itemize}
+  \item Every \texttt{nop} must itself be fetched from instruction memory.
+  \item A \texttt{nop} in the MEM stage does not use data memory, so it does
+        not cause a conflict.  However, the \texttt{nop} still needs to be
+        fetched (IF), and that fetch may conflict with the MEM of another
+        instruction.
+  \item The fundamental issue is that with a single memory port, the hardware
+        must arbitrate between IF and MEM.  Software scheduling can reduce the
+        frequency of conflicts, but there is no software-only guarantee that a
+        \texttt{nop}'s own IF will not collide with another instruction's MEM.
+\end{itemize}
+
+In practice, the simplest hardware solution is to stall the pipeline (delay
+the IF stage) whenever a MEM access is occurring.  The best long-term
+solution is to use separate instruction and data caches (a Harvard-style
+memory architecture), which eliminates the hazard entirely.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.22.4}
+\medskip\noindent\textbf{4.22.4}
+A structural hazard stall occurs whenever an instruction's MEM stage actually
+accesses data memory, which happens only for \texttt{lw} and \texttt{sw}
+instructions.  From the instruction mix in Exercise~4.3:
+\[
+  \text{Fraction using data memory} = \text{Load} + \text{Store}
+    = 25\% + 10\% = 35\%.
+\]
+Each such instruction causes one stall cycle (the IF of the instruction
+three positions later is blocked for one cycle).  Therefore, approximately
+\textbf{35\% of instructions will cause a one-cycle stall}, adding roughly
+0.35 extra cycles per instruction to the CPI.
+
+%-----------------------------------------------------------------------------
+\subsection*{4.23 --- Four-Stage Pipeline}
+\hypertarget{sol-4.23}{}
+\markright{4.23}
+\addcontentsline{toc}{subsection}{4.23 --- Four-Stage Pipeline}
+
+If load/store instructions use a register directly as the memory address
+(with no offset), those instructions no longer require the ALU to compute
+an effective address.  Consequently, the EX (ALU) and MEM (data memory)
+stages can be merged into a single stage, yielding a 4-stage pipeline:
+\[
+  \text{IF} \;\to\; \text{ID} \;\to\; \text{EX/MEM} \;\to\; \text{WB}
+\]
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.23.1}
+\medskip\noindent\textbf{4.23.1}
+The reduction from 5 stages to 4 stages affects performance in several ways:
+\begin{itemize}
+  \item The \textbf{pipeline latency} for each instruction drops from 5 cycles
+        to 4 cycles.  This reduces startup cost and branch penalty.
+  \item The \textbf{ideal CPI} is still 1 (one instruction completes per
+        cycle in steady state).
+  \item \textbf{Data hazard penalties decrease.}  In a 5-stage pipeline, a
+        load-use hazard requires 1 stall (the load result is available after
+        MEM, but the dependent instruction needs it in EX).  In the 4-stage
+        pipeline, the load produces its result at the end of the combined
+        EX/MEM stage, and the dependent instruction needs it at the start of
+        the \emph{next} EX/MEM stage---so forwarding from the EX/MEM output to
+        the EX/MEM input works with no stall.  This eliminates load-use
+        hazards entirely.
+  \item \textbf{Branch penalty decreases.}  With branches resolved in the
+        EX/MEM stage (stage 3), the misprediction penalty is 2 cycles instead
+        of 3 (in a 5-stage pipeline where branches resolve in EX, the penalty
+        is 2; if resolved in MEM, it is 3).  In the 4-stage pipeline the
+        penalty is at most 2 cycles (stages IF and ID must be flushed).
+  \item \textbf{Fewer pipeline registers} are needed (3 sets instead of 4),
+        reducing hardware cost and power.
+\end{itemize}
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.23.2}
+\medskip\noindent\textbf{4.23.2}
+This change can \textbf{improve} pipeline performance because:
+\begin{enumerate}
+  \item \textbf{Elimination of load-use stalls:} As noted above, forwarding
+        from the end of the combined EX/MEM stage to its own input removes
+        the 1-cycle load-use penalty that plagues the 5-stage design.  Since
+        loads are $\approx 25\%$ of instructions and many are followed by
+        dependent instructions, this can significantly reduce CPI.
+  \item \textbf{Reduced branch penalty:} Fewer stages between IF and the
+        branch resolution stage means fewer wasted cycles on mispredictions.
+  \item \textbf{Simpler forwarding logic:} Fewer stages mean fewer forwarding
+        paths and a simpler hazard detection unit.
+\end{enumerate}
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.23.3}
+\medskip\noindent\textbf{4.23.3}
+This change can \textbf{degrade} performance because:
+\begin{enumerate}
+  \item \textbf{Longer clock period:} The combined EX/MEM stage must
+        accommodate the latency of both the ALU \emph{and} the data memory
+        access (for load/store) or just the ALU (for R-type).  The clock
+        period is set by the slowest stage, so:
+        \[
+          T_{\text{clock}} = \max(\text{IF},\; \text{ID},\;
+            \text{ALU} + \text{D-Mem},\; \text{WB}).
+        \]
+        Using the latencies from Exercise~4.7:
+        $\text{ALU} + \text{D-Mem} = 120 + 200 = 320\;\text{ps}$ (at
+        minimum), which is likely the longest stage and thus increases the
+        clock period.
+  \item \textbf{Increased instruction count:} Without address offsets,
+        programs that currently use \texttt{lw \$t0, 8(\$s1)} must first
+        compute \texttt{\$s1 + 8} in a separate \texttt{addi} instruction,
+        then perform the load.  This increases the dynamic instruction count.
+        From Exercise~4.3, loads and stores are $25\% + 10\% = 35\%$ of
+        instructions; many of these use non-zero offsets, so the instruction
+        count could increase substantially.
+  \item \textbf{Reduced throughput:} The longer clock period directly reduces
+        the instruction throughput (instructions per second), partially or
+        fully offsetting the gains from fewer hazards.
+\end{enumerate}
+
+%-----------------------------------------------------------------------------
+\subsection*{4.24 --- Pipeline Diagram Selection}
+\hypertarget{sol-4.24}{}
+\markright{4.24}
+\addcontentsline{toc}{subsection}{4.24 --- Pipeline Diagram Selection}
+
+The two pipeline diagrams are:
+
+\begin{verbatim}
+    (a) ld  x1, x12:     IF  ID  EX  ME  WB
+        add x5, x1, x17:     IF  ID  EX  ME  WB
+
+    (b) ld  x1, x12:     IF  ID  EX  ME  WB
+        add x5, x1, x17:         IF  ID  EX  ME  WB
+\end{verbatim}
+
+\textbf{Diagram (b)} correctly represents the operation of the hazard
+detection unit.  The reasoning is as follows:
+
+\begin{enumerate}
+  \item The \texttt{add} instruction reads register \texttt{x1}, which is the
+        destination of the preceding \texttt{ld} instruction.  This is a
+        \emph{load-use} (RAW) data hazard.
+
+  \item In the standard 5-stage pipeline with forwarding, the \texttt{ld}
+        instruction does not produce the loaded value until the end of its
+        MEM stage.  With forwarding, this value can be sent from the MEM/WB
+        pipeline register to the EX stage of the next instruction---but only
+        one cycle \emph{after} the load's MEM stage.
+
+  \item In diagram~(a), \texttt{add} enters ID in CC3 and EX in CC4.
+        However, \texttt{ld} is in EX during CC3 and does not reach MEM until
+        CC4.  The loaded value is not available until the \emph{end} of CC4,
+        but \texttt{add} needs it at the \emph{beginning} of CC4 (start of
+        its EX stage).  Even with forwarding, the value is not ready in time.
+
+  \item The hazard detection unit recognizes this conflict during CC3
+        (when \texttt{ld} is in EX and \texttt{add} is in ID) and inserts a
+        \textbf{one-cycle stall} (pipeline bubble).
+
+  \item In diagram~(b), the stall shifts \texttt{add} by one cycle:
+        \texttt{add} does IF in CC2, then is stalled in CC3 (bubble inserted),
+        repeats ID in CC4, and enters EX in CC5.  Now \texttt{ld} finishes
+        MEM at the end of CC4, and the MEM/WB forwarding path delivers the
+        loaded value to \texttt{add}'s EX stage at the start of CC5.
+        \checkmark
+\end{enumerate}
+
+Therefore, diagram~(b) is correct because the hazard detection unit must
+insert a one-cycle stall for any load-use hazard, even when full forwarding
+is available.
+
+%-----------------------------------------------------------------------------
+\subsection*{4.25 --- Loop Pipeline Execution}
+\hypertarget{sol-4.25}{}
+\markright{4.25}
+\addcontentsline{toc}{subsection}{4.25 --- Loop Pipeline Execution}
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.25.1}
+\medskip\noindent\textbf{4.25.1}
+The loop body is:
+\begin{verbatim}
+    LOOP: lw   $s0, 0($s3)       # I1
+          add  $s1, $s0, $s2     # I2  (depends on I1: $s0)
+          sw   $s1, 0($s3)       # I3  (depends on I2: $s1)
+          addi $s3, $s3, -4      # I4
+          bne  $s3, $zero, LOOP  # I5  (depends on I4: $s3)
+\end{verbatim}
+
+\noindent \textbf{Assumptions:}
+\begin{itemize}
+  \item Full forwarding (EX/MEM $\to$ EX and MEM/WB $\to$ EX).
+  \item Branches resolved in the EX stage; perfect branch prediction (no
+        control hazard stalls).
+  \item No delay slots.
+\end{itemize}
+
+\noindent \textbf{Dependency analysis:}
+\begin{itemize}
+  \item \texttt{lw} $\to$ \texttt{add} (\texttt{\$s0}):  \textbf{Load-use
+        hazard}.  \texttt{lw} produces \texttt{\$s0} at end of MEM;
+        \texttt{add} needs it at start of EX.  Even with MEM/WB forwarding,
+        there is a 1-cycle stall.
+  \item \texttt{add} $\to$ \texttt{sw} (\texttt{\$s1}):  EX/MEM forwarding.
+        \texttt{add} produces \texttt{\$s1} at end of EX; \texttt{sw} reads
+        \texttt{\$s1} in EX (for the store data path).  Forwarding from
+        EX/MEM register works with no stall.
+  \item \texttt{addi} $\to$ \texttt{bne} (\texttt{\$s3}):  \texttt{addi}
+        produces \texttt{\$s3} at end of EX.  \texttt{bne} needs \texttt{\$s3}
+        at the start of its EX stage.  \texttt{addi} is immediately before
+        \texttt{bne}, so EX/MEM forwarding delivers the result with no stall.
+  \item \texttt{bne} $\to$ next iteration's \texttt{lw} (\texttt{\$s3}):
+        No dependency on \texttt{\$s3} via forwarding is needed because
+        \texttt{addi} wrote \texttt{\$s3} and it will be in the register file
+        or forwarded by the time the next \texttt{lw} reaches EX.
+\end{itemize}
+
+\noindent \textbf{Pipeline execution diagram} (two iterations):
+
+{\small
+\begin{verbatim}
+Cycle:       1    2    3    4    5    6    7    8    9   10   11   12   13   14
+lw   $s0:   IF   ID   EX  MEM   WB
+add  $s1:        IF   ID   **   EX  MEM   WB
+sw   $s1:             IF   **   ID   EX  MEM   WB
+addi $s3:                  IF   ID   EX  MEM   WB
+bne:                            IF   ID   EX  MEM   WB
+lw'  $s0:                           IF   ID   EX  MEM   WB
+add' $s1:                                IF   ID   **   EX  MEM   WB
+sw'  $s1:                                     IF   **   ID   EX  MEM   WB
+addi'$s3:                                          IF   ID   EX  MEM   WB
+bne':                                                   IF   ID   EX  MEM  WB
+\end{verbatim}
+}
+
+\noindent where \texttt{**} denotes a one-cycle stall (bubble) due to the
+load-use hazard between \texttt{lw} and \texttt{add}.
+
+\noindent \textbf{Cycle-by-cycle explanation (first iteration):}
+\begin{itemize}
+  \item \textbf{CC1}: \texttt{lw} -- IF.
+  \item \textbf{CC2}: \texttt{lw} -- ID; \texttt{add} -- IF.
+  \item \textbf{CC3}: \texttt{lw} -- EX; \texttt{add} -- ID (hazard
+        detected: \texttt{lw} in EX is a load, \texttt{add} in ID reads
+        \texttt{\$s0}).  Pipeline stalls \texttt{add} and all instructions
+        behind it.  \texttt{sw} -- IF.
+  \item \textbf{CC4}: \texttt{lw} -- MEM; bubble in EX; \texttt{add} -- ID
+        (held); \texttt{sw} -- IF (held); \texttt{addi} would enter IF but is
+        stalled.
+  \item \textbf{CC5}: \texttt{lw} -- WB; \texttt{add} -- EX (receives
+        \texttt{\$s0} via MEM$\to$EX forwarding); \texttt{sw} -- ID;
+        \texttt{addi} -- IF.
+  \item \textbf{CC6}: \texttt{add} -- MEM; \texttt{sw} -- EX (receives
+        \texttt{\$s1} via EX$\to$EX forwarding); \texttt{addi} -- ID;
+        \texttt{bne} -- IF.
+  \item \textbf{CC7}: \texttt{add} -- WB; \texttt{sw} -- MEM;
+        \texttt{addi} -- EX; \texttt{bne} -- ID; next iteration
+        \texttt{lw'} -- IF (branch predicted taken).
+  \item \textbf{CC8}: \texttt{sw} -- WB; \texttt{addi} -- MEM;
+        \texttt{bne} -- EX (receives \texttt{\$s3} from \texttt{addi} via
+        EX$\to$EX forwarding; branch resolved, prediction correct);
+        \texttt{lw'} -- ID.
+  \item \textbf{CC9}: \texttt{addi} -- WB; \texttt{bne} -- MEM;
+        \texttt{lw'} -- EX; \texttt{add'} -- ID (hazard detected again).
+\end{itemize}
+
+\noindent \textbf{Summary:} Each iteration takes \textbf{6 cycles}
+(5~instructions $+$ 1~stall from the load-use hazard).  For $n$ iterations
+the total cycle count is approximately $6n + 4$ (6 cycles per iteration
+plus 4 cycles of pipeline startup/drain).
+%-----------------------------------------------------------------------------
+\subsection*{4.26 --- RAW Dependencies and Forwarding}
+\hypertarget{sol-4.26}{}
+\markright{4.26}
+\addcontentsline{toc}{subsection}{4.26 --- RAW Dependencies and Forwarding}
+
+This problem uses the pipelined datapath from Figure~4.33, with the following
+RAW data-dependence frequencies:
+
+\begin{center}
+\begin{tabular}{cccccc}
+\toprule
+\textbf{EX to 1st} & \textbf{MEM to 1st} & \textbf{EX to 2nd} &
+\textbf{MEM to 2nd} & \textbf{EX to 1st \&} & \textbf{MEM to 1st \&} \\
+& & & & \textbf{EX to 2nd} & \textbf{MEM to 2nd} \\
+\midrule
+20\% & 5\% & 20\% & 10\% & 10\% & 5\% \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.26.1}
+\medskip\noindent\textbf{4.26.1}
+Example instruction sequences for each RAW dependency type:
+
+\textit{EX to 1st} --- the producing instruction's ALU result is needed by the
+very next instruction:
+\begin{verbatim}
+    add $s0, $s1, $s2     # produces $s0 in EX
+    add $s3, $s0, $s4     # consumes $s0 in EX (1st after producer)
+    add $s5, $s6, $s7
+\end{verbatim}
+
+\textit{MEM to 1st} --- a load's memory result is needed by the very next
+instruction:
+\begin{verbatim}
+    lw  $s0, 0($s1)       # produces $s0 in MEM
+    add $s3, $s0, $s4     # consumes $s0 in EX (1st after producer)
+    add $s5, $s6, $s7
+\end{verbatim}
+
+\textit{EX to 2nd} --- the producing instruction's ALU result is needed by the
+instruction two later:
+\begin{verbatim}
+    add $s0, $s1, $s2     # produces $s0 in EX
+    add $s5, $s6, $s7     # no dependency
+    add $s3, $s0, $s4     # consumes $s0 in EX (2nd after producer)
+\end{verbatim}
+
+\textit{MEM to 2nd} --- a load's memory result is needed by the instruction two
+later:
+\begin{verbatim}
+    lw  $s0, 0($s1)       # produces $s0 in MEM
+    add $s5, $s6, $s7     # no dependency
+    add $s3, $s0, $s4     # consumes $s0 in EX (2nd after producer)
+\end{verbatim}
+
+\textit{EX to 1st and EX to 2nd} --- the same ALU result is needed by both the
+next and the second-next instruction:
+\begin{verbatim}
+    add $s0, $s1, $s2     # produces $s0 in EX
+    add $s3, $s0, $s4     # consumes $s0 (1st after producer)
+    add $s5, $s0, $s6     # consumes $s0 (2nd after producer)
+\end{verbatim}
+
+\textit{MEM to 1st and MEM to 2nd} --- a load result is needed by both the next
+and the second-next instruction:
+\begin{verbatim}
+    lw  $s0, 0($s1)       # produces $s0 in MEM
+    add $s3, $s0, $s4     # consumes $s0 (1st after producer)
+    add $s5, $s0, $s6     # consumes $s0 (2nd after producer)
+\end{verbatim}
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.26.2}
+\medskip\noindent\textbf{4.26.2}
+Number of \texttt{nop}s needed for each dependency type on a pipeline with
+\emph{no} forwarding and \emph{no} hazard detection (the value must be written
+back to the register file before the consumer reads it in ID; we assume the
+register file supports write-first-half / read-second-half in the same cycle):
+
+\begin{center}
+\begin{tabular}{lc}
+\toprule
+\textbf{Dependency type} & \textbf{NOPs needed} \\
+\midrule
+EX to 1st              & 2 \\
+MEM to 1st             & 2 \\
+EX to 2nd              & 1 \\
+MEM to 2nd             & 1 \\
+EX to 1st \& EX to 2nd   & 2 \\
+MEM to 1st \& MEM to 2nd & 2 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textit{Reasoning:} Without forwarding, the consumer must wait until the producer
+has completed WB (or at least the first half of the WB cycle) so that the value
+is available in the register file for the consumer's ID stage. For both
+``to 1st'' types the consumer is one slot behind the producer, so we insert 2
+NOPs to create a 2-instruction gap (the producer reaches WB while the consumer
+is in ID). For both ``to 2nd'' types there is already a 1-instruction gap, so
+only 1 NOP is needed. For the combined cases, the tightest constraint is the
+``to 1st'' dependency, which requires 2 NOPs; those same NOPs also satisfy the
+``to 2nd'' constraint.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.26.3}
+\medskip\noindent\textbf{4.26.3}
+Consider the following three-instruction sequence:
+\begin{verbatim}
+    add $s0, $s1, $s2     # I1: produces $s0
+    add $s3, $s0, $s4     # I2: reads $s0 (EX to 1st from I1)
+    add $s5, $s0, $s6     # I3: reads $s0 (EX to 2nd from I1)
+\end{verbatim}
+
+Analyzing each dependency \emph{independently}:
+\begin{itemize}
+  \item I1 $\to$ I2 (EX to 1st): 2 stalls if considered alone.
+  \item I1 $\to$ I3 (EX to 2nd): 1 stall if considered alone.
+  \item Sum of individual stalls $= 2 + 1 = 3$.
+\end{itemize}
+
+However, the 2 NOPs inserted after I1 to resolve the I1$\to$I2 dependency also
+push I3 further from I1 (I3 is now 4 instructions after I1), which more than
+satisfies the I1$\to$I3 requirement. Therefore the actual stalls needed $= 2$,
+which is less than the sum of $3$.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.26.4}
+\medskip\noindent\textbf{4.26.4}
+We analyze each forwarding configuration separately. The table frequencies use
+inclusive counting (the ``combined'' entries are subsets of the individual
+entries), so we decompose into exclusive categories:
+
+\begin{center}
+\begin{tabular}{lc}
+\toprule
+\textbf{Exclusive category} & \textbf{Frequency} \\
+\midrule
+EX to 1st only (not also EX to 2nd)       & $20\% - 10\% = 10\%$ \\
+EX to 2nd only (not also EX to 1st)       & $20\% - 10\% = 10\%$ \\
+EX to 1st \& EX to 2nd                    & $10\%$ \\
+MEM to 1st only (not also MEM to 2nd)     & $5\% - 5\% = 0\%$ \\
+MEM to 2nd only (not also MEM to 1st)     & $10\% - 5\% = 5\%$ \\
+MEM to 1st \& MEM to 2nd                  & $5\%$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{No forwarding baseline.}
+Stall cycles per category (using the results from 4.26.2):
+
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Category} & \textbf{Stalls} & \textbf{Contribution} \\
+\midrule
+EX to 1st only     & 2 & $0.10 \times 2 = 0.20$ \\
+EX to 2nd only     & 1 & $0.10 \times 1 = 0.10$ \\
+EX to 1st \& 2nd   & 2 & $0.10 \times 2 = 0.20$ \\
+MEM to 1st only    & 2 & $0.00 \times 2 = 0.00$ \\
+MEM to 2nd only    & 1 & $0.05 \times 1 = 0.05$ \\
+MEM to 1st \& 2nd  & 2 & $0.05 \times 2 = 0.10$ \\
+\midrule
+\multicolumn{2}{l}{Total extra CPI} & $0.65$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+\[
+  \text{CPI}_{\text{no fwd}} = 1 + 0.65 = 1.65
+\]
+
+\textbf{EX-EX forwarding only}
+(forward from EX/MEM pipeline register to ALU inputs in EX stage).
+
+This eliminates stalls for any dependency where the result is produced in EX
+and the consumer is the very next instruction (EX to 1st). For EX to 2nd,
+by the time the consumer reaches EX, the producer is in WB; the value is
+written to the register file in the first half of WB, and the consumer reads
+it in the second half of ID (one stage earlier). With the write-first /
+read-second convention, EX to 2nd is resolved through the register file
+without needing MEM-EX forwarding. For MEM (load) dependencies, EX-EX
+forwarding does not help since the data is not available until after MEM.
+
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Category} & \textbf{Stalls} & \textbf{Contribution} \\
+\midrule
+EX to 1st only     & 0 & $0.10 \times 0 = 0.00$ \\
+EX to 2nd only     & 0 & $0.10 \times 0 = 0.00$ \\
+EX to 1st \& 2nd   & 0 & $0.10 \times 0 = 0.00$ \\
+MEM to 1st only    & 2 & $0.00 \times 2 = 0.00$ \\
+MEM to 2nd only    & 1 & $0.05 \times 1 = 0.05$ \\
+MEM to 1st \& 2nd  & 2 & $0.05 \times 2 = 0.10$ \\
+\midrule
+\multicolumn{2}{l}{Total extra CPI} & $0.15$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+\[
+  \text{CPI}_{\text{EX-EX only}} = 1 + 0.15 = 1.15
+\]
+
+\textbf{MEM-EX forwarding only}
+(forward from MEM/WB pipeline register to ALU inputs in EX stage).
+
+This eliminates stalls where the consumer can get the value from MEM/WB
+(MEM to 1st after a 1-cycle stall is actually still needed since we don't
+have EX-EX forwarding). With only MEM-EX forwarding:
+\begin{itemize}
+  \item EX to 1st: no EX-EX forwarding available. Need 1 stall so producer
+    moves from EX/MEM to MEM/WB, then forward via MEM-EX path.
+  \item EX to 2nd: producer is in MEM/WB when consumer reaches EX $\to$
+    forwarded via MEM-EX path $\to$ 0 stalls.
+  \item MEM to 1st: need 1 stall (producer must complete MEM before data is
+    in MEM/WB; after 1 stall, MEM-EX forwarding delivers the load value) $\to$
+    1 stall.
+  \item MEM to 2nd: producer is in WB when consumer is in EX; value already
+    written to register file $\to$ 0 stalls.
+\end{itemize}
+
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Category} & \textbf{Stalls} & \textbf{Contribution} \\
+\midrule
+EX to 1st only     & 1 & $0.10 \times 1 = 0.10$ \\
+EX to 2nd only     & 0 & $0.10 \times 0 = 0.00$ \\
+EX to 1st \& 2nd   & 1 & $0.10 \times 1 = 0.10$ \\
+MEM to 1st only    & 1 & $0.00 \times 1 = 0.00$ \\
+MEM to 2nd only    & 0 & $0.05 \times 0 = 0.00$ \\
+MEM to 1st \& 2nd  & 1 & $0.05 \times 1 = 0.05$ \\
+\midrule
+\multicolumn{2}{l}{Total extra CPI} & $0.25$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+\[
+  \text{CPI}_{\text{MEM-EX only}} = 1 + 0.25 = 1.25
+\]
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.26.5}
+\medskip\noindent\textbf{4.26.5}
+With full forwarding (both EX-EX and MEM-EX paths), all RAW hazards are
+resolved except load-use hazards (MEM to 1st), which still require 1 stall
+cycle because the load data is not available until the end of the MEM stage,
+one cycle too late for the immediately following instruction's EX stage.
+
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Category} & \textbf{Stalls} & \textbf{Contribution} \\
+\midrule
+EX to 1st only     & 0 & $0.10 \times 0 = 0.00$ \\
+EX to 2nd only     & 0 & $0.10 \times 0 = 0.00$ \\
+EX to 1st \& 2nd   & 0 & $0.10 \times 0 = 0.00$ \\
+MEM to 1st only    & 1 & $0.00 \times 1 = 0.00$ \\
+MEM to 2nd only    & 0 & $0.05 \times 0 = 0.00$ \\
+MEM to 1st \& 2nd  & 1 & $0.05 \times 1 = 0.05$ \\
+\midrule
+\multicolumn{2}{l}{Total extra CPI} & $0.05$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+\[
+  \text{CPI}_{\text{full fwd}} = 1 + 0.05 = 1.05
+\]
+
+Percentage of cycles stalled:
+\[
+  \frac{0.05}{1.05} \approx 4.76\%
+\]
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.26.6}
+\medskip\noindent\textbf{4.26.6}
+Speedup of each forwarding configuration relative to no forwarding
+(assuming the same clock cycle time):
+
+\[
+  \text{Speedup}_{\text{EX-EX}} = \frac{\text{CPI}_{\text{no fwd}}}
+    {\text{CPI}_{\text{EX-EX}}}
+  = \frac{1.65}{1.15} \approx 1.43
+\]
+
+\[
+  \text{Speedup}_{\text{MEM-EX}} = \frac{1.65}{1.25} = 1.32
+\]
+
+\[
+  \text{Speedup}_{\text{full}} = \frac{1.65}{1.05} \approx 1.57
+\]
+
+EX-EX forwarding alone provides a larger benefit than MEM-EX forwarding alone
+because EX-to-1st dependencies (ALU $\to$ next instruction) are far more
+common than load-use dependencies. Full forwarding provides the greatest
+speedup.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.26.7}
+\medskip\noindent\textbf{4.26.7}
+``Time-travel'' forwarding eliminates \emph{all} data hazards, so
+$\text{CPI}_{\text{time-travel}} = 1.0$. However, the additional circuitry
+adds 100\,ps to the EX stage.
+
+Let the original pipeline stage latencies be as given in Problem~4.16:
+IF $= 250$\,ps, ID $= 350$\,ps, EX $= 150$\,ps, MEM $= 300$\,ps,
+WB $= 200$\,ps. The clock cycle is determined by the slowest stage:
+$\text{Clk}_{\text{full fwd}} = 350$\,ps (ID stage).
+
+With time-travel forwarding, the EX stage becomes $150 + 100 = 250$\,ps. The
+bottleneck remains the ID stage at 350\,ps, so the clock cycle is unchanged:
+$\text{Clk}_{\text{time-travel}} = 350$\,ps.
+
+\[
+  \text{Speedup over full forwarding}
+  = \frac{\text{CPI}_{\text{full fwd}} \times \text{Clk}_{\text{full fwd}}}
+         {\text{CPI}_{\text{time-travel}} \times \text{Clk}_{\text{time-travel}}}
+  = \frac{1.05 \times 350}{1.0 \times 350}
+  = 1.05
+\]
+
+The additional speedup is $\approx 5\%$ over the fastest previous design.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.26.8}
+\medskip\noindent\textbf{4.26.8}
+The hazard table has separate entries for ``EX to 1st'' and ``EX to 1st and EX
+to 2nd,'' but \emph{does} include ``MEM to 1st and MEM to 2nd.'' A question
+arises: why is there no cross-type combined entry such as ``EX to 1st and MEM
+to 2nd'' or ``MEM to 1st and EX to 2nd''?
+
+The reason is that these cross-type combinations cannot occur from a
+\emph{single} producing instruction. A given instruction produces its result
+in \emph{either} EX (ALU/R-type/I-type instructions) \emph{or} MEM (load
+instructions), but not both. Therefore:
+
+\begin{itemize}
+  \item If the same instruction creates both a ``to 1st'' and a ``to 2nd''
+    dependency, both dependencies originate from the same pipeline stage
+    (either both EX or both MEM).
+  \item ``EX to 1st and MEM to 2nd'' would require the same producing
+    instruction to generate its result in EX for one consumer and in MEM for
+    another, which is impossible.
+\end{itemize}
+
+Hence the only meaningful combined entries are ``EX to 1st \& EX to 2nd'' and
+``MEM to 1st \& MEM to 2nd.''
+
+%-----------------------------------------------------------------------------
+\subsection*{4.27 --- Hazard Detection Code Analysis}
+\hypertarget{sol-4.27}{}
+\markright{4.27}
+\addcontentsline{toc}{subsection}{4.27 --- Hazard Detection Code Analysis}
+
+Reference code sequence on a five-stage pipeline:
+\begin{verbatim}
+    add $s3, $s1, $s4     # I1
+    lw  $s2, 4($s5)       # I2
+    or  $s2, $s4, $s1     # I3
+    sw  $s2, 0($s5)       # I4
+    add $s4, $s2, $s3     # I5
+\end{verbatim}
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.27.1}
+\medskip\noindent\textbf{4.27.1}
+\textbf{Situation:} The processor has forwarding paths but the hazard detection
+unit is missing (not implemented).
+
+First, identify all data dependencies and determine whether any require the
+hazard detection unit (i.e., load-use hazards):
+
+\begin{center}
+\begin{tabular}{llll}
+\toprule
+\textbf{Producer} & \textbf{Consumer} & \textbf{Register} & \textbf{Type} \\
+\midrule
+I1 (\texttt{add \$s3}) & I5 (\texttt{add}) & \texttt{\$s3} &
+  EX to 4th (no hazard) \\
+I3 (\texttt{or \$s2})  & I4 (\texttt{sw})  & \texttt{\$s2} &
+  EX to 1st (forwarding) \\
+I3 (\texttt{or \$s2})  & I5 (\texttt{add}) & \texttt{\$s2} &
+  EX to 2nd (forwarding) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Key observation: I2 (\texttt{lw \$s2}) writes \texttt{\$s2}, but I3
+(\texttt{or \$s2, \$s4, \$s1}) also writes \texttt{\$s2} and does \emph{not}
+read \texttt{\$s2} --- it reads \texttt{\$s4} and \texttt{\$s1}. Therefore I2's
+result for \texttt{\$s2} is never consumed by any later instruction (I3
+overwrites it). There is no load-use hazard in this sequence.
+
+\textbf{Conclusion:} Even without the hazard detection unit, this code executes
+correctly. All data dependencies are resolved by EX-EX or MEM-EX forwarding
+paths. No stalls are needed because there is no load-use hazard (the only
+case that requires the hazard detection unit to insert a bubble).
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.27.2}
+\medskip\noindent\textbf{4.27.2}
+\textbf{Goal:} Rearrange/modify the code to minimize NOPs, assuming a pipeline
+with \emph{no} forwarding and \emph{no} hazard detection. Register
+\texttt{\$s6} is available as a temporary.
+
+Without forwarding, a consumer must be at least 2 instructions after the
+producer (so the producer completes WB while the consumer is in ID). We
+identify dependencies in the original code:
+
+\begin{itemize}
+  \item I3 (\texttt{or}) $\to$ I4 (\texttt{sw}): gap = 1, need 2 more $\to$ 2 NOPs
+  \item I3 (\texttt{or}) $\to$ I5 (\texttt{add}): gap = 2, need 0 more (if 2 NOPs
+    already inserted after I3 for I4, I5 is also satisfied)
+\end{itemize}
+
+All other dependencies have sufficient separation. Original code needs 2 NOPs:
+\begin{verbatim}
+    add $s3, $s1, $s4     # I1
+    lw  $s2, 4($s5)       # I2 (result overwritten by I3)
+    or  $s2, $s4, $s1     # I3
+    nop                    # stall 1 (wait for $s2)
+    nop                    # stall 2
+    sw  $s2, 0($s5)       # I4: reads $s2 from I3
+    add $s4, $s2, $s3     # I5: reads $s2 from I3, $s3 from I1
+\end{verbatim}
+
+We can reorder instructions to fill the NOP slots. Since I1 is independent of
+I3, and I2's result is overwritten by I3, we can move I1 and I2 after I3:
+\begin{verbatim}
+    or  $s2, $s4, $s1     # I3 (moved first, no input dependency)
+    add $s3, $s1, $s4     # I1 (independent; fills NOP slot)
+    lw  $s6, 4($s5)       # I2' (use $s6 since $s2 overwritten anyway)
+    sw  $s2, 0($s5)       # I4: reads $s2 from I3 (3 instr gap -- OK)
+    add $s4, $s2, $s3     # I5: reads $s2 (4 gap), $s3 (3 gap -- OK)
+\end{verbatim}
+
+However, we must verify that the original program semantics are preserved. In
+the original code, \texttt{lw \$s2, 4(\$s5)} loads a value that is immediately
+overwritten by \texttt{or}. If the load was not used elsewhere (which it is not
+in this sequence), we can safely rename it to \texttt{\$s6} or even eliminate
+it if it has no side effects needed later. Assuming the load's result may be
+needed after this sequence, we rename it to \texttt{\$s6}:
+
+\begin{verbatim}
+    or  $s2, $s4, $s1     # produces $s2
+    add $s3, $s1, $s4     # produces $s3 (no dep on $s2)
+    lw  $s6, 4($s5)       # loads to $s6 (renamed from $s2)
+    sw  $s2, 0($s5)       # reads $s2 (3-instr gap, OK)
+    add $s4, $s2, $s3     # reads $s2 and $s3 (gaps >= 2, OK)
+\end{verbatim}
+
+\textbf{Result:} 0 NOPs needed after reordering. $\checkmark$
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.27.3}
+\medskip\noindent\textbf{4.27.3}
+Pipeline execution with forwarding for the first seven cycles. We show which
+forwarding and hazard detection signals are asserted.
+
+Pipeline diagram (with forwarding, no stalls needed):
+\begin{verbatim}
+              CC1  CC2  CC3  CC4  CC5  CC6  CC7  CC8  CC9
+  I1: add    IF   ID   EX   MEM  WB
+  I2: lw          IF   ID   EX   MEM  WB
+  I3: or               IF   ID   EX   MEM  WB
+  I4: sw                    IF   ID   EX   MEM  WB
+  I5: add                        IF   ID   EX   MEM  WB
+\end{verbatim}
+
+Forwarding signals asserted each cycle:
+
+\begin{center}
+\begin{tabular}{cl}
+\toprule
+\textbf{Cycle} & \textbf{Signals Asserted} \\
+\midrule
+CC1 & None (I1 in IF) \\
+CC2 & None (I1 in ID, I2 in IF) \\
+CC3 & None (I1 in EX, I2 in ID, I3 in IF --- no dependencies yet) \\
+CC4 & None (I1 in MEM, I2 in EX, I3 in ID --- I3 reads \$s4, \$s1; \\
+    & \quad no producer in EX/MEM or MEM/WB writes those registers) \\
+CC5 & \texttt{ForwardA = 00, ForwardB = 00} for I4 (sw reads \$s2 from I3; \\
+    & \quad I3 is in MEM/WB $\to$ \textbf{MEM-EX forward} for \$s2) \\
+    & \quad Specifically: MEM/WB.Rd = \$s2 matches ID/EX.Rs of I4 \\
+CC6 & I5 in ID reads \$s2 and \$s3; I3 in WB (done), I4 in MEM/WB: \\
+    & \quad I3.Rd = \$s2 forwarded from MEM/WB to I5? No, I4 is \texttt{sw}, \\
+    & \quad no write. Check EX/MEM: I4 is sw (RegWrite=0). \\
+    & \quad \$s2: I3 already completed WB, value in register file. \\
+    & \quad \$s3: I1 completed WB in CC5, value in register file. \\
+    & \quad No forwarding needed (values available from reg file). \\
+CC7 & I5 in EX. No active forwarding. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Hazard detection unit: No load-use hazard detected in any cycle (I2 produces
+\texttt{\$s2} but I3 does not read \texttt{\$s2}), so the hazard detection unit
+never asserts a stall signal.
+
+Summary of forwarding during CC5: \texttt{ForwardA} or \texttt{ForwardB} is set
+to select the MEM/WB forwarding path to deliver \texttt{\$s2} from I3's result
+to I4's \texttt{sw} data input.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.27.4}
+\medskip\noindent\textbf{4.27.4}
+Without forwarding, the hazard detection unit must detect \emph{all} RAW
+hazards (not just load-use). It needs to compare the destination register of
+instructions in EX, MEM, and WB stages against the source registers of the
+instruction in ID.
+
+\textbf{New inputs needed:}
+\begin{itemize}
+  \item \texttt{EX/MEM.RegisterRd} and \texttt{EX/MEM.RegWrite} --- to detect
+    dependencies from the instruction 2 stages ahead.
+  \item \texttt{MEM/WB.RegisterRd} and \texttt{MEM/WB.RegWrite} --- to detect
+    dependencies from the instruction 3 stages ahead (already partially handled
+    by write-first/read-second, but without forwarding we must stall if the
+    write hasn't completed).
+\end{itemize}
+
+In addition to the existing inputs (\texttt{ID/EX.RegisterRt} for load-use
+detection), we need:
+\begin{itemize}
+  \item \texttt{IF/ID.RegisterRs} and \texttt{IF/ID.RegisterRt} --- source
+    registers of the instruction currently in ID.
+  \item \texttt{ID/EX.RegisterRd} and \texttt{ID/EX.RegWrite} --- destination
+    of instruction in EX.
+\end{itemize}
+
+\textbf{New output:} The stall/bubble signal (same as before), but it must now
+be asserted for any RAW hazard, not just load-use.
+
+\textbf{Example from the code:} I3 (\texttt{or}) writes \texttt{\$s2}. I4
+(\texttt{sw}) reads \texttt{\$s2} in the very next cycle. Without forwarding,
+the hazard detection unit must stall I4 for 2 cycles until I3's result is
+written back.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.27.5}
+\medskip\noindent\textbf{4.27.5}
+Without forwarding, we trace the first 5 cycles and identify stalls. The
+hazard detection unit inserts bubbles whenever a source register in ID matches
+a destination register in EX or MEM (and that instruction writes a register).
+
+\begin{verbatim}
+         CC1  CC2  CC3  CC4  CC5  CC6  CC7  CC8  CC9
+  I1:    IF   ID   EX   MEM  WB
+  I2:         IF   ID   EX   MEM  WB
+  I3:              IF   ID   EX   MEM  WB
+  I4:                   IF   ID*  ID*  ID   EX   MEM  WB
+  I5:                        IF   IF   IF   ID   ...
+\end{verbatim}
+
+During the first 5 cycles (CC1--CC5):
+
+\begin{itemize}
+  \item CC1--CC3: No stalls. I1, I2, I3 flow through IF, ID, EX without
+    dependencies among them (I3 reads \texttt{\$s4} and \texttt{\$s1}; I1 writes
+    \texttt{\$s3}, I2 writes \texttt{\$s2} --- no match with I3's sources).
+  \item CC4: I4 enters ID. I4 (\texttt{sw \$s2}) reads \texttt{\$s2}. I3 is
+    in EX and writes \texttt{\$s2}. Hazard detected $\to$ \textbf{stall}.
+  \item CC5: I4 still in ID. I3 now in MEM, still writing \texttt{\$s2} (not
+    yet in WB). Hazard persists $\to$ \textbf{stall}.
+\end{itemize}
+
+\textbf{Result:} Approximately 2 stall cycles occur within the first 5
+pipeline cycles (at CC4 and CC5), both due to the I3 $\to$ I4 dependency on
+\texttt{\$s2}.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.27.6}
+\medskip\noindent\textbf{4.27.6}
+Total stall cycles for the entire code sequence without forwarding:
+
+Dependencies requiring stalls:
+\begin{enumerate}
+  \item I3 (\texttt{or \$s2}) $\to$ I4 (\texttt{sw \$s2}): gap = 1 instruction,
+    need gap of 2 $\to$ \textbf{2 stall cycles}.
+  \item I3 (\texttt{or \$s2}) $\to$ I5 (\texttt{add \$s4, \$s2, \$s3}): original
+    gap = 2 instructions, but after inserting 2 stalls for I4, the gap between
+    I3 and I5 becomes 4 $\to$ already satisfied, \textbf{0 additional stalls}.
+  \item I1 (\texttt{add \$s3}) $\to$ I5 (\texttt{add \$s4, \$s2, \$s3}): original
+    gap = 4 instructions $\to$ \textbf{0 stalls}.
+\end{enumerate}
+
+\textbf{Total stall cycles for the entire sequence: 2.} $\checkmark$
+
+%-----------------------------------------------------------------------------
+\subsection*{4.28 --- Branch Prediction CPI Impact}
+\hypertarget{sol-4.28}{}
+\markright{4.28}
+\addcontentsline{toc}{subsection}{4.28 --- Branch Prediction CPI Impact}
+
+Instruction mix and predictor accuracy:
+
+\begin{center}
+\begin{tabular}{ccccc}
+\toprule
+\textbf{R-type} & \textbf{beq/bne} & \textbf{jal} & \textbf{lw} &
+\textbf{sw} \\
+\midrule
+40\% & 25\% & 5\% & 20\% & 10\% \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{ccc}
+\toprule
+\textbf{Always-Taken} & \textbf{Always-Not-Taken} & \textbf{2-Bit} \\
+\midrule
+45\% & 55\% & 85\% \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Assumptions: branches (\texttt{beq}/\texttt{bne}) are resolved in the ID
+stage (with dedicated comparison hardware, as in Section~4.9), so the
+misprediction penalty is \textbf{1 cycle} (one instruction fetched after the
+branch must be flushed).
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.28.1}
+\medskip\noindent\textbf{4.28.1}
+Extra CPI due to mispredicted branches with the \textbf{always-taken}
+predictor:
+\[
+  \text{Extra CPI} = \text{branch fraction} \times \text{misprediction rate}
+    \times \text{penalty}
+\]
+\[
+  = 0.25 \times (1 - 0.45) \times 1
+  = 0.25 \times 0.55 \times 1
+  = \boxed{0.1375}
+\]
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.28.2}
+\medskip\noindent\textbf{4.28.2}
+Extra CPI with the \textbf{always-not-taken} predictor:
+\[
+  \text{Extra CPI} = 0.25 \times (1 - 0.55) \times 1
+  = 0.25 \times 0.45 \times 1
+  = \boxed{0.1125}
+\]
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.28.3}
+\medskip\noindent\textbf{4.28.3}
+Extra CPI with the \textbf{2-bit} predictor:
+\[
+  \text{Extra CPI} = 0.25 \times (1 - 0.85) \times 1
+  = 0.25 \times 0.15 \times 1
+  = \boxed{0.0375}
+\]
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.28.4}
+\medskip\noindent\textbf{4.28.4}
+With the 2-bit predictor, the CPI is:
+\[
+  \text{CPI}_{\text{original}} = 1 + 0.0375 = 1.0375
+\]
+
+If we could convert \emph{all} branch instructions to ALU instructions
+(eliminating all mispredictions), the branch fraction becomes 0\%, so:
+\[
+  \text{CPI}_{\text{no branches}} = 1.0
+\]
+
+Speedup:
+\[
+  \text{Speedup} = \frac{1.0375}{1.0} = \boxed{1.0375}
+\]
+
+This is a modest $\approx 3.75\%$ improvement, because the 2-bit predictor
+is already quite accurate.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.28.5}
+\medskip\noindent\textbf{4.28.5}
+If we convert \emph{half} of the branch instructions to (non-ALU)
+instructions that do not cause mispredictions, the branch fraction becomes:
+\[
+  \text{New branch fraction} = \frac{25\%}{2} = 12.5\%
+\]
+
+New extra CPI:
+\[
+  \text{Extra CPI}_{\text{new}} = 0.125 \times 0.15 \times 1 = 0.01875
+\]
+\[
+  \text{CPI}_{\text{new}} = 1 + 0.01875 = 1.01875
+\]
+
+Speedup over the original (with 2-bit predictor):
+\[
+  \text{Speedup} = \frac{1.0375}{1.01875} \approx \boxed{1.018}
+\]
+
+A modest $\approx 1.8\%$ improvement.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.28.6}
+\medskip\noindent\textbf{4.28.6}
+Given that 80\% of all branch instructions are ``easy-to-predict'' loop
+branches that are always predicted correctly, and the overall 2-bit predictor
+accuracy is 85\%, we find the accuracy on the remaining 20\% of branches.
+
+Let $x$ be the accuracy on the hard-to-predict 20\%:
+\[
+  0.80 \times 1.00 + 0.20 \times x = 0.85
+\]
+\[
+  0.80 + 0.20x = 0.85
+\]
+\[
+  0.20x = 0.05
+\]
+\[
+  x = \frac{0.05}{0.20} = \boxed{0.25 = 25\%}
+\]
+
+The 2-bit predictor achieves only 25\% accuracy on the remaining 20\% of
+(hard-to-predict) branch instructions. This is worse than random guessing
+(50\%), indicating that these branches have patterns that actively confuse the
+2-bit predictor.
+
+%-----------------------------------------------------------------------------
+\subsection*{4.29 --- Branch Predictor Design}
+\hypertarget{sol-4.29}{}
+\markright{4.29}
+\addcontentsline{toc}{subsection}{4.29 --- Branch Predictor Design}
+
+Repeating branch pattern: T, T, NT, T, T, NT, \ldots\ (period~3).
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.29.1}
+\medskip\noindent\textbf{4.29.1}
+\textbf{Always-Taken predictor:} predicts T every time.
+\begin{itemize}
+  \item Correct on T outcomes: 2 out of every 3 branches.
+  \item Incorrect on NT outcomes: 1 out of every 3 branches.
+\end{itemize}
+\[
+  \text{Accuracy}_{\text{always-T}} = \frac{2}{3} \approx \boxed{66.7\%}
+\]
+
+\textbf{Always-Not-Taken predictor:} predicts NT every time.
+\begin{itemize}
+  \item Correct on NT outcomes: 1 out of every 3 branches.
+  \item Incorrect on T outcomes: 2 out of every 3 branches.
+\end{itemize}
+\[
+  \text{Accuracy}_{\text{always-NT}} = \frac{1}{3} \approx \boxed{33.3\%}
+\]
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.29.2}
+\medskip\noindent\textbf{4.29.2}
+2-bit predictor states (from Figure~4.63):
+\begin{itemize}
+  \item State 0: Strongly Not Taken (predict NT)
+  \item State 1: Weakly Not Taken (predict NT)
+  \item State 2: Weakly Taken (predict T)
+  \item State 3: Strongly Taken (predict T)
+\end{itemize}
+
+Transitions: actual outcome T increments the state (up to 3); actual outcome
+NT decrements (down to 0). Starting state: 0 (Strongly Not Taken).
+
+\begin{center}
+\begin{tabular}{ccccc}
+\toprule
+\textbf{Branch \#} & \textbf{State before} & \textbf{Prediction} &
+  \textbf{Actual} & \textbf{Correct?} \\
+\midrule
+1 & 0 (Strongly NT) & NT & T  & No  \\
+2 & 1 (Weakly NT)   & NT & T  & No  \\
+3 & 2 (Weakly T)    & T  & NT & No  \\
+4 & 1 (Weakly NT)   & NT & T  & No  \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+After the state transitions: $0 \xrightarrow{T} 1 \xrightarrow{T} 2
+\xrightarrow{NT} 1 \xrightarrow{T} 2$.
+
+\[
+  \text{Accuracy (first 4 branches)} = \frac{0}{4} = \boxed{0\%}
+\]
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.29.3}
+\medskip\noindent\textbf{4.29.3}
+Continuing the trace from where 4.29.2 left off (state = 2 after branch 4):
+
+\begin{center}
+\begin{tabular}{ccccc}
+\toprule
+\textbf{Branch \#} & \textbf{State before} & \textbf{Prediction} &
+  \textbf{Actual} & \textbf{Correct?} \\
+\midrule
+5  & 2 (Weakly T)    & T & T  & Yes \\
+6  & 3 (Strongly T)  & T & NT & No  \\
+7  & 2 (Weakly T)    & T & T  & Yes \\
+8  & 3 (Strongly T)  & T & T  & Yes \\
+9  & 3 (Strongly T)  & T & NT & No  \\
+10 & 2 (Weakly T)    & T & T  & Yes \\
+11 & 3 (Strongly T)  & T & T  & Yes \\
+12 & 3 (Strongly T)  & T & NT & No  \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Starting from branch~7 onward, the pattern of states and outcomes repeats
+with a period of 3:
+\begin{itemize}
+  \item State 2 $\xrightarrow{T}$ 3 (correct), State 3 $\xrightarrow{T}$ 3
+    (correct), State 3 $\xrightarrow{NT}$ 2 (incorrect).
+\end{itemize}
+
+In steady state, the predictor always predicts T (from states 2 or 3) and is
+correct on 2 out of every 3 branches (the two T outcomes) and incorrect on
+the 1 NT outcome.
+
+\[
+  \text{Steady-state accuracy} = \frac{2}{3} \approx \boxed{66.7\%}
+\]
+
+This matches the always-taken predictor's accuracy. The 2-bit predictor cannot
+do better than always-taken for this pattern because after warming up, it
+effectively becomes an always-taken predictor (stuck in states 2--3).
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.29.4}
+\medskip\noindent\textbf{4.29.4}
+\textbf{Design a predictor with perfect accuracy for the repeating pattern
+T, T, NT.}
+
+We use a \textbf{3-state counter} (mod~3) that cycles unconditionally. The
+predictor has no input other than the clock and a signal indicating a
+conditional branch is being executed.
+
+\textbf{States and outputs:}
+\begin{center}
+\begin{tabular}{ccc}
+\toprule
+\textbf{State} & \textbf{Prediction} & \textbf{Next State} \\
+\midrule
+$S_0$ & 1 (Taken)     & $S_1$ \\
+$S_1$ & 1 (Taken)     & $S_2$ \\
+$S_2$ & 0 (Not Taken) & $S_0$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Implementation:} This can be built with a 2-bit register (encoding
+3 states) and simple combinational logic:
+\begin{itemize}
+  \item Output = $\overline{S_1 \cdot S_0}$ (output is 0 only when state =
+    $S_2 = \texttt{10}_2$, otherwise 1).
+  \item Or more precisely, if we encode $S_0 = 00$, $S_1 = 01$, $S_2 = 10$:
+    \begin{itemize}
+      \item Prediction output = NOT(bit$_1$) (the high bit)
+      \item Next state: $00 \to 01 \to 10 \to 00$ (a standard mod-3 counter)
+    \end{itemize}
+  \item The counter advances by 1 (mod~3) on every branch execution.
+\end{itemize}
+
+Starting in $S_0$, the predictions are: T, T, NT, T, T, NT, \ldots\ which
+exactly matches the pattern. \textbf{Accuracy = 100\%.} $\checkmark$
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.29.5}
+\medskip\noindent\textbf{4.29.5}
+The \textbf{opposite pattern} is: NT, NT, T, NT, NT, T, \ldots
+
+Our mod-3 predictor (from 4.29.4) still outputs: T, T, NT, T, T, NT, \ldots
+
+Comparing prediction vs.\ actual outcome:
+
+\begin{center}
+\begin{tabular}{cccc}
+\toprule
+\textbf{Branch \#} & \textbf{Prediction} & \textbf{Actual} &
+  \textbf{Correct?} \\
+\midrule
+1 & T  & NT & No \\
+2 & T  & NT & No \\
+3 & NT & T  & No \\
+4 & T  & NT & No \\
+$\vdots$ & $\vdots$ & $\vdots$ & $\vdots$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Every prediction is the opposite of the actual outcome.
+
+\[
+  \text{Accuracy} = \boxed{0\%}
+\]
+
+The predictor from 4.29.4 achieves the worst possible accuracy on the opposite
+pattern, because the two patterns are exact complements of each other.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.29.6}
+\medskip\noindent\textbf{4.29.6}
+\textbf{Design a predictor that eventually achieves perfect accuracy on both
+the pattern T, T, NT and its opposite NT, NT, T.}
+
+The predictor now receives an additional input: the \textbf{actual branch
+outcome} after each branch resolves. This feedback allows it to determine which
+of the two patterns it is observing.
+
+\textbf{Design: mod-3 counter with a mode bit.}
+
+\textbf{State:} Two components:
+\begin{enumerate}
+  \item A 2-bit \textbf{phase counter} $P \in \{0, 1, 2\}$ cycling mod~3
+    (same as 4.29.4).
+  \item A 1-bit \textbf{mode register} $M \in \{0, 1\}$:
+    \begin{itemize}
+      \item $M = 0$ (normal): predictions are T, T, NT (for phases 0, 1, 2).
+      \item $M = 1$ (inverted): predictions are NT, NT, T (for phases 0, 1, 2).
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Operation on each branch:}
+\begin{enumerate}
+  \item Read the current phase $P$ and mode $M$.
+  \item Compute prediction:
+    \[
+      \text{Pred} =
+      \begin{cases}
+        \text{base}(P) & \text{if } M = 0 \\
+        \overline{\text{base}(P)} & \text{if } M = 1
+      \end{cases}
+    \]
+    where $\text{base}(0) = \text{base}(1) = \text{T}$ and
+    $\text{base}(2) = \text{NT}$.
+  \item After the actual outcome is known, compare prediction with actual:
+    \begin{itemize}
+      \item If \textbf{mismatch}: toggle $M$ (flip the mode bit).
+      \item If \textbf{match}: keep $M$ unchanged.
+    \end{itemize}
+  \item Advance phase: $P \leftarrow (P + 1) \bmod 3$.
+\end{enumerate}
+
+\textbf{Total state:} 2 bits for the phase counter + 1 bit for the mode
+= \textbf{3 bits}.
+
+\textbf{Behavior on pattern T, T, NT} (starting with $M = 0$, $P = 0$):
+
+\begin{center}
+\begin{tabular}{cccccc}
+\toprule
+\textbf{\#} & $P$ & $M$ & \textbf{Pred} & \textbf{Actual} &
+  \textbf{Action} \\
+\midrule
+1 & 0 & 0 & T  & T  & match; $M$ stays 0 \\
+2 & 1 & 0 & T  & T  & match; $M$ stays 0 \\
+3 & 2 & 0 & NT & NT & match; $M$ stays 0 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Perfect from the start. $\checkmark$
+
+\textbf{Behavior on opposite pattern NT, NT, T} (starting with $M = 0$, $P = 0$):
+
+\begin{center}
+\begin{tabular}{cccccc}
+\toprule
+\textbf{\#} & $P$ & $M$ & \textbf{Pred} & \textbf{Actual} &
+  \textbf{Action} \\
+\midrule
+1 & 0 & 0 & T  & NT & mismatch; toggle $M \to 1$ \\
+2 & 1 & 1 & NT & NT & match; $M$ stays 1 \\
+3 & 2 & 1 & T  & T  & match; $M$ stays 1 \\
+4 & 0 & 1 & NT & NT & match; $M$ stays 1 \\
+5 & 1 & 1 & NT & NT & match; $M$ stays 1 \\
+6 & 2 & 1 & T  & T  & match; $M$ stays 1 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+After only 1 misprediction (branch~1), the mode toggles and the predictor
+locks into the correct mode. From branch~2 onward, all predictions are
+correct.
+
+\textbf{Steady-state accuracy on both patterns: 100\%.} $\checkmark$
+
+\textbf{Hardware summary:}
+\begin{itemize}
+  \item 2-bit mod-3 counter for phase ($P$).
+  \item 1-bit mode register ($M$).
+  \item XOR gate to invert the base prediction when $M = 1$.
+  \item XOR comparator between prediction and actual outcome to determine
+    whether to toggle $M$.
+  \item Mod-3 increment logic (same as 4.29.4).
+\end{itemize}
+%-----------------------------------------------------------------------------
+\subsection*{4.30 --- Exception Handling in Pipeline}
+\hypertarget{sol-4.30}{}
+\markright{4.30}
+\addcontentsline{toc}{subsection}{4.30 --- Exception Handling in Pipeline}
+
+The following two instructions are used for the first three sub-parts:
+
+\begin{center}
+\begin{tabular}{cc}
+\textbf{Instruction 1} & \textbf{Instruction 2} \\
+\texttt{beq \$s1, \$s0, label} & \texttt{add \$s3, \$s1, \$s2}
+\end{tabular}
+\end{center}
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.30.1}
+\medskip\noindent\textbf{4.30.1}
+Each instruction can trigger exceptions at particular pipeline stages:
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+\textbf{Instruction} & \textbf{Exception} & \textbf{Stage Detected} \\
+\midrule
+\texttt{beq} & Invalid/undefined instruction (bad opcode) & ID \\
+\texttt{beq} & Instruction address exception (PC misaligned) & IF \\
+\midrule
+\texttt{add} & Invalid/undefined instruction (bad opcode or funct) & ID \\
+\texttt{add} & Arithmetic overflow & EX \\
+\texttt{add} & Instruction address exception (PC misaligned) & IF \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Key distinction: \texttt{beq} performs a subtraction in the ALU to compare
+registers, but MIPS does not generate an arithmetic overflow exception for
+branch comparisons.  The \texttt{add} instruction, however, \emph{does}
+generate an overflow exception when the signed result cannot be represented in
+32 bits.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.30.2}
+\medskip\noindent\textbf{4.30.2}
+To support a separate handler address for each exception type, the pipeline
+organisation must be modified as follows:
+
+\begin{enumerate}
+\item \textbf{Exception cause encoder.}  Add logic that identifies the
+      exception type and produces a cause code (e.g., 2-bit encoding:
+      00 = undefined instruction, 01 = overflow, 10 = address exception).
+
+\item \textbf{Handler-address selection.}  Replace the single hardwired
+      exception handler address with a \emph{mux} (or lookup table) that maps
+      the cause code to the corresponding handler address.  The mux output
+      feeds the PC input.
+
+\item \textbf{EPC register.}  Add the Exception Program Counter register.
+      When an exception is detected, the PC of the faulting instruction is
+      saved in EPC so the handler can return to the correct location.
+
+\item \textbf{Pipeline flush logic.}  When an exception is detected in any
+      stage, all instructions that entered the pipeline \emph{after} the
+      faulting instruction must be flushed (their control signals are zeroed).
+
+\item \textbf{Priority logic.}  If multiple exceptions occur simultaneously
+      (e.g., in different pipeline stages), the exception from the earliest
+      instruction (furthest along in the pipeline) is handled first.
+\end{enumerate}
+
+\noindent The modified next-PC selection becomes:
+\[
+\text{Next PC} = \begin{cases}
+  \text{PC} + 4 & \text{normal} \\
+  \text{branch target} & \text{branch taken} \\
+  \text{Handler}_i & \text{exception of type } i
+\end{cases}
+\]
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.30.3}
+\medskip\noindent\textbf{4.30.3}
+Suppose \texttt{beq} (I1) causes an exception---for example, an undefined
+instruction detected in the ID stage.  At that point the second instruction
+\texttt{add} (I2) has already been fetched and is in the IF stage.  The
+pipeline must:
+
+\begin{enumerate}
+\item Detect the exception at the end of the ID stage for I1.
+\item Save the PC of I1 in the EPC register.
+\item Flush I2 by converting it to a \texttt{nop} (zero all its control
+      signals).
+\item Flush I1's remaining pipeline stages (prevent I1 from writing results).
+\item Load the appropriate exception handler address into the PC.
+\end{enumerate}
+
+\noindent Pipeline execution diagram (exception detected in ID of \texttt{beq}):
+
+\begin{verbatim}
+             CC1    CC2    CC3    CC4    CC5    CC6    CC7
+    beq:     IF     ID*    ---    ---    ---
+    add:            IF     ---    ---    ---
+    handler:               IF     ID     EX     MEM    WB
+\end{verbatim}
+
+\noindent \texttt{*} = exception detected. ``---'' indicates a flushed stage.
+The handler's first instruction begins fetching in CC3.
+
+If instead the exception occurs later (e.g., \texttt{add} overflows in EX):
+
+\begin{verbatim}
+             CC1    CC2    CC3    CC4    CC5    CC6    CC7    CC8
+    beq:     IF     ID     EX     MEM    WB
+    add:            IF     ID     EX*    ---    ---
+    (next):                IF     ID     ---    ---
+    handler:                             IF     ID     EX     MEM
+\end{verbatim}
+
+\noindent Here \texttt{add}'s overflow is detected at the end of EX (CC4).
+Any instruction fetched after \texttt{add} is flushed, and the handler begins
+fetching in CC5.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.30.4}
+\medskip\noindent\textbf{4.30.4}
+In vectored exception handling with the vector table stored in data memory:
+
+\begin{enumerate}
+\item The exception type generates an \emph{index} (cause code).
+\item A base address for the vector table is hardwired (e.g., \texttt{0x80000000}).
+\item The handler address is read from memory at
+      $\text{base} + \text{cause code} \times 4$.
+\item This requires an \emph{additional memory access} to read the handler
+      address from data memory before the handler can begin executing.
+\end{enumerate}
+
+\noindent Required hardware modifications:
+\begin{itemize}
+\item An adder to compute $\text{table base} + \text{cause} \times 4$.
+\item A path from data memory output back to the PC input mux (or a dedicated
+      read port).
+\item The pipeline must stall for one extra cycle while the vector table entry
+      is fetched from memory.
+\end{itemize}
+
+\noindent Pipeline diagram (exception in ID of \texttt{beq}, vectored via memory):
+
+\begin{verbatim}
+             CC1    CC2    CC3    CC4    CC5    CC6    CC7    CC8
+    beq:     IF     ID*    ---    ---    ---    ---
+    add:            IF     ---    ---    ---    ---
+    (vec rd):              MEM    ---                         [read table]
+    handler:                      IF     ID     EX     MEM    WB
+\end{verbatim}
+
+\noindent CC3 is used to read the handler address from the vector table in
+data memory.  The actual handler begins fetching in CC4, one cycle later
+than the non-vectored case.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.30.5}
+\medskip\noindent\textbf{4.30.5}
+To emulate vectored exception handling with only a single fixed handler
+address, the code at the fixed address must read the Cause register,
+determine the exception type, and branch to the appropriate specific handler.
+A jump-table approach is efficient:
+
+\begin{verbatim}
+    # Code at the single fixed exception handler address
+    mfc0  $k0, $13            # Read Cause register
+    andi  $k0, $k0, 0x7C     # Extract ExcCode field (bits 6:2)
+                              #   already a word offset (x4)
+    la    $k1, jump_table     # Load base of handler address table
+    add   $k1, $k1, $k0      # Index into table
+    lw    $k1, 0($k1)        # Load specific handler address
+    jr    $k1                 # Jump to the specific handler
+
+    # Handler address table (in data segment)
+    jump_table:
+        .word handler_int     # ExcCode 0: interrupt
+        .word handler_tlb     # ExcCode 1: TLB modification
+        .word handler_tlbl    # ExcCode 2: TLB load
+        .word handler_tlbs    # ExcCode 3: TLB store
+        .word handler_addrl   # ExcCode 4: address error (load)
+        .word handler_addrs   # ExcCode 5: address error (store)
+        ...
+        .word handler_ovf     # ExcCode 12: overflow
+\end{verbatim}
+
+\noindent The key insight is that the \texttt{ExcCode} field (bits [6:2] of
+the Cause register) is already shifted left by 2, so it directly serves as a
+byte offset into a word-aligned table.  This approach uses 6 instructions
+of overhead before reaching the actual handler, compared to zero overhead
+with true hardware-vectored exceptions.
+
+%-----------------------------------------------------------------------------
+\subsection*{4.31 --- Two-Issue Processor}
+\hypertarget{sol-4.31}{}
+\markright{4.31}
+\addcontentsline{toc}{subsection}{4.31 --- Two-Issue Processor}
+
+The loop under consideration (steady-state body in bold):
+
+\begin{verbatim}
+          li   $s1, 0
+          j    ENT
+    TOP:  add  $s1, $s2, $s0     # ALU
+          lw   $s2, 0($s3)       # Memory
+          sub  $s3, $s3, $s4     # ALU
+    ENT:  bne  $s0, $s1, TOP     # Branch (ALU slot)
+\end{verbatim}
+
+\noindent Two-issue rules: each packet contains at most one memory operation
+and one ALU/branch operation.  Full forwarding, perfect branch prediction.
+Two instructions in the same packet may not have a dependency between them.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.31.1}
+\medskip\noindent\textbf{4.31.1}
+Analyse the loop body dependencies (steady-state iteration):
+
+\begin{itemize}
+\item \texttt{add \$s1, \$s2, \$s0}: reads \texttt{\$s2} (produced by
+      \emph{previous} iteration's \texttt{lw}).
+\item \texttt{lw \$s2, 0(\$s3)}: reads \texttt{\$s3}, writes \texttt{\$s2}.
+\item \texttt{sub \$s3, \$s3, \$s4}: reads \texttt{\$s3} (no dependency on
+      \texttt{lw}'s output \texttt{\$s2}).
+\item \texttt{bne \$s0, \$s1}: reads \texttt{\$s1} (from \texttt{add}).
+\end{itemize}
+
+\noindent Can \texttt{lw} and \texttt{add} be paired?  \texttt{add} reads
+\texttt{\$s2} (old value from \emph{previous} \texttt{lw}), and this
+\texttt{lw} writes \texttt{\$s2} (new value).  Since register reads happen
+before writes in the same cycle, \texttt{add} reads the old \texttt{\$s2}.
+The two instructions in this packet have no true (same-iteration) data
+dependence, so they \emph{can} issue together.
+
+Can \texttt{sub} and \texttt{bne} be paired?  Both need the ALU/branch slot
+--- only one ALU/branch per packet.  They cannot be paired.
+
+\begin{center}
+\begin{tabular}{clll}
+\toprule
+\textbf{Cycle} & \textbf{Memory slot} & \textbf{ALU/Branch slot} & \textbf{Notes} \\
+\midrule
+1 & \texttt{lw \$s2, 0(\$s3)} & \texttt{add \$s1, \$s2, \$s0} & paired OK \\
+2 & \texttt{nop} & \texttt{sub \$s3, \$s3, \$s4} & only ALU \\
+3 & \texttt{nop} & \texttt{bne \$s0, \$s1, TOP} & branch; \texttt{\$s1} forwarded from cycle 1 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Pipeline diagram for two iterations (each packet uses both issue
+slots; IF/ID/EX/MEM/WB shown for the first instruction in each packet):
+
+\begin{verbatim}
+         CC1  CC2  CC3  CC4  CC5  CC6  CC7  CC8  CC9  CC10
+Pkt 1a:  IF   ID   EX   MEM  WB                 (lw + add)
+Pkt 2a:       IF   ID   EX   MEM  WB            (nop + sub)
+Pkt 3a:            IF   ID   EX   MEM  WB       (nop + bne)
+Pkt 1b:                 IF   ID   EX   MEM  WB  (lw + add) iter 2
+Pkt 2b:                      IF   ID   EX   MEM  WB
+Pkt 3b:                           IF   ID   EX   MEM  WB
+\end{verbatim}
+
+\noindent Each iteration takes \textbf{3 cycles} for 4 instructions.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.31.2}
+\medskip\noindent\textbf{4.31.2}
+\textbf{One-issue pipeline:} The loop body has 4 instructions.  Check for
+data hazards with full forwarding:
+
+\begin{itemize}
+\item \texttt{add} $\to$ \texttt{lw}: no dependency (different registers written/read).
+\item \texttt{lw} $\to$ \texttt{sub}: \texttt{sub} reads \texttt{\$s3},
+      \texttt{lw} reads \texttt{\$s3} --- no RAW hazard (both read).
+\item \texttt{sub} $\to$ \texttt{bne}: \texttt{bne} reads \texttt{\$s0, \$s1};
+      \texttt{sub} writes \texttt{\$s3} --- no hazard.
+\item \texttt{add} $\to$ \texttt{bne}: \texttt{add} writes \texttt{\$s1},
+      \texttt{bne} reads \texttt{\$s1}.  \texttt{add} is 3 instructions before
+      \texttt{bne}, so forwarding handles it (EX/MEM $\to$ EX, no stall).
+\item Cross-iteration: previous \texttt{lw} writes \texttt{\$s2},
+      next \texttt{add} reads \texttt{\$s2}.  Separation is 3 instructions
+      (\texttt{sub}, \texttt{bne}, then \texttt{add}), so forwarding handles
+      it with no stall.
+\end{itemize}
+
+One-issue: \textbf{4 cycles} per iteration (no stalls).
+
+\[
+\text{Speedup} = \frac{4 \text{ cycles (1-issue)}}{3 \text{ cycles (2-issue)}}
+              = \frac{4}{3} \approx 1.33
+\]
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.31.3}
+\medskip\noindent\textbf{4.31.3}
+To improve performance on the two-issue processor, we want to maximise the
+number of instructions that can be paired.  The bottleneck is that
+\texttt{sub} and \texttt{bne} both require the ALU slot and cannot be paired.
+
+Reorder the loop body to place \texttt{sub} where it can pair with
+\texttt{lw}:
+
+\begin{verbatim}
+    TOP:  lw   $s2, 0($s3)       # Memory
+          sub  $s3, $s3, $s4     # ALU (no dep on this lw's result)
+          add  $s1, $s2, $s0     # ALU (uses $s2 from prev iter's lw)
+    ENT:  bne  $s0, $s1, TOP     # Branch
+\end{verbatim}
+
+\noindent Correctness check: \texttt{sub} reads \texttt{\$s3} and \texttt{lw}
+also reads \texttt{\$s3} (no WAR hazard in hardware); \texttt{sub} does not
+use \texttt{\$s2}, so it is independent of \texttt{lw}.  \texttt{add} uses
+\texttt{\$s2} from the previous iteration's \texttt{lw}, not this one's, so
+the reordering is safe.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.31.4}
+\medskip\noindent\textbf{4.31.4}
+Issue schedule for the optimised code:
+
+\begin{center}
+\begin{tabular}{clll}
+\toprule
+\textbf{Cycle} & \textbf{Memory slot} & \textbf{ALU/Branch slot} & \textbf{Notes} \\
+\midrule
+1 & \texttt{lw \$s2, 0(\$s3)} & \texttt{sub \$s3, \$s3, \$s4} & no inter-dep \\
+2 & \texttt{nop} & \texttt{add \$s1, \$s2, \$s0} & \texttt{\$s2} from prev iter fwd \\
+3 & \texttt{nop} & \texttt{bne \$s0, \$s1, TOP} & \texttt{\$s1} fwd from cycle 2 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Still 3 cycles per iteration.  The reordering allowed \texttt{sub}
+to pair with \texttt{lw}, but we still have two unpaired ALU operations
+(\texttt{add}, \texttt{bne}).  Without additional memory instructions to fill
+the memory slot, we cannot do better than 3 cycles without loop unrolling.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.31.5}
+\medskip\noindent\textbf{4.31.5}
+(Same as 4.31.4 --- the pipeline diagram for the optimised code was shown
+above.)
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.31.6}
+\medskip\noindent\textbf{4.31.6}
+With the optimised code:
+\begin{itemize}
+\item One-issue: 4 cycles per iteration (no stalls).
+\item Two-issue: 3 cycles per iteration.
+\end{itemize}
+\[
+\text{Speedup} = \frac{4}{3} \approx 1.33
+\]
+Same as the unoptimised code.  The reordering helped utilisation but did not
+reduce the cycle count because the bottleneck is having three ALU/branch
+instructions vs.\ one memory instruction per iteration.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.31.7}
+\medskip\noindent\textbf{4.31.7}
+Unroll the loop so each iteration handles two original iterations.  Use
+\texttt{\$s5}--\texttt{\$s7} as additional registers:
+
+\begin{verbatim}
+    TOP:  lw   $s2, 0($s3)         # iter 1: load
+          sub  $s3, $s3, $s4       # iter 1: decrement pointer
+          add  $s1, $s2, $s0       # iter 1: accumulate
+          lw   $s5, 0($s3)         # iter 2: load (using updated $s3)
+          sub  $s3, $s3, $s4       # iter 2: decrement pointer
+          add  $s1, $s5, $s0       # iter 2: accumulate
+    ENT:  bne  $s0, $s1, TOP       # branch
+\end{verbatim}
+
+\noindent Rearranged for the one-issue processor to minimise stalls:
+
+\begin{verbatim}
+    TOP:  lw   $s2, 0($s3)         # Memory
+          sub  $s3, $s3, $s4       # ALU (fills load-use delay)
+          add  $s1, $s2, $s0       # ALU (fwd from lw 2 instr ago)
+          lw   $s5, 0($s3)         # Memory (uses updated $s3)
+          sub  $s3, $s3, $s4       # ALU (fills load-use delay)
+          add  $s1, $s5, $s0       # ALU (fwd from lw 2 instr ago)
+    ENT:  bne  $s0, $s1, TOP       # Branch
+\end{verbatim}
+
+\noindent One-issue: 7 instructions per unrolled iteration (handling 2
+original iterations), with no stalls if forwarding eliminates the load-use
+hazard (the \texttt{sub} between \texttt{lw} and \texttt{add} provides the
+needed one-cycle gap).  That is 3.5 cycles per original iteration, compared
+to 4 cycles without unrolling.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.31.8}
+\medskip\noindent\textbf{4.31.8}
+Two-issue schedule for the unrolled code:
+
+\begin{center}
+\begin{tabular}{clll}
+\toprule
+\textbf{Cycle} & \textbf{Memory slot} & \textbf{ALU/Branch slot} & \textbf{Notes} \\
+\midrule
+1 & \texttt{lw \$s2, 0(\$s3)} & \texttt{sub \$s3, \$s3, \$s4} & no inter-dep \\
+2 & \texttt{nop} & \texttt{add \$s1, \$s2, \$s0} & fwd \texttt{\$s2} \\
+3 & \texttt{lw \$s5, 0(\$s3)} & \texttt{sub \$s3, \$s3, \$s4} & no inter-dep \\
+4 & \texttt{nop} & \texttt{add \$s1, \$s5, \$s0} & fwd \texttt{\$s5} \\
+5 & \texttt{nop} & \texttt{bne \$s0, \$s1, TOP} & fwd \texttt{\$s1} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent 5 cycles for 2 original iterations = \textbf{2.5 cycles per
+original iteration}.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.31.9}
+\medskip\noindent\textbf{4.31.9}
+\begin{itemize}
+\item One-issue (unrolled): 7 cycles for 2 iterations = 3.5 cycles/iteration.
+\item Two-issue (unrolled): 5 cycles for 2 iterations = 2.5 cycles/iteration.
+\end{itemize}
+\[
+\text{Speedup} = \frac{3.5}{2.5} = 1.4
+\]
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.31.10}
+\medskip\noindent\textbf{4.31.10}
+If the two-issue processor can pair two ALU/branch instructions (but not two
+memory operations), we can fill the empty ALU slots:
+
+\begin{center}
+\begin{tabular}{clll}
+\toprule
+\textbf{Cycle} & \textbf{Slot 1} & \textbf{Slot 2} & \textbf{Notes} \\
+\midrule
+1 & \texttt{lw \$s2, 0(\$s3)} & \texttt{sub \$s3, \$s3, \$s4} & mem + ALU \\
+2 & \texttt{add \$s1, \$s2, \$s0} & \texttt{lw \$s5, 0(\$s3)} & ALU + mem \\
+3 & \texttt{sub \$s3, \$s3, \$s4} & \texttt{add \$s1, \$s5, \$s0} & ALU + ALU, but \texttt{\$s5} from lw in cycle 2 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Wait --- \texttt{add \$s1, \$s5, \$s0} in cycle 3 depends on
+\texttt{lw \$s5} from cycle 2 (load-use hazard: need 1 stall).  Rearrange:
+
+\begin{center}
+\begin{tabular}{clll}
+\toprule
+\textbf{Cycle} & \textbf{Slot 1} & \textbf{Slot 2} & \textbf{Notes} \\
+\midrule
+1 & \texttt{lw \$s2, 0(\$s3)} & \texttt{sub \$s3, \$s3, \$s4} & mem + ALU \\
+2 & \texttt{lw \$s5, 0(\$s3)} & \texttt{add \$s1, \$s2, \$s0} & mem + ALU; \texttt{\$s2} fwd OK \\
+3 & \texttt{sub \$s3, \$s3, \$s4} & \texttt{add \$s1, \$s5, \$s0} & ALU + ALU; load-use on \texttt{\$s5}! \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Still a load-use hazard.  Insert a stall or move \texttt{bne}:
+
+\begin{center}
+\begin{tabular}{clll}
+\toprule
+\textbf{Cycle} & \textbf{Slot 1} & \textbf{Slot 2} & \textbf{Notes} \\
+\midrule
+1 & \texttt{lw \$s2, 0(\$s3)} & \texttt{sub \$s3, \$s3, \$s4} & mem + ALU \\
+2 & \texttt{lw \$s5, 0(\$s3)} & \texttt{add \$s1, \$s2, \$s0} & mem + ALU \\
+3 & \texttt{sub \$s3, \$s3, \$s4} & \texttt{nop} & ALU only (wait for \texttt{\$s5}) \\
+4 & \texttt{add \$s1, \$s5, \$s0} & \texttt{bne \$s0, \$s1, TOP} & ALU + branch \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Wait --- \texttt{add} and \texttt{bne} in cycle 4: \texttt{bne}
+reads \texttt{\$s1} which \texttt{add} writes.  They are in the same packet
+and one depends on the other --- not allowed.
+
+\begin{center}
+\begin{tabular}{clll}
+\toprule
+\textbf{Cycle} & \textbf{Slot 1} & \textbf{Slot 2} & \textbf{Notes} \\
+\midrule
+1 & \texttt{lw \$s2, 0(\$s3)} & \texttt{sub \$s3, \$s3, \$s4} & mem + ALU \\
+2 & \texttt{lw \$s5, 0(\$s3)} & \texttt{add \$s1, \$s2, \$s0} & mem + ALU \\
+3 & \texttt{sub \$s3, \$s3, \$s4} & \texttt{add \$s1, \$s5, \$s0} & ALU + ALU; load-use stall \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent The load-use hazard on \texttt{\$s5} forces a stall.  Best
+achievable schedule:
+
+\begin{center}
+\begin{tabular}{clll}
+\toprule
+\textbf{Cycle} & \textbf{Slot 1} & \textbf{Slot 2} & \textbf{Notes} \\
+\midrule
+1 & \texttt{lw \$s2, 0(\$s3)} & \texttt{sub \$s3, \$s3, \$s4} & mem + ALU \\
+2 & \texttt{lw \$s5, 0(\$s3)} & \texttt{add \$s1, \$s2, \$s0} & mem + ALU \\
+3 & \texttt{nop} & \texttt{sub \$s3, \$s3, \$s4} & wait for \texttt{\$s5} \\
+4 & \texttt{nop} & \texttt{add \$s1, \$s5, \$s0} & fwd \texttt{\$s5} \\
+5 & \texttt{nop} & \texttt{bne \$s0, \$s1, TOP} & fwd \texttt{\$s1} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent 5 cycles for 2 iterations = 2.5 cycles per original iteration
+(same as before).
+
+Speedup over one-issue:
+\[
+\text{Speedup} = \frac{3.5}{2.5} = 1.4
+\]
+
+\noindent The relaxed pairing constraint did not help here because the
+bottleneck is the load-use hazard, not the slot restriction.
+
+%-----------------------------------------------------------------------------
+\subsection*{4.32 --- Energy Efficiency Analysis}
+\hypertarget{sol-4.32}{}
+\markright{4.32}
+\addcontentsline{toc}{subsection}{4.32 --- Energy Efficiency Analysis}
+
+Energy consumption per functional unit:
+
+\begin{center}
+\begin{tabular}{cccccc}
+\toprule
+\textbf{I-Mem} & \textbf{Reg Read} & \textbf{Reg Write} & \textbf{ALU} &
+\textbf{D-Mem Read} & \textbf{D-Mem Write} \\
+\midrule
+140\,pJ & 60\,pJ & 80\,pJ & 95\,pJ & 80\,pJ & 55\,pJ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.32.1}
+\medskip\noindent\textbf{4.32.1}
+Energy for \texttt{add} in a \textbf{single-cycle} design:
+
+The \texttt{add} instruction activates only the functional units it actually
+uses.  Both \texttt{MemRead} and \texttt{MemWrite} are 0 for R-type
+instructions, so neither data-memory read nor write energy is consumed:
+\[
+E_{\text{add, single}} = \underbrace{140}_{\text{I-Mem}}
+  + \underbrace{60}_{\text{Reg Read}}
+  + \underbrace{95}_{\text{ALU}}
+  + \underbrace{80}_{\text{Reg Write}}
+  = 375 \text{ pJ}
+\]
+
+In a \textbf{pipelined} design, the same functional units are traversed by the
+\texttt{add} instruction as it progresses through the five stages.  During the
+MEM stage, \texttt{MemRead}~=~0 gates the data memory, so no read energy is
+consumed:
+\[
+E_{\text{add, pipe}} = 140 + 60 + 95 + 80 = 375 \text{ pJ}
+\]
+
+\noindent The energy per \texttt{add} instruction is the same in both designs.
+(The pipeline saves \emph{time} through parallelism, but each instruction
+still visits the same functional units.)
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.32.2}
+\medskip\noindent\textbf{4.32.2}
+The worst-case instruction consumes the most energy.  Compare all instruction
+types (only counting functional units that are actually activated by the
+control signals):
+
+\begin{center}
+\begin{tabular}{lccccccl}
+\toprule
+\textbf{Instr} & \textbf{I-Mem} & \textbf{Reg Rd} & \textbf{ALU} &
+\textbf{D-Mem Rd} & \textbf{D-Mem Wr} & \textbf{Reg Wr} & \textbf{Total} \\
+\midrule
+R-type & 140 & 60 & 95 & --- & --- & 80 & 375 pJ \\
+\texttt{lw} & 140 & 60 & 95 & 80 & --- & 80 & 455 pJ \\
+\texttt{sw} & 140 & 60 & 95 & --- & 55 & --- & 350 pJ \\
+\texttt{beq} & 140 & 60 & 95 & --- & --- & --- & 295 pJ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent The worst-case instruction is \texttt{lw} at $\boxed{455 \text{ pJ}}$.
+It is the only instruction that activates every major functional unit: I-Mem,
+Reg Read, ALU (address calculation), D-Mem Read, and Reg Write.  R-type
+instructions are second at 375\,pJ (no data memory access).
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.32.3}
+\medskip\noindent\textbf{4.32.3}
+The \texttt{MemRead} signal already gates the data memory read port, so
+non-load instructions do not waste D-Mem energy in the current design.
+The main opportunity to reduce \texttt{lw} energy is to use the
+\textbf{no-offset load/store} design (from Exercise~4.15), which removes the
+ALU from the load path (the register value goes directly to the memory address
+input):
+\[
+E_{\text{lw, new}} = 140 + 60 + 80 + 80 = 360 \text{ pJ}
+\]
+\[
+\text{Reduction} = \frac{455 - 360}{455} = \frac{95}{455} \approx 20.9\%
+\]
+
+\noindent The 95\,pJ savings comes entirely from eliminating the ALU from the
+load critical path.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.32.4}
+\medskip\noindent\textbf{4.32.4}
+Other instructions that benefit from the no-offset load/store change:
+
+\begin{itemize}
+\item \textbf{\texttt{sw}} also benefits because it no longer needs the ALU to
+      compute the address:
+      $E_{\text{sw, new}} = 140 + 60 + 55 = 255$\,pJ (down from 350\,pJ,
+      a 27.1\% reduction).
+
+\item \textbf{R-type, \texttt{beq}, and other non-memory instructions} are
+      unaffected by this change --- they still use the ALU for their primary
+      computation.
+\end{itemize}
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.32.5}
+\medskip\noindent\textbf{4.32.5}
+The no-offset load/store change (from Exercise 4.15) has the following
+performance effects on a pipelined CPU:
+
+\begin{itemize}
+\item \textbf{Positive:} The clock cycle time may decrease because load/store
+      no longer uses both the ALU and data memory in sequence.  The MEM and
+      EX stages could potentially overlap (4-stage pipeline).
+
+\item \textbf{Negative:} The instruction count \emph{increases} because every
+      load/store with a non-zero offset now requires an additional \texttt{add}
+      instruction to pre-compute the address.  If 35\% of instructions are
+      loads/stores (from the Exercise 4.3 mix: 25\% + 10\%), many will need
+      extra instructions.
+
+\item \textbf{Net effect:}  As shown in Exercise 4.15, the increase in
+      instruction count typically outweighs the decrease in clock cycle time,
+      resulting in a net \emph{slowdown} in most programs.  The energy savings
+      must be weighed against this performance degradation.
+\end{itemize}
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.32.6}
+\medskip\noindent\textbf{4.32.6}
+\textbf{Can we eliminate the MemRead control signal?}
+
+Yes.  If data memory is readable every cycle, the processor still functions
+correctly because:
+\begin{itemize}
+\item For \texttt{lw}: the data memory output is selected by the MemtoReg mux
+      (MemtoReg = 1) and written to the register file.  Behaviour unchanged.
+\item For all other instructions: the data memory still produces an output,
+      but the MemtoReg mux selects the ALU result (MemtoReg = 0), so the
+      memory output is simply \emph{ignored}.  No incorrect data is written.
+\end{itemize}
+
+\noindent Effects:
+
+\textbf{Clock frequency:}  No change.  Data memory was already on the critical
+path for \texttt{lw} instructions, and its latency does not increase.  For
+non-load instructions, the memory read happens in parallel with the ALU (or
+is an unused output), so it does not lengthen the critical path.
+
+\textbf{Energy consumption:}  With 25\% loads, the remaining 75\% of
+instructions now waste energy on unnecessary D-Mem reads:
+\[
+\text{Extra energy per instruction (avg)} = 0.75 \times 80 = 60 \text{ pJ}
+\]
+
+\noindent For a program of $N$ instructions, the total wasted energy is
+$60N$\,pJ.  If the average instruction energy is approximately 380\,pJ
+(weighted average with MemRead gating), this represents about a 16\% increase
+in energy consumption.  The trade-off: simpler control logic (one fewer signal)
+at the cost of higher energy.
+
+%-----------------------------------------------------------------------------
+\subsection*{4.33 --- Stuck-at Fault Testing}
+\hypertarget{sol-4.33}{}
+\markright{4.33}
+\addcontentsline{toc}{subsection}{4.33 --- Stuck-at Fault Testing}
+
+All problems refer to \textbf{bit 0 of the Write Register input} of the
+Register File, unless otherwise stated.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.33.1}
+\medskip\noindent\textbf{4.33.1}
+\textbf{Test for stuck-at-0 on bit 0 of Write Register.}
+
+If bit 0 is stuck at 0, any write to an odd-numbered register (bit 0 = 1)
+will instead be directed to the corresponding even-numbered register
+(bit 0 forced to 0).  For example, a write to register 1 (\texttt{00001})
+goes to register 0 (\texttt{00000}).
+
+\textbf{Test procedure:}
+\begin{enumerate}
+\item Initialise register \texttt{\$1} to a known value (e.g., 0).
+\item Execute: \texttt{addi \$1, \$zero, 42}
+      \quad (should write 42 to register 1).
+\item Read register \texttt{\$1}.
+\end{enumerate}
+
+\textbf{Expected results:}
+\begin{itemize}
+\item \textbf{No fault:} \texttt{\$1} = 42. \checkmark
+\item \textbf{Stuck-at-0:} The write targets register 0 (\texttt{00000})
+      instead of register 1 (\texttt{00001}).  Since \texttt{\$0} is
+      hardwired to zero, the write has no effect.  \texttt{\$1} retains its
+      initial value of 0.  Detecting \texttt{\$1} $\neq$ 42 reveals the fault.
+\end{itemize}
+
+\noindent More generally, any R-type or I-type instruction that writes to
+an odd-numbered register can serve as a test.  After execution, verify the
+odd register holds the expected result.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.33.2}
+\medskip\noindent\textbf{4.33.2}
+\textbf{Test for stuck-at-1 on bit 0 of Write Register.}
+
+If bit 0 is stuck at 1, any write to an even-numbered register (bit 0 = 0)
+will instead go to the corresponding odd-numbered register (bit 0 forced
+to 1).  For example, a write to register 2 (\texttt{00010}) goes to
+register 3 (\texttt{00011}).
+
+\textbf{Test procedure:}
+\begin{enumerate}
+\item Initialise register \texttt{\$2} to 0 and register \texttt{\$3} to 99.
+\item Execute: \texttt{addi \$2, \$zero, 42}
+      \quad (should write 42 to register 2).
+\item Read registers \texttt{\$2} and \texttt{\$3}.
+\end{enumerate}
+
+\textbf{Expected results:}
+\begin{itemize}
+\item \textbf{No fault:} \texttt{\$2} = 42, \texttt{\$3} = 99. \checkmark
+\item \textbf{Stuck-at-1:} The write goes to register 3 instead of register 2.
+      \texttt{\$2} remains 0, \texttt{\$3} becomes 42 (instead of 99).
+      Detecting \texttt{\$2} $\neq$ 42 or \texttt{\$3} $\neq$ 99 reveals
+      the fault.
+\end{itemize}
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.33.3}
+\medskip\noindent\textbf{4.33.3}
+\textbf{Test for RegWrite stuck-at-0.}
+
+If RegWrite is stuck at 0, \emph{no instruction} can write to the register
+file---every register write is suppressed.
+
+\textbf{Test procedure:}
+\begin{enumerate}
+\item Initialise register \texttt{\$1} to 0.
+\item Execute: \texttt{addi \$1, \$zero, 7}
+      \quad (should write 7 to \texttt{\$1}).
+\item Read register \texttt{\$1}.
+\end{enumerate}
+
+\textbf{Expected results:}
+\begin{itemize}
+\item \textbf{No fault:} \texttt{\$1} = 7. \checkmark
+\item \textbf{Stuck-at-0:} RegWrite is never asserted, so the register file
+      ignores the write.  \texttt{\$1} remains 0.  Detecting
+      \texttt{\$1} $\neq$ 7 reveals the fault.
+\end{itemize}
+
+\noindent Any instruction that writes a register (\texttt{add}, \texttt{sub},
+\texttt{lw}, \texttt{addi}, etc.) can serve as a test.
+
+\phantomsection\addcontentsline{toc}{subsubsection}{4.33.4}
+\medskip\noindent\textbf{4.33.4}
+\textbf{Test for RegWrite stuck-at-1.}
+
+If RegWrite is stuck at 1, \emph{every instruction} writes to the register
+file---including instructions that should not (e.g., \texttt{sw},
+\texttt{beq}).  The value written and the destination register depend on the
+datapath signals:
+\begin{itemize}
+\item The write-register input comes from the RegDst mux (either \texttt{rd}
+      or \texttt{rt} field).
+\item The write-data input comes from the MemtoReg mux (either ALU result or
+      memory data).
+\end{itemize}
+
+\textbf{Test procedure:}
+\begin{enumerate}
+\item Initialise all registers to known values (e.g., \texttt{\$1} = 100,
+      \texttt{\$2} = 200, etc.).
+\item Execute an instruction that should \emph{not} write to the register
+      file.  For example:
+
+\begin{verbatim}
+    sw $1, 0($2)     # Store; RegWrite should be 0
+\end{verbatim}
+
+\item Read all registers and compare to their initial values.
+\end{enumerate}
+
+\textbf{Expected results:}
+\begin{itemize}
+\item \textbf{No fault:} All registers retain their initial values. \checkmark
+\item \textbf{Stuck-at-1:} The \texttt{sw} instruction writes a value to
+      the register file.  For \texttt{sw}, the RegDst mux output selects a
+      destination register (the \texttt{rd} field, which for \texttt{sw} is
+      bits [15:11] of the instruction encoding, typically a garbage destination).
+      The MemtoReg mux selects the ALU result (the computed memory address
+      $\texttt{\$2} + 0$).  Some register is overwritten with the address
+      value.  Detecting any register change reveals the fault.
+\end{itemize}
+
+\noindent A \texttt{beq} instruction is equally effective: it should not write
+any register, so any register modification after executing \texttt{beq}
+indicates a stuck-at-1 fault on RegWrite.
