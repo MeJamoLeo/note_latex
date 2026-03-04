@@ -172,22 +172,24 @@ Average annual rate: $r = (V_n / V_0)^{1/n} - 1$ where $n = 9$ years (2010--2019
 Years to double: $n_d = \ln 2 / \ln(1 + r)$.
 
 \begin{center}
+\small
 \begin{tabular}{lcccc}
 \toprule
 \textbf{Indicator} & \textbf{2010} & \textbf{2019} & \textbf{Rate/yr} &
 \textbf{Yrs to double} \\
 \midrule
-Tech (nm, smaller = better) & 45 & 14 & 13.8\% & 5.4 \\
-Clock (GHz)      & 2.93 & 3.60 & 2.3\%  & 30.2 \\
-Integer IPC/Core & 1.0  & 1.5  & 4.6\%  & 15.4 \\
-Cores            & 4    & 8    & 8.0\%  & 9.0  \\
-Max DRAM (GB)    & 16   & 128  & 26.0\% & 3.0  \\
-DRAM BW (GB/s)   & 21   & 41.6 & 7.9\%  & 9.1  \\
+Tech (nm, smaller = better) & 32  & 14  & 9.6\%  & 7.5  \\
+Max Clock Speed (GHz)       & 3.33 & 4.90 & 4.4\% & 16.2 \\
+Integer IPC/Core            & 4   & 8   & 8.0\%  & 9.0  \\
+Cores                       & 2   & 8   & 16.7\% & 4.5  \\
+Max DRAM BW (GB/s)          & 17.1 & 42.7 & 10.7\% & 6.8 \\
+SP FP (Gflop/s)             & 107  & 627  & 21.7\% & 3.5 \\
+L3 Cache (MiB)              & 4   & 12  & 13.0\% & 5.7  \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-For Tech, ``improvement'' means shrinking: ratio $= 45/14 \approx 3.21$.
+For Tech, ``improvement'' means shrinking: ratio $= 32/14 \approx 2.29$.
 
 %-----------------------------------------------------------------------------
 \subsection*{1.7 --- Two ISA Implementations Compared}

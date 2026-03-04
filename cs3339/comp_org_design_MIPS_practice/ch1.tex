@@ -105,21 +105,24 @@ each performance indicator, calculate the average rate of improvement from
 corresponding rate.
 
 \begin{center}
-\begin{tabular}{lccccccc}
+\small
+\begin{tabular}{lcccccccc}
 \toprule
-\textbf{Desktop} & \textbf{Year} & \textbf{Tech} & \textbf{Clock} &
-\textbf{Integer} & \textbf{Cores} & \textbf{Max.\ DRAM} &
-\textbf{DRAM BW} \\
-\textbf{Processor} & & \textbf{(nm)} & \textbf{(GHz)} &
-\textbf{IPC/Core} & & \textbf{Capacity} & \textbf{(GB/s)} \\
+\textbf{Desktop}   & \textbf{Year} & \textbf{Tech} & \textbf{Max.\ Clock} &
+\textbf{Integer}   & \textbf{Cores} & \textbf{Max.\ DRAM} &
+\textbf{SP FP}     & \textbf{L3 Cache} \\
+\textbf{Processor} & & \textbf{(nm)} & \textbf{Speed (GHz)} &
+\textbf{IPC/Core}  & & \textbf{BW (GB/s)} &
+\textbf{(Gflop/s)} & \textbf{(MiB)} \\
 \midrule
-Core i7 870      & 2010 & 45  & 2.93 & 1.0 & 4  & 16 GB & 21  \\
-Core i7 4770     & 2013 & 22  & 3.40 & 1.3 & 4  & 32 GB & 25.6 \\
-Core i7 6700K    & 2015 & 14  & 4.00 & 1.5 & 4  & 64 GB & 34.1 \\
-Core i7 8700K    & 2017 & 14  & 3.70 & 1.5 & 6  & 64 GB & 38.4 \\
-Core i9 9900K    & 2019 & 14  & 3.60 & 1.5 & 8  & 128 GB & 41.6 \\
+Westmere i7-620      & 2010 & 32 & 3.33 & 4 & 2 & 17.1 & 107 & 4  \\
+Ivy Bridge i7-3770K  & 2013 & 22 & 3.90 & 6 & 4 & 25.6 & 250 & 8  \\
+Broadwell i7-6700K   & 2015 & 14 & 4.20 & 8 & 4 & 34.1 & 269 & 8  \\
+Kaby Lake i7-7700K   & 2017 & 14 & 4.50 & 8 & 4 & 38.4 & 288 & 8  \\
+Coffee Lake i7-9700K & 2019 & 14 & 4.90 & 8 & 8 & 42.7 & 627 & 12 \\
 \midrule
-\textbf{Imp/year} & & & & & & & \\
+\textbf{Imp./year}     & & \_\_\% & \_\_\% & \_\_\% & \_\_\% & \_\_\% & \_\_\% & \_\_\% \\
+\textbf{Doubles every} & & \_\_\,yrs & \_\_\,yrs & \_\_\,yrs & \_\_\,yrs & \_\_\,yrs & \_\_\,yrs & \_\_\,yrs \\
 \bottomrule
 \end{tabular}
 \end{center}
