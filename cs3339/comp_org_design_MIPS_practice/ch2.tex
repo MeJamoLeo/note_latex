@@ -141,7 +141,7 @@ and for R-type instructions, show the value of the second source register (rt).
 \problembreak
 
 %-----------------------------------------------------------------------------
-\subsection{[5] Register Arithmetic and Overflow}
+\subsection{[30] Register Arithmetic and Overflow}
 \hypertarget{prob-2.10}{}
 \noindent$\langle$\S2.4$\rangle$\medskip
 
@@ -149,50 +149,50 @@ and for R-type instructions, show the value of the second source register (rt).
 values \texttt{0x80000000} and \texttt{0xD0000000}, respectively.
 
 \begin{enumerate}
-  \phantomsection\addcontentsline{toc}{subsubsection}{2.10.1}
-  \item[2.10.1] What is the value of \texttt{\$t0} for the following assembly
+  \phantomsection\addcontentsline{toc}{subsubsection}{[5] 2.10.1}
+  \item[{[5] 2.10.1}] What is the value of \texttt{\$t0} for the following assembly
         code? \quad \texttt{add \$t0, \$s0, \$s1}
-  \phantomsection\addcontentsline{toc}{subsubsection}{2.10.2}
-  \item[2.10.2] Is the result in \texttt{\$t0} the desired result, or has
+  \phantomsection\addcontentsline{toc}{subsubsection}{[5] 2.10.2}
+  \item[{[5] 2.10.2}] Is the result in \texttt{\$t0} the desired result, or has
         there been overflow?
-  \phantomsection\addcontentsline{toc}{subsubsection}{2.10.3}
-  \item[2.10.3] For the contents of registers \texttt{\$s0} and
+  \phantomsection\addcontentsline{toc}{subsubsection}{[5] 2.10.3}
+  \item[{[5] 2.10.3}] For the contents of registers \texttt{\$s0} and
         \texttt{\$s1} as specified above, what is the value of \texttt{\$t0}
         for the following assembly code? \quad \texttt{sub \$t0, \$s0, \$s1}
-  \phantomsection\addcontentsline{toc}{subsubsection}{2.10.4}
-  \item[2.10.4] Is the result in \texttt{\$t0} the desired result, or has
+  \phantomsection\addcontentsline{toc}{subsubsection}{[5] 2.10.4}
+  \item[{[5] 2.10.4}] Is the result in \texttt{\$t0} the desired result, or has
         there been overflow?
-  \phantomsection\addcontentsline{toc}{subsubsection}{2.10.5}
-  \item[2.10.5] For the contents of registers \texttt{\$s0} and
+  \phantomsection\addcontentsline{toc}{subsubsection}{[5] 2.10.5}
+  \item[{[5] 2.10.5}] For the contents of registers \texttt{\$s0} and
         \texttt{\$s1} as specified above, what is the value of \texttt{\$t0}
         for the following assembly code?
         \quad \texttt{add \$t0, \$s0, \$s1} \quad followed by
         \quad \texttt{add \$t0, \$t0, \$s0}
-  \phantomsection\addcontentsline{toc}{subsubsection}{2.10.6}
-  \item[2.10.6] Is the result in \texttt{\$t0} the desired result, or has
+  \phantomsection\addcontentsline{toc}{subsubsection}{[5] 2.10.6}
+  \item[{[5] 2.10.6}] Is the result in \texttt{\$t0} the desired result, or has
         there been overflow?
 \end{enumerate}
 
 \problembreak
 
 %-----------------------------------------------------------------------------
-\subsection{[5] Overflow Ranges}
+\subsection{[15] Overflow Ranges}
 \hypertarget{prob-2.11}{}
 \noindent$\langle$\S2.4$\rangle$\medskip
 
 \noindent Assume that \texttt{\$s1} holds the value $128_{10}$.
 
 \begin{enumerate}
-  \phantomsection\addcontentsline{toc}{subsubsection}{2.11.1}
-  \item[2.11.1] For the instruction \texttt{add \$s0, \$s0, \$s1}, what is
+  \phantomsection\addcontentsline{toc}{subsubsection}{[5] 2.11.1}
+  \item[{[5] 2.11.1}] For the instruction \texttt{add \$s0, \$s0, \$s1}, what is
         the range(s) of values for \texttt{\$s0} that would result in
         overflow?
-  \phantomsection\addcontentsline{toc}{subsubsection}{2.11.2}
-  \item[2.11.2] For the instruction \texttt{sub \$s0, \$s0, \$s1}, what is
+  \phantomsection\addcontentsline{toc}{subsubsection}{[5] 2.11.2}
+  \item[{[5] 2.11.2}] For the instruction \texttt{sub \$s0, \$s0, \$s1}, what is
         the range(s) of values for \texttt{\$s0} that would result in
         overflow?
-  \phantomsection\addcontentsline{toc}{subsubsection}{2.11.3}
-  \item[2.11.3] For the instruction \texttt{sub \$s0, \$s1, \$s0}, what is
+  \phantomsection\addcontentsline{toc}{subsubsection}{[5] 2.11.3}
+  \item[{[5] 2.11.3}] For the instruction \texttt{sub \$s0, \$s1, \$s0}, what is
         the range(s) of values for \texttt{\$s0} that would result in
         overflow?
 \end{enumerate}
@@ -249,7 +249,7 @@ representation of the instruction described by the following MIPS fields:
 \problembreak
 
 %-----------------------------------------------------------------------------
-\subsection{[5] Expanding the Register File}
+\subsection{[15] Expanding the Register File}
 \hypertarget{prob-2.16}{}
 \noindent$\langle$\S2.5$\rangle$\medskip
 
@@ -258,14 +258,14 @@ registers and expand the instruction set to contain four times as many
 instructions.
 
 \begin{enumerate}
-  \phantomsection\addcontentsline{toc}{subsubsection}{2.16.1}
-  \item[2.16.1] How would this affect the size of each of the bit fields in
+  \phantomsection\addcontentsline{toc}{subsubsection}{[5] 2.16.1}
+  \item[{[5] 2.16.1}] How would this affect the size of each of the bit fields in
         the R-type instructions?
-  \phantomsection\addcontentsline{toc}{subsubsection}{2.16.2}
-  \item[2.16.2] How would this affect the size of each of the bit fields in
+  \phantomsection\addcontentsline{toc}{subsubsection}{[5] 2.16.2}
+  \item[{[5] 2.16.2}] How would this affect the size of each of the bit fields in
         the I-type instructions?
-  \phantomsection\addcontentsline{toc}{subsubsection}{2.16.3}
-  \item[2.16.3] How could each of two proposed changes decrease the size of
+  \phantomsection\addcontentsline{toc}{subsubsection}{[5] 2.16.3}
+  \item[{[5] 2.16.3}] How could each of two proposed changes decrease the size of
         an MIPS assembly program? On the other hand, how could the proposed
         change increase the size of an MIPS assembly program?
 \end{enumerate}
@@ -273,7 +273,7 @@ instructions.
 \problembreak
 
 %-----------------------------------------------------------------------------
-\subsection{[5] Bitwise Operations on Registers}
+\subsection{[15] Bitwise Operations on Registers}
 \hypertarget{prob-2.17}{}
 \noindent$\langle$\S2.6$\rangle$\medskip
 
@@ -281,22 +281,22 @@ instructions.
 \texttt{\$t0 = 0xAAAAAAAA}, \texttt{\$t1 = 0x12345678}.
 
 \begin{enumerate}
-  \phantomsection\addcontentsline{toc}{subsubsection}{2.17.1}
-  \item[2.17.1] What is the value of \texttt{\$t2} after the following
+  \phantomsection\addcontentsline{toc}{subsubsection}{[5] 2.17.1}
+  \item[{[5] 2.17.1}] What is the value of \texttt{\$t2} after the following
         instructions?
 \begin{verbatim}
     sll $t2, $t0, 4
     or  $t2, $t2, $t1
 \end{verbatim}
-  \phantomsection\addcontentsline{toc}{subsubsection}{2.17.2}
-  \item[2.17.2] What is the value of \texttt{\$t2} after the following
+  \phantomsection\addcontentsline{toc}{subsubsection}{[5] 2.17.2}
+  \item[{[5] 2.17.2}] What is the value of \texttt{\$t2} after the following
         instructions?
 \begin{verbatim}
     srl $t2, $t0, 3
     and $t2, $t2, $t1
 \end{verbatim}
-  \phantomsection\addcontentsline{toc}{subsubsection}{2.17.3}
-  \item[2.17.3] What is the value of \texttt{\$t2} after the following
+  \phantomsection\addcontentsline{toc}{subsubsection}{[5] 2.17.3}
+  \item[{[5] 2.17.3}] What is the value of \texttt{\$t2} after the following
         instructions?
 \begin{verbatim}
     srl $t2, $t0, 4
@@ -366,20 +366,20 @@ EXIT:
 \problembreak
 
 %-----------------------------------------------------------------------------
-\subsection{[5] PC Addressing Range}
+\subsection{[10] PC Addressing Range}
 \hypertarget{prob-2.22}{}
 \noindent$\langle$\S2.10$\rangle$\medskip
 
 \noindent Suppose the program counter (PC) is set to \texttt{0x00400000}.
 
 \begin{enumerate}
-  \phantomsection\addcontentsline{toc}{subsubsection}{2.22.1}
-  \item[2.22.1] What range of addresses can be reached using the MIPS
+  \phantomsection\addcontentsline{toc}{subsubsection}{[5] 2.22.1}
+  \item[{[5] 2.22.1}] What range of addresses can be reached using the MIPS
         jump-and-link (\texttt{jal}) instruction? (In other words, what is
         the set of possible values for the PC after the jump instruction
         executes?)
-  \phantomsection\addcontentsline{toc}{subsubsection}{2.22.2}
-  \item[2.22.2] What range of addresses can be reached using the MIPS branch
+  \phantomsection\addcontentsline{toc}{subsubsection}{[5] 2.22.2}
+  \item[{[5] 2.22.2}] What range of addresses can be reached using the MIPS branch
         if equal (\texttt{beq}) instruction? (In other words, what is the set
         of possible values for the PC after the branch instruction executes?)
 \end{enumerate}
@@ -408,7 +408,7 @@ What are the issues that might prevent this from being a real MIPS instruction?
 \problembreak
 
 %-----------------------------------------------------------------------------
-\subsection{[5] MIPS Loop Analysis}
+\subsection{[15] MIPS Loop Analysis}
 \hypertarget{prob-2.24}{}
 \noindent$\langle$\S2.7$\rangle$\medskip
 
@@ -423,17 +423,17 @@ What are the issues that might prevent this from being a real MIPS instruction?
 \end{verbatim}
 
 \begin{enumerate}
-  \phantomsection\addcontentsline{toc}{subsubsection}{2.24.1}
-  \item[2.24.1] Assume that the register \texttt{\$t1} is initialized to the
+  \phantomsection\addcontentsline{toc}{subsubsection}{[5] 2.24.1}
+  \item[{[5] 2.24.1}] Assume that the register \texttt{\$t1} is initialized to the
         value 10. What is the value in register \texttt{\$s2} assuming
         \texttt{\$s0} initially points to an array of integers?
-  \phantomsection\addcontentsline{toc}{subsubsection}{2.24.2}
-  \item[2.24.2] For the loop above, write the equivalent C code. Assume that
+  \phantomsection\addcontentsline{toc}{subsubsection}{[5] 2.24.2}
+  \item[{[5] 2.24.2}] For the loop above, write the equivalent C code. Assume that
         the registers \texttt{\$s1}, \texttt{\$s2}, \texttt{\$t1}, and
         \texttt{\$t2} are integers \texttt{a}, \texttt{b}, \texttt{i}, and
         \texttt{temp}, respectively.
-  \phantomsection\addcontentsline{toc}{subsubsection}{2.24.3}
-  \item[2.24.3] For the loop above, assume that \texttt{\$t1} is initialized
+  \phantomsection\addcontentsline{toc}{subsubsection}{[5] 2.24.3}
+  \item[{[5] 2.24.3}] For the loop above, assume that \texttt{\$t1} is initialized
         to the value $N$. How many MIPS instructions are executed?
 \end{enumerate}
 
@@ -594,7 +594,7 @@ There is no ``null'' instruction. Just store the constant 10 in a register.
 \problembreak
 
 %-----------------------------------------------------------------------------
-\subsection{[5] Memory Store and Endianness}
+\subsection{[10] Memory Store and Endianness}
 \hypertarget{prob-2.35}{}
 \noindent$\langle$\S2.9$\rangle$\medskip
 
@@ -608,11 +608,11 @@ There is no ``null'' instruction. Just store the constant 10 in a register.
 \texttt{0x10000000}.
 
 \begin{enumerate}
-  \phantomsection\addcontentsline{toc}{subsubsection}{2.35.1}
-  \item[2.35.1] What value is stored at \texttt{0x10000000} on a big-endian
+  \phantomsection\addcontentsline{toc}{subsubsection}{[5] 2.35.1}
+  \item[{[5] 2.35.1}] What value is stored at \texttt{0x10000000} on a big-endian
         machine?
-  \phantomsection\addcontentsline{toc}{subsubsection}{2.35.2}
-  \item[2.35.2] What value is stored at \texttt{0x10000000} on a
+  \phantomsection\addcontentsline{toc}{subsubsection}{[5] 2.35.2}
+  \item[{[5] 2.35.2}] What value is stored at \texttt{0x10000000} on a
         little-endian machine?
 \end{enumerate}
 
@@ -661,7 +661,7 @@ time, assuming that each processor executes exactly one instruction per cycle.
 \problembreak
 
 %-----------------------------------------------------------------------------
-\subsection{[5] New Arithmetic Instructions}
+\subsection{[10] New Arithmetic Instructions}
 \hypertarget{prob-2.39}{}
 \noindent$\langle$\S2.14, 2.13$\rangle$\medskip
 
@@ -672,15 +672,15 @@ instructions is 3. Assume a program has the following instruction breakdown:
 100 million branch instructions.
 
 \begin{enumerate}
-  \phantomsection\addcontentsline{toc}{subsubsection}{2.39.1}
-  \item[2.39.1] Suppose that new, more powerful arithmetic instructions are
+  \phantomsection\addcontentsline{toc}{subsubsection}{[5] 2.39.1}
+  \item[{[5] 2.39.1}] Suppose that new, more powerful arithmetic instructions are
         added to the instruction set. On average, through the use of these
         more powerful arithmetic instructions, we can reduce the number of
         arithmetic instructions needed to execute a program by 25\%, and the
         cost of increasing the clock cycle time by 10\%. Is this a good
         design choice? Why?
-  \phantomsection\addcontentsline{toc}{subsubsection}{2.39.2}
-  \item[2.39.2] Suppose that we find a way to double the performance of
+  \phantomsection\addcontentsline{toc}{subsubsection}{[5] 2.39.2}
+  \item[{[5] 2.39.2}] Suppose that we find a way to double the performance of
         arithmetic instructions. What is the overall speedup of our machine?
         What if we find a way to improve the performance of arithmetic
         instructions by 10 times?
@@ -689,7 +689,7 @@ instructions is 3. Assume a program has the following instruction breakdown:
 \problembreak
 
 %-----------------------------------------------------------------------------
-\subsection{[5] CPI and Instruction Mix}
+\subsection{[15] CPI and Instruction Mix}
 \hypertarget{prob-2.40}{}
 \noindent$\langle$\S2.14, 2.13$\rangle$\medskip
 
@@ -697,17 +697,17 @@ instructions is 3. Assume a program has the following instruction breakdown:
 are arithmetic, 10\% are load/store, and 20\% are branch.
 
 \begin{enumerate}
-  \phantomsection\addcontentsline{toc}{subsubsection}{2.40.1}
-  \item[2.40.1] Given the instruction mix and the assumption that an
+  \phantomsection\addcontentsline{toc}{subsubsection}{[5] 2.40.1}
+  \item[{[5] 2.40.1}] Given the instruction mix and the assumption that an
         arithmetic instruction requires 2 cycles, a load/store instruction
         takes 6 cycles, and a branch instruction takes 3 cycles, find the
         average CPI.
-  \phantomsection\addcontentsline{toc}{subsubsection}{2.40.2}
-  \item[2.40.2] For a 25\% improvement in performance, how many cycles, on
+  \phantomsection\addcontentsline{toc}{subsubsection}{[5] 2.40.2}
+  \item[{[5] 2.40.2}] For a 25\% improvement in performance, how many cycles, on
         average, may an arithmetic instruction take if load/store and branch
         instructions are not improved at all?
-  \phantomsection\addcontentsline{toc}{subsubsection}{2.40.3}
-  \item[2.40.3] For a 50\% improvement in performance, how many cycles, on
+  \phantomsection\addcontentsline{toc}{subsubsection}{[5] 2.40.3}
+  \item[{[5] 2.40.3}] For a 50\% improvement in performance, how many cycles, on
         average, may an arithmetic instruction take if load/store and branch
         instructions are not improved at all?
 \end{enumerate}
