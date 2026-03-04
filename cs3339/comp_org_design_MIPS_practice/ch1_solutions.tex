@@ -462,6 +462,31 @@ Clock cycle time $= 0.333$ ns $\Rightarrow f = 1/0.333\text{n} = 3.0$ GHz.
 \]
 
 \noindent\textbf{1.12.3}
+IC increases 10\%, CPI and clock unchanged:
+$T' = 1.1 \times T = 1.1 \times 750 = 825$ s.
+\textbf{Increase = 10\%.}
+
+\noindent\textbf{1.12.4}
+IC $+10\%$, CPI $+5\%$, clock unchanged:
+\[
+  T' = \frac{1.1 \times \text{IC} \times 1.05 \times \text{CPI}}{f}
+     = 1.155\,T = 1.155 \times 750 = 866.25\text{ s}
+\]
+\textbf{Increase = 15.5\%.}
+
+\phantomsection\addcontentsline{toc}{subsubsection}{1.12.5}
+\medskip\noindent\textbf{1.12.5}
+Using $T'$ from 1.12.4:
+\[
+  \text{SPECratio}' = \frac{\text{Reference time}}{T'}
+  = \frac{9650}{866.25} \approx 11.14
+\]
+Original SPECratio $= 12.87$.
+\textbf{SPECratio decreases by $\approx 13.4\%$}
+(from $12.87$ to $11.14$).
+
+\phantomsection\addcontentsline{toc}{subsubsection}{1.12.6}
+\medskip\noindent\textbf{1.12.6}
 New clock $= 4$ GHz, IC reduced 15\% $\Rightarrow \text{IC}' = 0.85 \times
 2.389 \times 10^{12} = 2.031 \times 10^{12}$.
 SPECratio $= 13.7 \Rightarrow T' = 9650/13.7 \approx 704.4$ s.
@@ -470,31 +495,63 @@ SPECratio $= 13.7 \Rightarrow T' = 9650/13.7 \approx 704.4$ s.
   = \frac{2817.6}{2031} \approx 1.387
 \]
 
-\noindent\textbf{1.12.4}
-IC increases 10\%, CPI and clock unchanged:
-$T' = 1.1 \times T = 1.1 \times 750 = 825$ s.
-\textbf{Increase = 10\%.}
+\phantomsection\addcontentsline{toc}{subsubsection}{1.12.7}
+\medskip\noindent\textbf{1.12.7}
+From 1.12.1: $\text{CPI} = 0.942$ at $f = 3$ GHz.\quad
+From 1.12.6: $\text{CPI}' = 1.387$ at $f' = 4$ GHz.
+\begin{align*}
+  \text{CPI ratio} &= 1.387/0.942 \approx 1.472 \quad (+47.2\%) \\
+  \text{Clock ratio} &= 4/3 \approx 1.333 \quad (+33.3\%)
+\end{align*}
+The increase in CPI ($47.2\%$) is \textbf{larger than} the increase in
+clock rate ($33.3\%$).  They are \textbf{dissimilar} because CPI depends
+on the microarchitecture and memory hierarchy, not just clock rate.
+Higher clock rates increase cache miss penalties (in cycles), raising
+CPI disproportionately.
 
-\phantomsection\addcontentsline{toc}{subsubsection}{1.12.5}
-\medskip\noindent\textbf{1.12.5}
-IC $+10\%$, CPI $-15\%$, clock unchanged:
+\phantomsection\addcontentsline{toc}{subsubsection}{1.12.8}
+\medskip\noindent\textbf{1.12.8}
+$T_{\text{old}} = 750$ s, \;$T_{\text{new}} = 9650/13.7 \approx 704.4$ s.
 \[
-  T' = \frac{1.1 \times \text{IC} \times 0.85 \times \text{CPI}}{f}
-     = 0.935 \times T = 0.935 \times 750 = 701.3\text{ s}
+  \text{Reduction} = \frac{750 - 704.4}{750}
+  = \frac{45.6}{750} \approx 6.1\%
 \]
-CPU time \textbf{decreases by 6.5\%}.
+CPU time \textbf{reduced by $\approx 6.1\%$}.
 
-\phantomsection\addcontentsline{toc}{subsubsection}{1.12.6}
-\medskip\noindent\textbf{1.12.6}
-IC $+10\%$, CPI $-15\%$, and require $T' = 0.8T$ (20\% reduction).
+\phantomsection\addcontentsline{toc}{subsubsection}{1.12.9}
+\medskip\noindent\textbf{1.12.9}
+Libquantum: $T = 960$ s, CPI $= 1.61$, $f = 3$ GHz.
+Original instruction count:
 \[
-  T' = \frac{\text{IC}' \times \text{CPI}'}{f'}
-  \;\Rightarrow\;
-  f' = \frac{1.1 \times 0.85 \times \text{IC} \times \text{CPI}}{0.8\,T}
-     = \frac{0.935}{0.8}\,f = 1.169\,f
+  \text{IC} = \frac{T \times f}{\text{CPI}}
+  = \frac{960 \times 3 \times 10^9}{1.61}
+  \approx 1.789 \times 10^{12}
 \]
-Clock must \textbf{increase by $\approx 16.9\%$}
-(e.g.\ $3.0 \to 3.51$ GHz).
+New: $T' = 0.9 \times 960 = 864$ s, CPI $= 1.61$, $f' = 4$ GHz:
+\[
+  \text{IC}' = \frac{T' \times f'}{\text{CPI}}
+  = \frac{864 \times 4 \times 10^9}{1.61}
+  \approx \mathbf{2.147 \times 10^{12}}
+\]
+
+\phantomsection\addcontentsline{toc}{subsubsection}{1.12.10}
+\medskip\noindent\textbf{1.12.10}
+Further 10\% reduction: $T'' = 0.9 \times 864 = 777.6$ s.
+IC and CPI unchanged from 1.12.9:
+\[
+  f'' = \frac{\text{IC}' \times \text{CPI}}{T''}
+  = \frac{2.147 \times 10^{12} \times 1.61}{777.6}
+  \approx \mathbf{4.44\text{ GHz}}
+\]
+
+\phantomsection\addcontentsline{toc}{subsubsection}{1.12.11}
+\medskip\noindent\textbf{1.12.11}
+CPI $-15\%$, $T -20\%$, IC unchanged from 1.12.9:
+\[
+  f'' = \frac{\text{IC}' \times 0.85 \times \text{CPI}}{0.8 \times T'}
+  = \frac{2.147 \times 10^{12} \times 1.3685}{691.2}
+  \approx \mathbf{4.25\text{ GHz}}
+\]
 
 %-----------------------------------------------------------------------------
 \subsection*{1.13 --- Performance Equation Pitfall}
