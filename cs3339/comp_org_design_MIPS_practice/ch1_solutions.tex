@@ -213,11 +213,25 @@ Weighted CPI:
 \end{align*}
 \textbf{P2 is faster} by a factor of $1.04/0.667 \approx 1.56$.
 
-\medskip\noindent\textbf{b.} Clock cycles:
+\medskip\noindent\textbf{b.} CC (Clock Cycles) can be obtained in two equivalent ways:
+
+\noindent\textit{Approach 1:} Directly from the definition,
+$\text{CC} = \text{IC} \times \text{CPI}$:
 \[
-  \text{P1}: 10^6 \times 2.6 = 2.6 \times 10^6, \qquad
-  \text{P2}: 10^6 \times 2.0 = 2.0 \times 10^6
+  \text{CC}_{\text{P1}} = 10^6 \times 2.6 = 2.6 \times 10^6, \qquad
+  \text{CC}_{\text{P2}} = 10^6 \times 2.0 = 2.0 \times 10^6
 \]
+
+\noindent\textit{Approach 2:} From the execution time computed in (a),
+$\text{CC} = T \times f$:
+\[
+  \text{CC}_{\text{P1}} = 1.04 \times 10^{-3} \times 2.5 \times 10^9 = 2.6 \times 10^6, \qquad
+  \text{CC}_{\text{P2}} = 0.667 \times 10^{-3} \times 3.0 \times 10^9 = 2.0 \times 10^6
+\]
+
+\noindent Both agree because
+$T = \text{IC} \times \text{CPI} / f$ implies
+$T \times f = \text{IC} \times \text{CPI} = \text{CC}$.
 
 %-----------------------------------------------------------------------------
 \subsection*{1.8 --- Compiler Impact on Performance}
