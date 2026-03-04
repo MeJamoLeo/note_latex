@@ -13,3 +13,4 @@
 # Ignore embedded git repos
 CS3354/Java_Examples/bubblesort_profiling_example/
 CS3354/Java_Examples/spaceinvaders/
+!.claude/**
