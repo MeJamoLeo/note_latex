@@ -41,17 +41,44 @@ C statement: \texttt{f = g + h + i;}
 \markright{2.3}
 \addcontentsline{toc}{subsection}{2.3 --- C to MIPS: Array Access}
 
-\texttt{B[8] = A[i] + A[j];} with 4-byte (word) elements.
+\texttt{B[8] = A[i-j];} with 4-byte (word) elements.
 \begin{verbatim}
-    sll  $t0, $s3, 2       # $t0 = i * 4
-    add  $t0, $s6, $t0     # $t0 = &A[i]
-    lw   $t0, 0($t0)       # $t0 = A[i]
-    sll  $t1, $s4, 2       # $t1 = j * 4
-    add  $t1, $s6, $t1     # $t1 = &A[j]
-    lw   $t1, 0($t1)       # $t1 = A[j]
-    add  $t0, $t0, $t1     # $t0 = A[i] + A[j]
+    sub  $t0, $s3, $s4     # $t0 = i - j
+    sll  $t0, $t0, 2       # $t0 = (i-j) * 4
+    add  $t0, $s6, $t0     # $t0 = &A[i-j]
+    lw   $t0, 0($t0)       # $t0 = A[i-j]
     sw   $t0, 32($s7)      # B[8] = $t0  (8*4=32)
 \end{verbatim}
+{\scriptsize\textit{Note:}
+\texttt{\$t0} is a temporary register used for intermediate values.
+\texttt{\$s0}--\texttt{\$s4} already hold the program variables
+\texttt{f}--\texttt{j}, so overwriting any of them would destroy data
+the program may still need.}
+
+\medskip
+{\small\textbf{Trace} (e.g.\ $i{=}5,\; j{=}2,\;
+\texttt{\$s6}{=}\texttt{0x1000},\; \texttt{\$s7}{=}\texttt{0x2000},\;
+A[3]{=}99$):}
+
+\begin{center}
+\small
+\begin{tabular}{clll}
+\toprule
+\textbf{Step} & \textbf{Instruction} & \texttt{\$t0} & \textbf{Data flow} \\
+\midrule
+1 & \texttt{sub \$t0, \$s3, \$s4} & $5-2=3$
+  & \texttt{\$s3}, \texttt{\$s4} $\to$ \texttt{\$t0} \\
+2 & \texttt{sll \$t0, \$t0, 2}    & $3\times4=12$
+  & \texttt{\$t0} $\to$ \texttt{\$t0} \\
+3 & \texttt{add \$t0, \$s6, \$t0} & \texttt{0x100C}
+  & \texttt{\$s6}$+$\texttt{\$t0} $\to$ \texttt{\$t0} \\
+4 & \texttt{lw \$t0, 0(\$t0)}     & $99$
+  & Mem[\texttt{0x100C}] $\to$ \texttt{\$t0} \\
+5 & \texttt{sw \$t0, 32(\$s7)}    & $99$
+  & \texttt{\$t0} $\to$ Mem[\texttt{0x2020}] \\
+\bottomrule
+\end{tabular}
+\end{center}
 
 %-----------------------------------------------------------------------------
 \subsection*{2.4 --- MIPS to C: Array Code}
@@ -65,27 +92,60 @@ Reading the assembly line by line:
   \item \texttt{add \$t0, \$s6, \$t0} $\rightarrow$ \texttt{\$t0 = \&A[f]}
   \item \texttt{sll \$t1, \$s1, 2} $\rightarrow$ \texttt{\$t1 = g * 4}
   \item \texttt{add \$t1, \$s7, \$t1} $\rightarrow$ \texttt{\$t1 = \&B[g]}
-  \item \texttt{lw \$s0, 0(\$t0)} $\rightarrow$ \texttt{f = A[f]}
+  \item \texttt{lw \$s0, 0(\$t0)} $\rightarrow$ \texttt{\$s0 = A[f]}
+        \quad$\Leftarrow$ \textbf{\texttt{\$s0} is overwritten:
+        the original value of \texttt{f} is lost from this point on.}
   \item \texttt{addi \$t2, \$t0, 4} $\rightarrow$ \texttt{\$t2 = \&A[f] + 4
         = \&A[f+1]}
   \item \texttt{lw \$t0, 0(\$t2)} $\rightarrow$ \texttt{\$t0 = A[f+1]}
-  \item \texttt{add \$t0, \$t0, \$s0} $\rightarrow$ \texttt{\$t0 = A[f+1] + f}
-        (but f was overwritten in step 5 to A[f])
-  \item \texttt{sw \$t0, 0(\$t1)} $\rightarrow$ \texttt{B[g] = \$t0}
+  \item \texttt{add \$t0, \$t0, \$s0} $\rightarrow$ \texttt{\$t0 = A[f+1]
+        + A[f]} \quad (note: \texttt{\$s0} is now A[f], not f)
+  \item \texttt{sw \$t0, 0(\$t1)} $\rightarrow$ \texttt{B[g] = A[f+1] + A[f]}
 \end{enumerate}
 
-C code (using original f):
+C code (using the original value of f before it is destroyed):
 \begin{verbatim}
     B[g] = A[f] + A[f + 1];
 \end{verbatim}
-Note: the original value of \texttt{f} is destroyed (overwritten with
-\texttt{A[f]}).
+
+{\scriptsize\textit{Caveat:}
+Unlike the C statement above, the assembly has a side effect:
+\texttt{\$s0}~(\texttt{f}) is overwritten with \texttt{A[f]} at step~5.
+In C this would be equivalent to:
+\texttt{f = A[f]; B[g] = f + A[f\_orig + 1];}
+where \texttt{f\_orig} is the original value of \texttt{f} (already used
+to compute the address before step~5).}
 
 %-----------------------------------------------------------------------------
 \subsection*{2.5 --- Byte Ordering: Endianness}
 \hypertarget{sol-2.5}{}
 \markright{2.5}
 \addcontentsline{toc}{subsection}{2.5 --- Byte Ordering: Endianness}
+
+\begin{flushright}
+\begin{minipage}{0.88\linewidth}
+\scriptsize
+\textbf{Background --- Endianness:}\quad
+Endianness refers to the ordering of bytes within a word in memory.
+\textbf{Little-endian} (Intel/DEC): most significant byte stored at the
+highest address.
+\textbf{Big-endian} (IBM/Motorola): most significant byte stored at the
+lowest address.
+Example --- the value \texttt{0x00000003} at address \texttt{0x4000}:
+
+\begin{center}
+\begin{tabular}{lcccc}
+\toprule
+& \texttt{x4003} & \texttt{x4002} & \texttt{x4001} & \texttt{x4000} \\
+\midrule
+Little-endian & \texttt{00} & \texttt{00} & \texttt{00} & \texttt{03} \\
+Big-endian    & \texttt{03} & \texttt{00} & \texttt{00} & \texttt{00} \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{minipage}
+\end{flushright}
+\medskip
 
 Value \texttt{0xABCDEF12} stored at address 0:
 
@@ -115,6 +175,27 @@ Little-endian stores the least significant byte at the lowest address.
      + 14 \times 16^3 + 15 \times 16^2 + 1 \times 16^1 + 2 \times 16^0 \\
   &= 2{,}882{,}400{,}018
 \end{align*}
+
+\textit{Alt (Horner's method):} Evaluate left-to-right by repeated
+$\times 16 +{}$next digit --- no large powers needed:
+
+\begin{center}
+\small
+\begin{tabular}{rl}
+\toprule
+\textbf{Digit} & \textbf{Accumulator} \\
+\midrule
+A $(10)$ & $10$ \\
+B $(11)$ & $10 \times 16 + 11 = 171$ \\
+C $(12)$ & $171 \times 16 + 12 = 2{,}748$ \\
+D $(13)$ & $2{,}748 \times 16 + 13 = 43{,}981$ \\
+E $(14)$ & $43{,}981 \times 16 + 14 = 703{,}710$ \\
+F $(15)$ & $703{,}710 \times 16 + 15 = 11{,}259{,}375$ \\
+1 $(1)$  & $11{,}259{,}375 \times 16 + 1 = 180{,}150{,}001$ \\
+2 $(2)$  & $180{,}150{,}001 \times 16 + 2 = \mathbf{2{,}882{,}400{,}018}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
 
 As a signed 32-bit integer (MSB is 1):
 $2{,}882{,}400{,}018 - 2^{32} = -1{,}412{,}567{,}278$.
