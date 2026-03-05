@@ -255,25 +255,40 @@ to prevent an unwanted exception.
 
 \texttt{add \$s0, \$s0, \$s1} --- R-type:
 \begin{center}
-\begin{tabular}{cccccc}
+\small
+\begin{tabular}{lcccccc}
 \toprule
-op & rs & rt & rd & shamt & funct \\
+& op (6) & rs (5) & rt (5) & rd (5) & shamt (5) & funct (6) \\
 \midrule
-0 & 16 (\$s0) & 17 (\$s1) & 16 (\$s0) & 0 & 32 (add) \\
+Dec & 0 & 16 (\$s0) & 17 (\$s1) & 16 (\$s0) & 0 & 32 (add) \\
+Bin & \texttt{000000} & \texttt{10000} & \texttt{10001}
+    & \texttt{10000} & \texttt{00000} & \texttt{100000} \\
+Hex & \texttt{0x00} & \texttt{0x10} & \texttt{0x11}
+    & \texttt{0x10} & \texttt{0x00} & \texttt{0x20} \\
 \bottomrule
 \end{tabular}
 \end{center}
+Full word: \texttt{0000\,0010\,0001\,0001\,1000\,0000\,0010\,0000}
+$=$ \texttt{0x02118020}
 
+\bigskip
 \texttt{sw \$t1, 0(\$s0)} --- I-type:
 \begin{center}
-\begin{tabular}{cccc}
+\small
+\begin{tabular}{lcccc}
 \toprule
-op & rs & rt & immediate \\
+& op (6) & rs (5) & rt (5) & immediate (16) \\
 \midrule
-43 (sw) & 16 (\$s0) & 9 (\$t1) & 0 \\
+Dec & 43 (sw) & 16 (\$s0) & 9 (\$t1) & 0 \\
+Bin & \texttt{101011} & \texttt{10000} & \texttt{01001}
+    & \texttt{0000\,0000\,0000\,0000} \\
+Hex & \texttt{0x2B} & \texttt{0x10} & \texttt{0x09}
+    & \texttt{0x0000} \\
 \bottomrule
 \end{tabular}
 \end{center}
+Full word: \texttt{1010\,1110\,0000\,1001\,0000\,0000\,0000\,0000}
+$=$ \texttt{0xAE090000}
 
 %-----------------------------------------------------------------------------
 \subsection*{2.9 --- MIPS Fields for Exercise 2.8}
@@ -308,37 +323,63 @@ Hex: \texttt{0xAE090000}
 
 \phantomsection\addcontentsline{toc}{subsubsection}{2.10.1}
 \medskip\noindent\textbf{2.10.1} \texttt{add \$t0, \$s0, \$s1}:
-$\texttt{0x80000000} + \texttt{0xD0000000} = \texttt{0x(1)50000000}$.
-Lower 32 bits: \texttt{\$t0 = 0x50000000}.
+ALU computes
+$\texttt{0x80000000} + \texttt{0xD0000000} = \texttt{0x(1)50000000}$;
+the lower 32~bits are \texttt{0x50000000}.
+However, \texttt{add} is a \emph{signed} operation that \textbf{traps on
+overflow}.  Both operands are negative yet the 32-bit result is positive,
+so overflow is detected: the CPU raises an exception and
+\textbf{\texttt{\$t0} is not written} (the ALU result is discarded).
 
 \noindent\textbf{2.10.2}
-Both operands are negative; the true sum is
-$-2{,}147{,}483{,}648 + (-805{,}306{,}368) = -2{,}952{,}789{,}016$,
-which is below $-2^{31}$.  The result \texttt{0x50000000} is positive.
+True sum: $-2{,}147{,}483{,}648 + (-805{,}306{,}368) = -2{,}952{,}789{,}016$,
+which is below $-2^{31} = -2{,}147{,}483{,}648$.
 \textbf{Overflow has occurred.}
+Because \texttt{add} (not \texttt{addu}) was used, the processor traps
+and \texttt{\$t0} retains its prior value.
 
 \phantomsection\addcontentsline{toc}{subsubsection}{2.10.3}
 \medskip\noindent\textbf{2.10.3} \texttt{sub \$t0, \$s0, \$s1}:
 $\texttt{0x80000000} - \texttt{0xD0000000} = \texttt{0x80000000}
 + \texttt{0x30000000} = \texttt{0xB0000000}$.
-\texttt{\$t0 = 0xB0000000} $= -1{,}342{,}177{,}280$.
+True result: $-2{,}147{,}483{,}648 - (-805{,}306{,}368)
+= -1{,}342{,}177{,}280$, which fits in $[-2^{31},\;2^{31}-1]$.
+No overflow $\Rightarrow$ \texttt{\$t0 = 0xB0000000} is written normally.
 
 \noindent\textbf{2.10.4}
-True result: $-2{,}147{,}483{,}648 - (-805{,}306{,}368)
-= -1{,}342{,}177{,}280$, which fits in 32 bits.
 \textbf{No overflow.}
+The result $-1{,}342{,}177{,}280$ is representable in 32-bit signed,
+so \texttt{sub} completes without exception.
 
 \phantomsection\addcontentsline{toc}{subsubsection}{2.10.5}
 \medskip\noindent\textbf{2.10.5}
-First: \texttt{add \$t0, \$s0, \$s1}
-$\rightarrow$ \texttt{\$t0 = 0x50000000} (overflow already).
-Then: \texttt{add \$t0, \$t0, \$s0}
-$= \texttt{0x50000000} + \texttt{0x80000000} = \texttt{0xD0000000}$.
+First instruction: \texttt{add \$t0, \$s0, \$s1} --- as shown in 2.10.1,
+this overflows.  \texttt{add} traps on overflow, so:
+\begin{itemize}
+  \item The CPU raises an exception and jumps to the exception handler.
+  \item \texttt{\$t0} is \textbf{not updated}.
+  \item The second instruction \texttt{add \$t0, \$t0, \$s0} is
+        \textbf{never executed}.
+\end{itemize}
+Therefore \texttt{\$t0} remains at its prior value (unspecified here).
+
+\begin{flushright}
+\begin{minipage}{0.92\linewidth}
+\scriptsize
+\textbf{Note:}\quad
+If \texttt{addu} were used instead of \texttt{add}, no exception would
+occur and both instructions would execute:
+\texttt{0x80000000}~$+$~\texttt{0xD0000000}~$=$~\texttt{0x50000000},
+then \texttt{0x50000000}~$+$~\texttt{0x80000000}~$=$~\texttt{0xD0000000}.
+The final value \texttt{0xD0000000} would happen to equal \texttt{\$s1},
+but the computation would still be arithmetically incorrect.
+\end{minipage}
+\end{flushright}
 
 \noindent\textbf{2.10.6}
-The first add already overflowed. The final value \texttt{0xD0000000}
-happens to equal \texttt{\$s1}, but the computation is incorrect.
-\textbf{Overflow occurred} in the first instruction.
+\textbf{Overflow occurred} in the first \texttt{add}.
+The exception prevents the second instruction from running,
+so no ``desired result'' is produced at all.
 
 %-----------------------------------------------------------------------------
 \subsection*{2.11 --- Overflow Ranges}
@@ -346,23 +387,191 @@ happens to equal \texttt{\$s1}, but the computation is incorrect.
 \markright{2.11}
 \addcontentsline{toc}{subsection}{2.11 --- Overflow Ranges}
 
-\texttt{\$s1 = 128}.
+\begin{flushright}
+\begin{minipage}{0.92\linewidth}
+\scriptsize
+\textbf{Background: signed overflow vs.\ unsigned wrap}\par\smallskip
+MIPS distinguishes two kinds of arithmetic instructions:
 
-\noindent\textbf{2.11.1} \texttt{add \$s0, \$s0, \$s1}: overflow when
-$\texttt{\$s0} + 128 > 2^{31}-1$, i.e.\ $\texttt{\$s0} > 2^{31}-129
-= 2{,}147{,}483{,}519$.
-Range: $\texttt{\$s0} \in [2{,}147{,}483{,}520,\; 2{,}147{,}483{,}647]$.
+\smallskip
+\begin{tabular}{@{}l l l l@{}}
+\toprule
+& Boundary & Condition & MIPS behaviour \\
+\midrule
+Signed overflow &
+  \texttt{0x80000000} ($2^{31}$, bit~31) &
+  sign flips (pos$\to$neg or neg$\to$pos) &
+  \texttt{add}/\texttt{sub} $\to$ \textbf{trap} \\
+Unsigned wrap &
+  \texttt{0x100000000} ($2^{32}$, bit~32) &
+  carry out of bit~31 &
+  \texttt{addu}/\texttt{subu} $\to$ no trap \\
+\bottomrule
+\end{tabular}
 
-\noindent\textbf{2.11.2} \texttt{sub \$s0, \$s0, \$s1}: overflow when
-$\texttt{\$s0} - 128 < -2^{31}$, i.e.\ $\texttt{\$s0} < -2^{31}+128
-= -2{,}147{,}483{,}520$.
-Range: $\texttt{\$s0} \in [-2{,}147{,}483{,}648,\; -2{,}147{,}483{,}521]$.
+\smallskip
+Example: \texttt{0x7FFFFFFF + 1 = 0x80000000}.
+Signed: positive max $\to$ negative $\Rightarrow$ overflow
+(\texttt{add} traps).
+Unsigned: just $2^{31}$, still in $[0,\;2^{32}-1]$ $\Rightarrow$ no problem.
 
-\noindent\textbf{2.11.3} \texttt{sub \$s0, \$s1, \$s0}: overflow when
-$128 - \texttt{\$s0} > 2^{31}-1$ (positive overflow) or
-$128 - \texttt{\$s0} < -2^{31}$ (negative overflow).
-Positive: $\texttt{\$s0} < 128 - (2^{31}-1) = -2{,}147{,}483{,}519$, so
-$\texttt{\$s0} \in [-2{,}147{,}483{,}648,\; -2{,}147{,}483{,}520]$.
+\smallskip
+Example: \texttt{0xFFFFFFFF + 1 = 0x(1)00000000}.
+Signed: $-1+1=0$ $\Rightarrow$ no overflow (\texttt{add} does not trap).
+Unsigned: exceeds 32~bits $\Rightarrow$ wraps to \texttt{0x00000000}
+(\texttt{addu} silently wraps).
+
+\smallskip
+This problem uses \texttt{add}/\texttt{sub} (signed),
+so the overflow boundary is $2^{31}$ (\texttt{0x80000000}),
+\textbf{not} $2^{32}$ (\texttt{0x100000000}).
+\end{minipage}
+\end{flushright}
+
+\medskip
+\texttt{\$s1} = 128 = \texttt{0x80} = $2^{7}$.\quad
+32-bit signed range: $[-2^{31},\; 2^{31}-1]$
+= [\texttt{0x80000000},\; \texttt{0x7FFFFFFF}].
+
+%--- 2.11.1 ---
+\medskip\noindent\textbf{2.11.1} \texttt{add \$s0, \$s0, \$s1}
+
+Positive overflow occurs when the sum exceeds $2^{31}-1$:
+\begin{align}
+  \texttt{\$s0} + \texttt{0x80} &> 2^{31}-1 \notag\\
+  \texttt{\$s0} &> 2^{31}-1-\texttt{0x80} \notag\\
+  \texttt{\$s0} &> 2^{31}-\texttt{0x81} \notag
+\end{align}
+Therefore the overflow range is $\texttt{\$s0} \ge 2^{31}-\texttt{0x80}$:
+
+\smallskip
+\noindent
+\begin{tabular}{@{}l l l l@{}}
+\toprule
+& Lower bound & & Upper bound \\
+\midrule
+Hex & \texttt{0x7FFFFF80} & --- & \texttt{0x7FFFFFFF} \\
+Bin & \texttt{0111\,1111\,...\,1000\,0000} & --- &
+      \texttt{0111\,1111\,...\,1111\,1111} \\
+\bottomrule
+\end{tabular}
+\smallskip
+
+\noindent$(= [2^{31}-2^{7},\; 2^{31}-1])$
+
+%--- 2.11.2 ---
+\medskip\noindent\textbf{2.11.2} \texttt{sub \$s0, \$s0, \$s1}
+
+Negative overflow occurs when the difference falls below $-2^{31}$:
+\begin{align}
+  \texttt{\$s0} - \texttt{0x80} &< -2^{31} \notag\\
+  \texttt{\$s0} &< -2^{31}+\texttt{0x80} \notag
+\end{align}
+Therefore the overflow range is $\texttt{\$s0} \le -2^{31}+\texttt{0x7F}$:
+
+\smallskip
+\noindent
+\begin{tabular}{@{}l l l l@{}}
+\toprule
+& Lower bound & & Upper bound \\
+\midrule
+Hex & \texttt{0x80000000} & --- & \texttt{0x8000007F} \\
+Bin & \texttt{1000\,0000\,...\,0000\,0000} & --- &
+      \texttt{1000\,0000\,...\,0111\,1111} \\
+\bottomrule
+\end{tabular}
+\smallskip
+
+\noindent$(= [-2^{31},\; -2^{31}+2^{7}-1])$
+
+%--- 2.11.3 ---
+\medskip\noindent\textbf{2.11.3} \texttt{sub \$s0, \$s1, \$s0}
+
+Result is $\texttt{0x80} - \texttt{\$s0}$.  Two cases to check:
+
+\medskip\noindent\textit{(a) Positive overflow}
+($\texttt{0x80} - \texttt{\$s0} > 2^{31}-1$):
+\begin{align}
+  \texttt{0x80} - \texttt{\$s0} &> 2^{31}-1 \notag\\
+  -\texttt{\$s0} &> 2^{31}-1-\texttt{0x80} \notag\\
+  \texttt{\$s0} &< -(2^{31}-\texttt{0x81}) \notag\\
+  \texttt{\$s0} &< -2^{31}+\texttt{0x81} \notag
+\end{align}
+Therefore the overflow range is $\texttt{\$s0} \le -2^{31}+\texttt{0x80}$:
+
+\medskip\noindent\textit{(b) Negative overflow}
+($\texttt{0x80} - \texttt{\$s0} < -2^{31}$):
+\begin{align}
+  \texttt{0x80} - \texttt{\$s0} &< -2^{31} \notag\\
+  -\texttt{\$s0} &< -2^{31}-\texttt{0x80} \notag\\
+  \texttt{\$s0} &> 2^{31}+\texttt{0x80} \notag
+\end{align}
+But $\texttt{\$s0} \le 2^{31}-1 < 2^{31}+\texttt{0x80}$, so this is
+\textbf{impossible} for any 32-bit signed value.
+
+\smallskip
+\noindent
+\begin{tabular}{@{}l l l l@{}}
+\toprule
+& Lower bound & & Upper bound \\
+\midrule
+Hex & \texttt{0x80000000} & --- & \texttt{0x80000080} \\
+Bin & \texttt{1000\,0000\,...\,0000\,0000} & --- &
+      \texttt{1000\,0000\,...\,1000\,0000} \\
+\bottomrule
+\end{tabular}
+\smallskip
+
+\noindent$(= [-2^{31},\; -2^{31}+2^{7}])$
+
+\bigskip
+\begin{flushright}
+\begin{minipage}{0.95\linewidth}
+\scriptsize
+\textbf{Alternative --- binary arithmetic approach}\par\smallskip
+\texttt{\$s1} = bit~7 only:
+\texttt{0000\,0000\,0000\,0000\,0000\,0000\,\underline{1}000\,0000}.
+Overflow boundary ($2^{31}$) = bit~31 only:
+\texttt{\underline{1}000\,0000\,0000\,0000\,0000\,0000\,0000\,0000}.
+The boundary values can be found by direct binary addition/subtraction
+on just the relevant bits.
+
+\medskip
+\textbf{2.11.1} Lower bound = overflow boundary $-$ \texttt{\$s1}:
+\begin{verbatim}
+    1000 0000 0000 0000 0000 0000 0000 0000   (2^31)
+  - 0000 0000 0000 0000 0000 0000 1000 0000   ($s1)
+  ------------------------------------------
+    0111 1111 1111 1111 1111 1111 1000 0000   (lower bound)
+\end{verbatim}
+\vspace{-6pt}
+Borrow propagates from bit~7 through bit~30, flipping
+all those bits to~1 and clearing bit~31.
+Upper bound = \texttt{0111\,1111\,...\,1111\,1111} ($2^{31}-1$).
+
+\medskip
+\textbf{2.11.2} Upper bound = minimum signed $+$ (\texttt{\$s1} $-$ 1):
+\begin{verbatim}
+    1000 0000 0000 0000 0000 0000 0000 0000   (-2^31)
+  + 0000 0000 0000 0000 0000 0000 0111 1111   ($s1 - 1)
+  ------------------------------------------
+    1000 0000 0000 0000 0000 0000 0111 1111   (upper bound)
+\end{verbatim}
+\vspace{-6pt}
+No carry --- only bits [6:0] change. Lower bound = \texttt{1000\,0000\,...\,0000\,0000} ($-2^{31}$).
+
+\medskip
+\textbf{2.11.3} Upper bound = minimum signed $+$ \texttt{\$s1}:
+\begin{verbatim}
+    1000 0000 0000 0000 0000 0000 0000 0000   (-2^31)
+  + 0000 0000 0000 0000 0000 0000 1000 0000   ($s1)
+  ------------------------------------------
+    1000 0000 0000 0000 0000 0000 1000 0000   (upper bound)
+\end{verbatim}
+\vspace{-6pt}
+No carry --- only bit~7 changes. Lower bound = \texttt{1000\,0000\,...\,0000\,0000} ($-2^{31}$).
+\end{minipage}
+\end{flushright}
 
 %-----------------------------------------------------------------------------
 \subsection*{2.12 --- Binary to Instruction Type}
