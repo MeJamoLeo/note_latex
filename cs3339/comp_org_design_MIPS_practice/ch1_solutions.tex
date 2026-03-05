@@ -292,6 +292,20 @@ faster clock.
 
 Dynamic power: $P_{\text{dyn}} = C \times V^2 \times f$.
 
+\begin{flushright}
+\begin{minipage}{0.85\linewidth}
+\scriptsize
+\textbf{Background:}\quad
+Transistor gates and interconnect wires in a CMOS chip behave as tiny
+capacitors. Every signal transition (0$\to$1 or 1$\to$0) charges or
+discharges these capacitors, and this is the physical origin of dynamic
+power. The \emph{average capacitance}~$C$ represents the per-cycle average
+of all switched capacitive load across the chip, so
+$C = P_{\mathrm{dyn}}/(V^{2}\!f)$.
+\end{minipage}
+\end{flushright}
+\medskip
+
 \phantomsection\addcontentsline{toc}{subsubsection}{1.9.1}
 \medskip\noindent\textbf{1.9.1} Solve for $C$:
 
@@ -320,7 +334,8 @@ $C = P_{\text{dyn}}/(V^2 f)$ & $\dfrac{90}{1.5625 \times 3.6\text{G}}
 \midrule
 $P_{\text{total}}$ (W)       & 100  & 70 \\
 $P_{\text{static}}$ (W)      & 10   & 30 \\
-Static \%                     & 10\% & 42.9\% \\
+Static \% $=P_{\text{static}}/P_{\text{total}}$
+                              & $10/100 = 10\%$ & $30/70 \approx 42.9\%$ \\
 $P_{\text{static}}/P_{\text{dyn}}$ & $1/9 \approx 0.111$ & $3/4 = 0.75$ \\
 \bottomrule
 \end{tabular}
