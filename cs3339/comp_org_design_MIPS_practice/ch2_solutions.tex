@@ -206,21 +206,46 @@ $2{,}882{,}400{,}018 - 2^{32} = -1{,}412{,}567{,}278$.
 \markright{2.7}
 \addcontentsline{toc}{subsection}{2.7 --- C to MIPS: 8-Byte Word Arrays}
 
-Same as 2.3 but with 8-byte elements, so multiply index by 8 (shift left by
-3):
+Elements are 8 bytes but MIPS registers are 32 bits (4 bytes), so each
+element requires two \texttt{lw}/\texttt{sw} operations (upper and lower
+word). The index is multiplied by 8 (shift left by 3). Assuming big-endian
+(upper word at offset 0, lower word at offset 4):
 \begin{verbatim}
+    # Load A[i] (64-bit)
     sll  $t0, $s3, 3       # $t0 = i * 8
     add  $t0, $s6, $t0     # $t0 = &A[i]
-    lw   $t0, 0($t0)       # $t0 = A[i] (lower 32 bits)
-    sll  $t1, $s4, 3       # $t1 = j * 8
-    add  $t1, $s6, $t1     # $t1 = &A[j]
-    lw   $t1, 0($t1)       # $t1 = A[j] (lower 32 bits)
-    add  $t0, $t0, $t1     # $t0 = A[i] + A[j]
-    sw   $t0, 64($s7)      # B[8] = $t0  (8*8=64)
+    lw   $t1, 0($t0)       # $t1 = A[i] upper 32 bits
+    lw   $t2, 4($t0)       # $t2 = A[i] lower 32 bits
+
+    # Load A[j] (64-bit)
+    sll  $t3, $s4, 3       # $t3 = j * 8
+    add  $t3, $s6, $t3     # $t3 = &A[j]
+    lw   $t4, 0($t3)       # $t4 = A[j] upper 32 bits
+    lw   $t5, 4($t3)       # $t5 = A[j] lower 32 bits
+
+    # 64-bit addition: lower + carry into upper
+    addu $t6, $t2, $t5     # $t6 = lower sum
+    sltu $t7, $t6, $t2     # $t7 = carry (1 if overflow)
+    addu $t1, $t1, $t4     # $t1 = upper sum (no carry yet)
+    addu $t1, $t1, $t7     # $t1 = upper sum + carry
+
+    # Store to B[8] (offset = 8*8 = 64)
+    sw   $t1, 64($s7)      # B[8] upper 32 bits
+    sw   $t6, 68($s7)      # B[8] lower 32 bits
 \end{verbatim}
-Note: for a full 64-bit value on a 32-bit MIPS, both the upper and lower
-32 bits would need to be loaded and added. The solution above handles only
-the lower word.
+\textit{Why \texttt{addu} instead of \texttt{add}?}\enspace
+\texttt{add} raises an overflow exception, while \texttt{addu} does not.
+Here the lower-word addition is expected to overflow (the carry is
+propagated to the upper word via \texttt{sltu}), so \texttt{addu} is used
+to prevent an unwanted exception.
+
+\medskip\noindent\textit{Instruction templates:}
+\begin{itemize}
+  \item \texttt{addu} (Add Unsigned) --- \texttt{addu \$rd, \$rs, \$rt}:
+        \texttt{\$rd = \$rs + \$rt} (no overflow exception)
+  \item \texttt{sltu} (Set Less Than Unsigned) --- \texttt{sltu \$rd, \$rs, \$rt}:
+        \texttt{\$rd = (\$rs < \$rt) ? 1 : 0} (used here to detect carry)
+\end{itemize}
 
 %-----------------------------------------------------------------------------
 \subsection*{2.8 --- Instruction Format Fields}
