@@ -2,7 +2,7 @@
 % Chapter 4 Exercises
 %=============================================================================
 \newpage
-\section{Chapter 4 Exercises [895]}
+\section{Chapter 4 Exercises [1060]}
 
 %-----------------------------------------------------------------------------
 \subsection{[20] Control Signals for \texttt{lw2}}
@@ -89,7 +89,7 @@ logical 0. This is often called a ``stuck-at-0'' fault.
 \problembreak
 
 %-----------------------------------------------------------------------------
-\subsection{[40] Trace Instruction Through Datapath}
+\subsection{[45] Trace Instruction Through Datapath}
 \hypertarget{prob-4.5}{}
 \noindent$\langle$\S4.4$\rangle$\medskip
 
@@ -113,8 +113,8 @@ execution of the following instruction through the datapath:
   \phantomsection\addcontentsline{toc}{subsubsection}{4.5.4~[10]}
   \item[4.5.4] [10] What are the input values for the ALU and the two
         read data outputs?
-  \phantomsection\addcontentsline{toc}{subsubsection}{4.5.5~[5]}
-  \item[4.5.5] [5] What are the values of all inputs for the registers?
+  \phantomsection\addcontentsline{toc}{subsubsection}{4.5.5~[10]}
+  \item[4.5.5] [10] What are the values of all inputs for the registers?
 \end{enumerate}
 
 \problembreak
@@ -141,7 +141,7 @@ load/store.
 \problembreak
 
 %-----------------------------------------------------------------------------
-\subsection{[20] Instruction Latencies}
+\subsection{[30] Instruction Latencies}
 \hypertarget{prob-4.7}{}
 \noindent$\langle$\S4.4$\rangle$\medskip
 
@@ -169,10 +169,10 @@ register's data input must be stable before the rising edge of the clock.
   \item[4.7.1] [5] What is the latency of an R-type instruction (i.e., how
         long must the clock period be to ensure that this instruction works
         correctly)?
-  \phantomsection\addcontentsline{toc}{subsubsection}{4.7.2~[5]}
-  \item[4.7.2] [5] What is the latency of a \texttt{lw} instruction?
-  \phantomsection\addcontentsline{toc}{subsubsection}{4.7.3~[5]}
-  \item[4.7.3] [5] What is the latency of an arithmetic, logical, or shift
+  \phantomsection\addcontentsline{toc}{subsubsection}{4.7.2~[10]}
+  \item[4.7.2] [10] What is the latency of a \texttt{lw} instruction?
+  \phantomsection\addcontentsline{toc}{subsubsection}{4.7.3~[10]}
+  \item[4.7.3] [10] What is the latency of an arithmetic, logical, or shift
         I-type (non-load) instruction?
   \phantomsection\addcontentsline{toc}{subsubsection}{4.7.4~[5]}
   \item[4.7.4] [5] What is the minimum clock period for this CPU?
@@ -266,7 +266,7 @@ instruction to MIPS:
 \problembreak
 
 %-----------------------------------------------------------------------------
-\subsection{[25] Swap Instruction}
+\subsection{[30] Swap Instruction}
 \hypertarget{prob-4.12}{}
 \noindent$\langle$\S4.4$\rangle$\medskip
 
@@ -279,8 +279,8 @@ instruction to MIPS:
 \begin{enumerate}
   \phantomsection\addcontentsline{toc}{subsubsection}{4.12.1~[5]}
   \item[4.12.1] [5] Which new functional blocks (if any) do we need?
-  \phantomsection\addcontentsline{toc}{subsubsection}{4.12.2~[5]}
-  \item[4.12.2] [5] Which existing functional blocks (if any) require
+  \phantomsection\addcontentsline{toc}{subsubsection}{4.12.2~[10]}
+  \item[4.12.2] [10] Which existing functional blocks (if any) require
         modification?
   \phantomsection\addcontentsline{toc}{subsubsection}{4.12.3~[5]}
   \item[4.12.3] [5] What new data paths do we need (if any)?
@@ -295,7 +295,7 @@ instruction to MIPS:
 \problembreak
 
 %-----------------------------------------------------------------------------
-\subsection{[25] Store Sum Instruction}
+\subsection{[35] Store Sum Instruction}
 \hypertarget{prob-4.13}{}
 \noindent$\langle$\S4.4$\rangle$\medskip
 
@@ -306,10 +306,10 @@ instruction to MIPS:
 \end{verbatim}
 
 \begin{enumerate}
-  \phantomsection\addcontentsline{toc}{subsubsection}{4.13.1~[5]}
-  \item[4.13.1] [5] Which new functional blocks (if any) do we need?
-  \phantomsection\addcontentsline{toc}{subsubsection}{4.13.2~[5]}
-  \item[4.13.2] [5] Which existing functional blocks (if any) require
+  \phantomsection\addcontentsline{toc}{subsubsection}{4.13.1~[10]}
+  \item[4.13.1] [10] Which new functional blocks (if any) do we need?
+  \phantomsection\addcontentsline{toc}{subsubsection}{4.13.2~[10]}
+  \item[4.13.2] [10] Which existing functional blocks (if any) require
         modification?
   \phantomsection\addcontentsline{toc}{subsubsection}{4.13.3~[5]}
   \item[4.13.3] [5] What new data paths do we need (if any)?
@@ -334,7 +334,7 @@ critical path?
 \problembreak
 
 %-----------------------------------------------------------------------------
-\subsection{[20] No-Offset Load/Store Redesign}
+\subsection{[25] No-Offset Load/Store Redesign}
 \hypertarget{prob-4.15}{}
 \noindent$\langle$\S4.4$\rangle$\medskip
 
@@ -351,8 +351,8 @@ combined instructions.
 \begin{enumerate}
   \phantomsection\addcontentsline{toc}{subsubsection}{4.15.1~[5]}
   \item[4.15.1] [5] What would the new clock cycle time be?
-  \phantomsection\addcontentsline{toc}{subsubsection}{4.15.2~[5]}
-  \item[4.15.2] [5] Would a program with the instruction mix presented in
+  \phantomsection\addcontentsline{toc}{subsubsection}{4.15.2~[10]}
+  \item[4.15.2] [10] Would a program with the instruction mix presented in
         Exercise 4.7 run faster or slower on this new CPU? By how much? (For
         simplicity, assume any \texttt{lw} or \texttt{sw} is replaced with a
         sequence of two instructions.)
@@ -368,7 +368,7 @@ combined instructions.
 \problembreak
 
 %-----------------------------------------------------------------------------
-\subsection{[40] Pipelining and Clock Cycle Time}
+\subsection{[45] Pipelining and Clock Cycle Time}
 \hypertarget{prob-4.16}{}
 \noindent$\langle$\S4.6$\rangle$\medskip
 
@@ -393,8 +393,8 @@ down as follows: ALU/Logic 40\%, Jump/Branch 20\%, Load 20\%, Store 20\%.
   \phantomsection\addcontentsline{toc}{subsubsection}{4.16.1~[5]}
   \item[4.16.1] [5] What is the clock cycle time in a pipelined and
         non-pipelined processor?
-  \phantomsection\addcontentsline{toc}{subsubsection}{4.16.2~[5]}
-  \item[4.16.2] [5] What is the total latency of an \texttt{lw} instruction
+  \phantomsection\addcontentsline{toc}{subsubsection}{4.16.2~[10]}
+  \item[4.16.2] [10] What is the total latency of an \texttt{lw} instruction
         in a pipelined and non-pipelined processor?
   \phantomsection\addcontentsline{toc}{subsubsection}{4.16.3~[10]}
   \item[4.16.3] [10] If we can split one stage of the pipelined datapath
@@ -525,7 +525,7 @@ cycle in which another instruction accesses data.
 \problembreak
 
 %-----------------------------------------------------------------------------
-\subsection{[25] Four-Stage Pipeline}
+\subsection{[20] Four-Stage Pipeline}
 \hypertarget{prob-4.23}{}
 \noindent$\langle$\S4.6$\rangle$\medskip
 
@@ -538,8 +538,8 @@ the pipeline has only four stages.
   \phantomsection\addcontentsline{toc}{subsubsection}{4.23.1~[10]}
   \item[4.23.1] [10] How will the reduction in pipeline depth affect
         performance?
-  \phantomsection\addcontentsline{toc}{subsubsection}{4.23.2~[10]}
-  \item[4.23.2] [10] How might this change improve the pipeline performance?
+  \phantomsection\addcontentsline{toc}{subsubsection}{4.23.2~[5]}
+  \item[4.23.2] [5] How might this change improve the pipeline performance?
   \phantomsection\addcontentsline{toc}{subsubsection}{4.23.3~[5]}
   \item[4.23.3] [5] How might this change degrade the performance?
 \end{enumerate}
@@ -655,7 +655,7 @@ instruction that consumes it):
 \problembreak
 
 %-----------------------------------------------------------------------------
-\subsection{[55] Hazard Detection Code Analysis}
+\subsection{[75] Hazard Detection Code Analysis}
 \hypertarget{prob-4.27}{}
 \noindent$\langle$\S4.8$\rangle$\medskip
 
@@ -683,23 +683,23 @@ datapath:
   \item[4.27.3] [10] If there is forwarding, for the first seven cycles
         during the execution of this code, specify which signals are asserted
         in each cycle by hazard detection and forwarding units.
-  \phantomsection\addcontentsline{toc}{subsubsection}{4.27.4~[10]}
-  \item[4.27.4] [10] If there is no forwarding, what new input and output
+  \phantomsection\addcontentsline{toc}{subsubsection}{4.27.4~[20]}
+  \item[4.27.4] [20] If there is no forwarding, what new input and output
         signals do we need for the hazard detection unit? Using this
         instruction sequence as an example, explain why.
   \phantomsection\addcontentsline{toc}{subsubsection}{4.27.5~[10]}
   \item[4.27.5] [10] For the new hazard detection unit from 4.27.4, roughly
         how many stall cycles are needed for the first 5 cycles during the
         execution of this code?
-  \phantomsection\addcontentsline{toc}{subsubsection}{4.27.6~[10]}
-  \item[4.27.6] [10] For the new hazard detection unit, what is the total
+  \phantomsection\addcontentsline{toc}{subsubsection}{4.27.6~[20]}
+  \item[4.27.6] [20] For the new hazard detection unit, what is the total
         number of stall cycles for the entire code sequence?
 \end{enumerate}
 
 \problembreak
 
 %-----------------------------------------------------------------------------
-\subsection{[55] Branch Prediction CPI Impact}
+\subsection{[60] Branch Prediction CPI Impact}
 \hypertarget{prob-4.28}{}
 \noindent$\langle$\S4.9$\rangle$\medskip
 
@@ -742,8 +742,8 @@ categories is:
   \item[4.28.4] [10] With the 2-bit predictor, what speedup would be
         achieved if we could convert all branch instructions to ALU
         instructions?
-  \phantomsection\addcontentsline{toc}{subsubsection}{4.28.5~[5]}
-  \item[4.28.5] [5] With the 2-bit predictor, what speedup would be achieved
+  \phantomsection\addcontentsline{toc}{subsubsection}{4.28.5~[10]}
+  \item[4.28.5] [10] With the 2-bit predictor, what speedup would be achieved
         if we could convert half of the branch instructions to non-ALU
         instructions?
   \phantomsection\addcontentsline{toc}{subsubsection}{4.28.6~[10]}
@@ -756,7 +756,7 @@ categories is:
 \problembreak
 
 %-----------------------------------------------------------------------------
-\subsection{[60] Branch Predictor Design}
+\subsection{[80] Branch Predictor Design}
 \hypertarget{prob-4.29}{}
 \noindent$\langle$\S4.9$\rangle$\medskip
 
@@ -774,8 +774,8 @@ outcomes: T, T, NT, T, T, NT, \ldots
   \phantomsection\addcontentsline{toc}{subsubsection}{4.29.3~[10]}
   \item[4.29.3] [10] What is the accuracy of the 2-bit predictor if this
         pattern is repeated forever?
-  \phantomsection\addcontentsline{toc}{subsubsection}{4.29.4~[10]}
-  \item[4.29.4] [10] Design a predictor that would achieve perfect accuracy
+  \phantomsection\addcontentsline{toc}{subsubsection}{4.29.4~[30]}
+  \item[4.29.4] [30] Design a predictor that would achieve perfect accuracy
         if this pattern is repeated forever. Your predictor should be a
         sequential circuit with one output that provides a prediction (1 for
         taken, 0 for not taken) and no inputs other than the clock and the
@@ -794,7 +794,7 @@ outcomes: T, T, NT, T, T, NT, \ldots
 \problembreak
 
 %-----------------------------------------------------------------------------
-\subsection{[50] Exception Handling in Pipeline}
+\subsection{[60] Exception Handling in Pipeline}
 \hypertarget{prob-4.30}{}
 \noindent$\langle$\S4.10$\rangle$\medskip
 
@@ -809,8 +809,8 @@ design. The first three problems refer to the following two instructions:
 \end{center}
 
 \begin{enumerate}
-  \phantomsection\addcontentsline{toc}{subsubsection}{4.30.1~[10]}
-  \item[4.30.1] [10] Which exceptions can each of these instructions trigger?
+  \phantomsection\addcontentsline{toc}{subsubsection}{4.30.1~[5]}
+  \item[4.30.1] [5] Which exceptions can each of these instructions trigger?
         For each exception, specify the pipeline stage in which it is
         detected.
   \phantomsection\addcontentsline{toc}{subsubsection}{4.30.2~[10]}
@@ -821,13 +821,13 @@ design. The first three problems refer to the following two instructions:
   \item[4.30.3] [10] If the second instruction is fetched immediately after
         the first, describe what happens in the pipeline when the first
         instruction causes an exception. Show the pipeline execution diagram.
-  \phantomsection\addcontentsline{toc}{subsubsection}{4.30.4~[10]}
-  \item[4.30.4] [10] In vectored exception handling, the table of exception
+  \phantomsection\addcontentsline{toc}{subsubsection}{4.30.4~[20]}
+  \item[4.30.4] [20] In vectored exception handling, the table of exception
         handler addresses is in data memory at a known address. Change the
         pipeline to implement this. Repeat Exercise 4.30.3 using this
         modified pipeline.
-  \phantomsection\addcontentsline{toc}{subsubsection}{4.30.5~[10]}
-  \item[4.30.5] [10] We want to emulate vectored exception handling on a
+  \phantomsection\addcontentsline{toc}{subsubsection}{4.30.5~[15]}
+  \item[4.30.5] [15] We want to emulate vectored exception handling on a
         machine that has only one fixed handler address. Write the code that
         should be at that fixed address.
 \end{enumerate}
@@ -835,7 +835,7 @@ design. The first three problems refer to the following two instructions:
 \problembreak
 
 %-----------------------------------------------------------------------------
-\subsection{[105] Two-Issue Processor}
+\subsection{[180] Two-Issue Processor}
 \hypertarget{prob-4.31}{}
 \noindent$\langle$\S4.11$\rangle$\medskip
 
@@ -864,8 +864,8 @@ properties:
 \end{enumerate}
 
 \begin{enumerate}
-  \phantomsection\addcontentsline{toc}{subsubsection}{4.31.1~[10]}
-  \item[4.31.1] [10] Draw a pipeline diagram showing how the MIPS code above
+  \phantomsection\addcontentsline{toc}{subsubsection}{4.31.1~[30]}
+  \item[4.31.1] [30] Draw a pipeline diagram showing how the MIPS code above
         executes on the two-issue processor.
   \phantomsection\addcontentsline{toc}{subsubsection}{4.31.2~[10]}
   \item[4.31.2] [10] What is the speedup of going from a one-issue to a
@@ -876,8 +876,8 @@ properties:
   \phantomsection\addcontentsline{toc}{subsubsection}{4.31.4~[20]}
   \item[4.31.4] [20] Repeat Exercise 4.31.1 using your optimized code from
         4.31.3.
-  \phantomsection\addcontentsline{toc}{subsubsection}{4.31.5~[5]}
-  \item[4.31.5] [5] Repeat Exercise 4.31.1, but this time use your
+  \phantomsection\addcontentsline{toc}{subsubsection}{4.31.5~[30]}
+  \item[4.31.5] [30] Repeat Exercise 4.31.1, but this time use your
         optimized code from Exercise 4.31.3.
   \phantomsection\addcontentsline{toc}{subsubsection}{4.31.6~[10]}
   \item[4.31.6] [10] What is the speedup of going from a one-issue to a
@@ -887,14 +887,14 @@ properties:
         iteration of the unrolled loop handles two iterations of the original
         loop. Then, rearrange/rewrite your unrolled code to achieve better
         performance on the one-issue processor.
-  \phantomsection\addcontentsline{toc}{subsubsection}{4.31.8~[10]}
-  \item[4.31.8] [10] Repeat Exercise 4.31.4 for the unrolled code on a
+  \phantomsection\addcontentsline{toc}{subsubsection}{4.31.8~[20]}
+  \item[4.31.8] [20] Repeat Exercise 4.31.4 for the unrolled code on a
         two-issue processor.
   \phantomsection\addcontentsline{toc}{subsubsection}{4.31.9~[10]}
   \item[4.31.9] [10] What is the speedup of going from a one-issue to a
         two-issue processor? (Assume the loop runs thousands of iterations.)
-  \phantomsection\addcontentsline{toc}{subsubsection}{4.31.10~[10]}
-  \item[4.31.10] [10] What is the speedup if the two-issue processor can run
+  \phantomsection\addcontentsline{toc}{subsubsection}{4.31.10~[30]}
+  \item[4.31.10] [30] What is the speedup if the two-issue processor can run
         two arithmetic/logic instructions together, but the instructions in
         a packet can be any type except that two memory operations cannot be
         scheduled at the same time?
