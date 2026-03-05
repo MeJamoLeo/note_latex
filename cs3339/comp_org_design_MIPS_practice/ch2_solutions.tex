@@ -387,191 +387,69 @@ so no ``desired result'' is produced at all.
 \markright{2.11}
 \addcontentsline{toc}{subsection}{2.11 --- Overflow Ranges}
 
-\begin{flushright}
-\begin{minipage}{0.92\linewidth}
-\scriptsize
-\textbf{Background: signed overflow vs.\ unsigned wrap}\par\smallskip
-MIPS distinguishes two kinds of arithmetic instructions:
-
-\smallskip
-\begin{tabular}{@{}l l l l@{}}
-\toprule
-& Boundary & Condition & MIPS behaviour \\
-\midrule
-Signed overflow &
-  \texttt{0x80000000} ($2^{31}$, bit~31) &
-  sign flips (pos$\to$neg or neg$\to$pos) &
-  \texttt{add}/\texttt{sub} $\to$ \textbf{trap} \\
-Unsigned wrap &
-  \texttt{0x100000000} ($2^{32}$, bit~32) &
-  carry out of bit~31 &
-  \texttt{addu}/\texttt{subu} $\to$ no trap \\
-\bottomrule
-\end{tabular}
-
-\smallskip
-Example: \texttt{0x7FFFFFFF + 1 = 0x80000000}.
-Signed: positive max $\to$ negative $\Rightarrow$ overflow
-(\texttt{add} traps).
-Unsigned: just $2^{31}$, still in $[0,\;2^{32}-1]$ $\Rightarrow$ no problem.
-
-\smallskip
-Example: \texttt{0xFFFFFFFF + 1 = 0x(1)00000000}.
-Signed: $-1+1=0$ $\Rightarrow$ no overflow (\texttt{add} does not trap).
-Unsigned: exceeds 32~bits $\Rightarrow$ wraps to \texttt{0x00000000}
-(\texttt{addu} silently wraps).
-
-\smallskip
-This problem uses \texttt{add}/\texttt{sub} (signed),
-so the overflow boundary is $2^{31}$ (\texttt{0x80000000}),
-\textbf{not} $2^{32}$ (\texttt{0x100000000}).
-\end{minipage}
-\end{flushright}
-
-\medskip
-\texttt{\$s1} = 128 = \texttt{0x80} = $2^{7}$.\quad
-32-bit signed range: $[-2^{31},\; 2^{31}-1]$
-= [\texttt{0x80000000},\; \texttt{0x7FFFFFFF}].
+\texttt{\$s1} = 128 = \texttt{0x80}.\quad
+Signed overflow occurs when the result falls outside
+$[-2^{31},\; 2^{31}-1]$.
 
 %--- 2.11.1 ---
 \medskip\noindent\textbf{2.11.1} \texttt{add \$s0, \$s0, \$s1}
 
-Positive overflow occurs when the sum exceeds $2^{31}-1$:
-\begin{align}
-  \texttt{\$s0} + \texttt{0x80} &> 2^{31}-1 \notag\\
-  \texttt{\$s0} &> 2^{31}-1-\texttt{0x80} \notag\\
-  \texttt{\$s0} &> 2^{31}-\texttt{0x81} \notag
-\end{align}
-Therefore the overflow range is $\texttt{\$s0} \ge 2^{31}-\texttt{0x80}$:
+\noindent\textit{Positive overflow}
+($\texttt{\$s0} + 2^{7} > 2^{31}-1$):
+\[
+  \texttt{\$s0} > 2^{31}-1-2^{7}
+  \;\Longrightarrow\;
+  \texttt{\$s0} \ge 2^{31}-2^{7}
+\]
+$\texttt{\$s0} \in [2^{31}-2^{7},\; 2^{31}-1]
+= [\texttt{0x7FFFFF80},\; \texttt{0x7FFFFFFF}]$.
 
 \smallskip
-\noindent
-\begin{tabular}{@{}l l l l@{}}
-\toprule
-& Lower bound & & Upper bound \\
-\midrule
-Hex & \texttt{0x7FFFFF80} & --- & \texttt{0x7FFFFFFF} \\
-Bin & \texttt{0111\,1111\,...\,1000\,0000} & --- &
-      \texttt{0111\,1111\,...\,1111\,1111} \\
-\bottomrule
-\end{tabular}
-\smallskip
-
-\noindent$(= [2^{31}-2^{7},\; 2^{31}-1])$
+\noindent\textit{Negative overflow}
+($\texttt{\$s0} + 2^{7} < -2^{31}$):
+$\texttt{\$s0} < -2^{31}-2^{7}$,
+but $\texttt{\$s0} \ge -2^{31}$ always, so \textbf{impossible}.
 
 %--- 2.11.2 ---
 \medskip\noindent\textbf{2.11.2} \texttt{sub \$s0, \$s0, \$s1}
 
-Negative overflow occurs when the difference falls below $-2^{31}$:
-\begin{align}
-  \texttt{\$s0} - \texttt{0x80} &< -2^{31} \notag\\
-  \texttt{\$s0} &< -2^{31}+\texttt{0x80} \notag
-\end{align}
-Therefore the overflow range is $\texttt{\$s0} \le -2^{31}+\texttt{0x7F}$:
+\noindent\textit{Negative overflow}
+($\texttt{\$s0} - 2^{7} < -2^{31}$):
+\[
+  \texttt{\$s0} < -2^{31}+2^{7}
+  \;\Longrightarrow\;
+  \texttt{\$s0} \le -2^{31}+2^{7}-1
+\]
+$\texttt{\$s0} \in [-2^{31},\; -2^{31}+2^{7}-1]
+= [\texttt{0x80000000},\; \texttt{0x8000007F}]$.
 
 \smallskip
-\noindent
-\begin{tabular}{@{}l l l l@{}}
-\toprule
-& Lower bound & & Upper bound \\
-\midrule
-Hex & \texttt{0x80000000} & --- & \texttt{0x8000007F} \\
-Bin & \texttt{1000\,0000\,...\,0000\,0000} & --- &
-      \texttt{1000\,0000\,...\,0111\,1111} \\
-\bottomrule
-\end{tabular}
-\smallskip
-
-\noindent$(= [-2^{31},\; -2^{31}+2^{7}-1])$
+\noindent\textit{Positive overflow}
+($\texttt{\$s0} - 2^{7} > 2^{31}-1$):
+$\texttt{\$s0} > 2^{31}-1+2^{7}$,
+but $\texttt{\$s0} \le 2^{31}-1$ always, so \textbf{impossible}.
 
 %--- 2.11.3 ---
 \medskip\noindent\textbf{2.11.3} \texttt{sub \$s0, \$s1, \$s0}
 
-Result is $\texttt{0x80} - \texttt{\$s0}$.  Two cases to check:
-
-\medskip\noindent\textit{(a) Positive overflow}
-($\texttt{0x80} - \texttt{\$s0} > 2^{31}-1$):
-\begin{align}
-  \texttt{0x80} - \texttt{\$s0} &> 2^{31}-1 \notag\\
-  -\texttt{\$s0} &> 2^{31}-1-\texttt{0x80} \notag\\
-  \texttt{\$s0} &< -(2^{31}-\texttt{0x81}) \notag\\
-  \texttt{\$s0} &< -2^{31}+\texttt{0x81} \notag
-\end{align}
-Therefore the overflow range is $\texttt{\$s0} \le -2^{31}+\texttt{0x80}$:
-
-\medskip\noindent\textit{(b) Negative overflow}
-($\texttt{0x80} - \texttt{\$s0} < -2^{31}$):
-\begin{align}
-  \texttt{0x80} - \texttt{\$s0} &< -2^{31} \notag\\
-  -\texttt{\$s0} &< -2^{31}-\texttt{0x80} \notag\\
-  \texttt{\$s0} &> 2^{31}+\texttt{0x80} \notag
-\end{align}
-But $\texttt{\$s0} \le 2^{31}-1 < 2^{31}+\texttt{0x80}$, so this is
-\textbf{impossible} for any 32-bit signed value.
+Result is $2^{7} - \texttt{\$s0}$.
 
 \smallskip
-\noindent
-\begin{tabular}{@{}l l l l@{}}
-\toprule
-& Lower bound & & Upper bound \\
-\midrule
-Hex & \texttt{0x80000000} & --- & \texttt{0x80000080} \\
-Bin & \texttt{1000\,0000\,...\,0000\,0000} & --- &
-      \texttt{1000\,0000\,...\,1000\,0000} \\
-\bottomrule
-\end{tabular}
+\noindent\textit{Positive overflow}
+($2^{7} - \texttt{\$s0} > 2^{31}-1$):
+\[
+  \texttt{\$s0} < 2^{7}-(2^{31}-1) = -2^{31}+2^{7}+1
+  \;\Longrightarrow\;
+  \texttt{\$s0} \le -2^{31}+2^{7}
+\]
+$\texttt{\$s0} \in [-2^{31},\; -2^{31}+2^{7}]
+= [\texttt{0x80000000},\; \texttt{0x80000080}]$.
+
 \smallskip
-
-\noindent$(= [-2^{31},\; -2^{31}+2^{7}])$
-
-\bigskip
-\begin{flushright}
-\begin{minipage}{0.95\linewidth}
-\scriptsize
-\textbf{Alternative --- binary arithmetic approach}\par\smallskip
-\texttt{\$s1} = bit~7 only:
-\texttt{0000\,0000\,0000\,0000\,0000\,0000\,\underline{1}000\,0000}.
-Overflow boundary ($2^{31}$) = bit~31 only:
-\texttt{\underline{1}000\,0000\,0000\,0000\,0000\,0000\,0000\,0000}.
-The boundary values can be found by direct binary addition/subtraction
-on just the relevant bits.
-
-\medskip
-\textbf{2.11.1} Lower bound = overflow boundary $-$ \texttt{\$s1}:
-\begin{verbatim}
-    1000 0000 0000 0000 0000 0000 0000 0000   (2^31)
-  - 0000 0000 0000 0000 0000 0000 1000 0000   ($s1)
-  ------------------------------------------
-    0111 1111 1111 1111 1111 1111 1000 0000   (lower bound)
-\end{verbatim}
-\vspace{-6pt}
-Borrow propagates from bit~7 through bit~30, flipping
-all those bits to~1 and clearing bit~31.
-Upper bound = \texttt{0111\,1111\,...\,1111\,1111} ($2^{31}-1$).
-
-\medskip
-\textbf{2.11.2} Upper bound = minimum signed $+$ (\texttt{\$s1} $-$ 1):
-\begin{verbatim}
-    1000 0000 0000 0000 0000 0000 0000 0000   (-2^31)
-  + 0000 0000 0000 0000 0000 0000 0111 1111   ($s1 - 1)
-  ------------------------------------------
-    1000 0000 0000 0000 0000 0000 0111 1111   (upper bound)
-\end{verbatim}
-\vspace{-6pt}
-No carry --- only bits [6:0] change. Lower bound = \texttt{1000\,0000\,...\,0000\,0000} ($-2^{31}$).
-
-\medskip
-\textbf{2.11.3} Upper bound = minimum signed $+$ \texttt{\$s1}:
-\begin{verbatim}
-    1000 0000 0000 0000 0000 0000 0000 0000   (-2^31)
-  + 0000 0000 0000 0000 0000 0000 1000 0000   ($s1)
-  ------------------------------------------
-    1000 0000 0000 0000 0000 0000 1000 0000   (upper bound)
-\end{verbatim}
-\vspace{-6pt}
-No carry --- only bit~7 changes. Lower bound = \texttt{1000\,0000\,...\,0000\,0000} ($-2^{31}$).
-\end{minipage}
-\end{flushright}
+\noindent\textit{Negative overflow}
+($2^{7} - \texttt{\$s0} < -2^{31}$):
+$\texttt{\$s0} > 2^{31}+2^{7}$,
+but $\texttt{\$s0} \le 2^{31}-1$ always, so \textbf{impossible}.
 
 %-----------------------------------------------------------------------------
 \subsection*{2.12 --- Binary to Instruction Type}
