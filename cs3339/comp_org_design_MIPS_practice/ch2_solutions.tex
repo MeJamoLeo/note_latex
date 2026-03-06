@@ -459,31 +459,13 @@ but $\texttt{\$s0} \le 2^{31}-1$ always, so \textbf{impossible}.
 
 Binary: \texttt{0000 0010 0001 0100 1000 0000 0010 0000}.
 
+R-type field split (6--5--5--5--5--6):
 \begin{verbatim}
-  000000 10001 01001 00000 00100 000
-\end{verbatim}
-Wait---let us regroup by field boundaries:
-\begin{verbatim}
-  000000 00100 10100 10000 00000 100000
-  op=0   rs=4  rt=20  rd=16 sh=0  fn=32
-\end{verbatim}
-
-Hmm, let me recount the 32 bits:
-\begin{verbatim}
-  0000 0010 0001 0100 1000 0000 0010 0000
-\end{verbatim}
-R-type field split (6-5-5-5-5-6):
-\begin{verbatim}
-  000000 10001 01001 00000 00010 000000
-\end{verbatim}
-Wait, that does not add up to 32 bits properly either. Let me be careful:
-\begin{verbatim}
-  Bits: 0000 0010 0001 0100 1000 0000 0010 0000
-  Flat: 00000010000101001000000000100000
-  R:    000000 10000 10100 10000 00000 100000
-        op=0   rs=16 rt=20 rd=16 sh=0  fn=32
+  000000 10000 10100 10000 00000 100000
+  op=0   rs=16 rt=20 rd=16 sh=0  fn=32
 \end{verbatim}
 op=0, funct=32 $\Rightarrow$ \textbf{R-type, \texttt{add}}.
+
 \texttt{add \$s0, \$s0, \$s4} \quad (rd=16=\$s0, rs=16=\$s0, rt=20=\$s4).
 
 %-----------------------------------------------------------------------------
