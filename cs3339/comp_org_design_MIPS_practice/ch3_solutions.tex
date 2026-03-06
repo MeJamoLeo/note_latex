@@ -141,7 +141,7 @@ Convert each octal number to binary (each octal digit is 3 bits):
 Subtraction:
 \[ -245 - (+1794) = -2039 \]
 
-Check range: 12-bit sign-magnitude range is $[-(2^{11}-1),\; +(2^{11}-1)] =
+Overflow check (Method 1): 12-bit sign-magnitude range is $[-(2^{11}-1),\; +(2^{11}-1)] =
 [-2047,\; +2047]$. Since $|-2039| = 2039 \le 2047$, no overflow.
 
 Encode $-2039$: sign bit $= 1$, magnitude $= 2039$.
@@ -161,12 +161,41 @@ Result: $\mathbf{7767_8}$ (representing $-2039$ in sign-magnitude).
 \hypertarget{sol-3.6}{}
 \markright{3.6}
 
+\begin{flushright}
+\begin{minipage}{0.92\linewidth}
+\scriptsize
+\textbf{Background: two ways to detect overflow}\par\smallskip
+\begin{enumerate}
+  \item \textbf{Decimal range check} --- compute the true result and verify
+        it fits in the representable range.
+  \item \textbf{Binary bit check} --- inspect carry/borrow or sign bits
+        after the binary computation.
+\end{enumerate}
+\smallskip
+Method~2 depends on the representation:
+
+\smallskip
+\begin{tabular}{@{}l l@{}}
+\toprule
+Representation & Binary overflow condition \\
+\midrule
+Unsigned & carry out (addition) or borrow out (subtraction) \\
+Two's complement & sign flip: pos$+$pos$\to$neg or neg$+$neg$\to$pos \\
+Sign-magnitude & magnitude exceeds available bits (no simple bit trick) \\
+\bottomrule
+\end{tabular}
+\end{minipage}
+\end{flushright}
+
+\medskip
 Unsigned 8-bit range: $[0, 255]$.
 
 \[ 185 - 122 = 63 \]
 
-Since $63 \in [0, 255]$ and $185 \ge 122$ (no borrow out), there is
-\textbf{neither overflow nor underflow}.
+Method 1: $63 \in [0, 255]$ $\checkmark$.
+Method 2: $185 \ge 122$ (no borrow out) $\checkmark$.
+
+\textbf{Neither overflow nor underflow}.
 
 %-----------------------------------------------------------------------------
 \subsection*{3.7: Signed Sign-Magnitude Subtraction Overflow}
@@ -188,8 +217,38 @@ Interpret the bit patterns:
 $185 - 122$ in sign-magnitude means:
 \[ (-57) - (+122) = -179 \]
 
-Since $|-179| = 179 > 127$, this \textbf{overflows} (negative overflow, i.e.,
-the result is more negative than the format can represent).
+Method 1: $|-179| = 179 > 127$ (outside $[-127,\;+127]$) $\Rightarrow$
+\textbf{overflow}.
+
+(Method 2 does not apply to sign-magnitude---there is no simple bit trick
+like two's complement sign flip. Just check the magnitude.)
+
+\begin{flushright}
+\begin{minipage}{0.92\linewidth}
+\scriptsize
+\textbf{Note: same bit pattern, three interpretations (3.6 vs.\ 3.7)}\par\smallskip
+The bit pattern $185 = \texttt{10111001}_2$ has MSB $= 1$.
+This is where the three representations diverge:
+
+\smallskip
+\begin{tabular}{@{}l l l@{}}
+\toprule
+Representation & 185 (\texttt{10111001}) & 122 (\texttt{01111010}) \\
+\midrule
+Unsigned & $185$ & $122$ \\
+Sign-magnitude & $-57$ \;(sign=1, mag=$\texttt{0111001}=57$)
+               & $+122$ \;(sign=0, mag=$\texttt{1111010}=122$) \\
+Two's complement & $-71$ \;(flip+1: $\texttt{01000111}=71$)
+                 & $+122$ \;(MSB=0, positive) \\
+\bottomrule
+\end{tabular}
+
+\smallskip
+Problems 3.1--3.2 used \texttt{5ED4} and \texttt{07A4} (both MSB $= 0$),
+so all three representations gave the same value---the difference only
+appears when MSB $= 1$.
+\end{minipage}
+\end{flushright}
 
 %-----------------------------------------------------------------------------
 \subsection*{3.8: Signed Sign-Magnitude Addition Overflow}
@@ -203,7 +262,7 @@ $185 = -57$, $122 = +122$.
 $185 + 122$ in sign-magnitude means:
 \[ (-57) + (+122) = +65 \]
 
-Since $65 \in [-127, +127]$, there is \textbf{no overflow}.
+Method 1: $65 \in [-127, +127]$ $\checkmark$ $\Rightarrow$ \textbf{no overflow}.
 
 %-----------------------------------------------------------------------------
 \subsection*{3.9: Two's Complement Saturating Addition}
@@ -211,21 +270,116 @@ Since $65 \in [-127, +127]$, there is \textbf{no overflow}.
 \hypertarget{sol-3.9}{}
 \markright{3.9}
 
-In signed 8-bit two's complement, the bit pattern for a decimal value $d$
-(where $0 \le d \le 255$) is interpreted as:
-\begin{itemize}
-  \item $151_{10} = 10010111_2$. Since MSB $= 1$: value $= 151 - 256 = -105$.
-  \item $214_{10} = 11010110_2$. Since MSB $= 1$: value $= 214 - 256 = -42$.
-\end{itemize}
+\begin{flushright}
+\begin{minipage}{0.92\linewidth}
+\scriptsize
+\textbf{Reading the problem statement}\par\smallskip
+``signed 8-bit \textbf{decimal} integers stored in \textbf{two's complement} format''
+--- each word has a distinct role:
 
-True sum:
-\[ (-105) + (-42) = -147 \]
+\smallskip
+\begin{tabular}{@{}l l@{}}
+\toprule
+Phrase & Meaning \\
+\midrule
+\textit{decimal} & The number is \textbf{written} in base-10 (notation) \\
+\textit{8-bit} & The value is stored in 8 bits (storage size) \\
+\textit{two's complement} & How to \textbf{interpret} the bit pattern (encoding) \\
+\bottomrule
+\end{tabular}
 
-Signed 8-bit two's complement range: $[-128, +127]$.  Since $-147 < -128$,
-overflow occurs (negative overflow).
+\smallskip
+``decimal'' is \textbf{not} an encoding like octal or hex.
+Octal means each digit $\to$ 3~bits, hex means each digit $\to$ 4~bits
+--- these are notation-to-binary shortcuts.
+``Decimal'' has no such shortcut; it simply means
+``$151$ is written in base-10.''
+The notation (decimal/octal/hex) and the storage size (8-bit/16-bit)
+are independent concepts.
+
+\smallskip
+So the process is:
+$151_{10} \to \texttt{10010111}_2$ (8-bit binary) $\to$
+interpret as two's complement $\to -105$.
+\end{minipage}
+\end{flushright}
+
+\begin{flushright}
+\begin{minipage}{0.92\linewidth}
+\scriptsize
+\textbf{Two's complement: storage format vs.\ computation technique}\par\smallskip
+Two's complement has two distinct roles that are easy to conflate:
+
+\smallskip
+\begin{tabular}{@{}l l@{}}
+\toprule
+Role & Description \\
+\midrule
+\textbf{Storage format} &
+  MSB has weight $-2^{n-1}$.
+  E.g.\ $\texttt{10010111} = -128+16+4+2+1 = -105$. \\
+\textbf{Computation technique} &
+  $A - B = A + (\sim\!B + 1)$. Subtraction via flip+1 and add. \\
+\bottomrule
+\end{tabular}
+
+\smallskip
+The computation technique works \textbf{regardless of the storage format}.
+Example: IEEE 754 exponent $- 127$ (biased format, not two's complement):
+\[
+  127 = \texttt{01111111}
+  \;\xrightarrow{\text{flip}}\;
+  \texttt{10000000}
+  \;\xrightarrow{+1}\;
+  \texttt{10000001}
+\]
+Adding \texttt{10000001} to the stored exponent:
+\[
+  \text{stored} + \texttt{10000001}
+  = \text{stored} + (2^8 - 127)
+  = (\text{stored} - 127) + 2^8
+\]
+The $2^8$ part overflows out of 8~bits (carry out) and is discarded,
+leaving $\text{stored} - 127$ --- the correct actual exponent.
+
+\smallskip
+\begin{tabular}{@{}l l l@{}}
+\toprule
+Context & Storage format & flip+1 used? \\
+\midrule
+MIPS signed integer & two's complement & yes (format \textit{and} technique) \\
+Unsigned subtraction (3.1) & unsigned & yes (technique only) \\
+FP exponent $-$ bias & biased & yes (technique only) \\
+\bottomrule
+\end{tabular}
+
+\smallskip
+Key point: flip+1 $\ne$ two's complement format.
+Flip+1 is just a subtraction tool; any format can use it.
+\end{minipage}
+\end{flushright}
+
+\medskip
+Convert to 8-bit binary:
+$151_{10} = \texttt{10010111}_2$, \;
+$214_{10} = \texttt{11010110}_2$.
+Both have MSB $= 1$, so both are negative in two's complement.
+
+Add in binary:
+\begin{verbatim}
+    10010111   (151 unsigned, -105 in two's complement)
+  + 11010110   (214 unsigned,  -42 in two's complement)
+  ----------
+  1 01101101
+  ^ carry out (discard)
+  = 01101101
+\end{verbatim}
+
+Overflow check (Method 2): neg $+$ neg $\to$ pos (MSB $= 0$)
+$\Rightarrow$ \textbf{overflow}.
 
 With \textbf{saturating arithmetic}, the result clamps to the most negative
-representable value: $\mathbf{-128}$.
+representable value: $\mathbf{-128}$ ($= \texttt{10000000}_2$).
 
 %-----------------------------------------------------------------------------
 \subsection*{3.10: Two's Complement Saturating Subtraction}
@@ -233,14 +387,28 @@ representable value: $\mathbf{-128}$.
 \hypertarget{sol-3.10}{}
 \markright{3.10}
 
-Same interpretations: $151 \to -105$, $214 \to -42$.
+$151_{10} = \texttt{10010111}_2$, \;
+$214_{10} = \texttt{11010110}_2$.
 
-\[ 151 - 214 \;\text{ means }\; (-105) - (-42) = -105 + 42 = -63 \]
+Subtraction $= $ addition of flip+1:
+\begin{verbatim}
+  ~11010110 = 00101001
+  00101001 + 1 = 00101010   (flip+1 of 214)
+\end{verbatim}
 
-Since $-63 \in [-128, +127]$, no overflow occurs. Saturating arithmetic has no
-effect.
+Add:
+\begin{verbatim}
+    10010111   (151)
+  + 00101010   (flip+1 of 214)
+  ----------
+    11000001
+\end{verbatim}
 
-Result: $\mathbf{-63}$.
+Overflow check (Method 2): neg $+$ pos $\to$ \textbf{never overflows}.
+
+Result: $\texttt{11000001}_2$. MSB $= 1$ (negative),
+$= -128 + 64 + 1 = \mathbf{-63}$.
+Saturating arithmetic has no effect.
 
 %-----------------------------------------------------------------------------
 \subsection*{3.11: Unsigned Saturating Addition}
