@@ -517,6 +517,19 @@ Binary:
   100011 00001 00010 0000000000000100
 \end{verbatim}
 
+\begin{flushright}
+\begin{minipage}{0.92\linewidth}
+\scriptsize
+\textbf{Note:}\quad
+The \texttt{op} field is 6~bits (bits [31:26]), so valid opcodes
+are \texttt{0x00}--\texttt{0x3F} (0--63).
+\texttt{op=0x23} = \texttt{100011}$_{2}$ (6~bits; the 8-bit form
+\texttt{00100011} has two leading zero-padding bits).
+A value such as \texttt{op=0x43} (=67, requires 7~bits) is
+\textbf{impossible} since it exceeds the 6-bit field.
+\end{minipage}
+\end{flushright}
+
 %-----------------------------------------------------------------------------
 \subsection*{2.16 --- Expanding the Register File}
 \hypertarget{sol-2.16}{}
@@ -569,13 +582,52 @@ shorter, possibly requiring extra jumps.
 \begin{align*}
   \texttt{srl \$t2, \$t0, 4}: &\quad \texttt{0xAAAAAAAA} \gg 4
     = \texttt{0x0AAAAAAA} \\
-  \texttt{andi \$t2, \$t2, -1}: &\quad \text{andi sign-extends the 16-bit
-    immediate } \texttt{-1} = \texttt{0xFFFF} \\
+  \texttt{andi \$t2, \$t2, -1}: &\quad \text{andi \textbf{zero}-extends the
+    16-bit immediate } \texttt{-1} = \texttt{0xFFFF} \\
   &\quad \texttt{0x0AAAAAAA} \mathbin{\&} \texttt{0x0000FFFF}
     = \texttt{0x0000AAAA}
 \end{align*}
-Note: \texttt{andi} zero-extends the 16-bit immediate, so \texttt{-1} as a
-16-bit value is \texttt{0xFFFF}, which becomes \texttt{0x0000FFFF}.
+
+\begin{flushright}
+\begin{minipage}{0.92\linewidth}
+\scriptsize
+\textbf{Note 1 --- Why $-1$ = \texttt{0xFFFF}, not \texttt{1001}}\par\smallskip
+MIPS integers use \textbf{2's complement}, not sign-magnitude.
+In sign-magnitude, $-1$ would be a sign bit followed by the value~1
+(e.g.\ \texttt{1\,001}).
+In 2's complement:
+\begin{verbatim}
+   +1 = 0000 0000 0000 0001
+  ~+1 = 1111 1111 1111 1110   (bit-flip)
+   +1 = 1111 1111 1111 1111   (add 1)  = 0xFFFF
+\end{verbatim}
+\vspace{-6pt}
+(Intuition: \texttt{0x0000 $-$ 0x0001} wraps to \texttt{0xFFFF}.)
+
+\smallskip
+Note: IEEE~754 floating point \emph{does} use sign-magnitude
+(bit~31 = sign, remaining bits = exponent + mantissa).
+Only integer arithmetic in MIPS uses 2's complement.
+
+\medskip
+\textbf{Note 2 --- zero-extend vs.\ sign-extend}\par\smallskip
+The 16-bit immediate \texttt{0xFFFF} has bit~15~=~1.
+If \emph{sign}-extended, bits [31:16] would all be~1
+$\Rightarrow$ \texttt{0xFFFFFFFF}.
+But \texttt{andi} \textbf{zero}-extends, so bits [31:16] are all~0
+$\Rightarrow$ \texttt{0x0000FFFF}.
+
+\smallskip
+\begin{tabular}{@{}l l@{}}
+\toprule
+Sign-extend (\texttt{addi}, \texttt{lw}, \texttt{sw}, \texttt{beq}, \ldots)
+  & bit~15 copied to bits [31:16] \\
+Zero-extend (\texttt{andi}, \texttt{ori}, \texttt{xori})
+  & bits [31:16] $= 0$ \\
+\bottomrule
+\end{tabular}
+\end{minipage}
+\end{flushright}
 
 %-----------------------------------------------------------------------------
 \subsection*{2.18 --- Bit Field Extraction}
@@ -646,21 +698,108 @@ EXIT:
 
 PC $=$ \texttt{0x00400000}.
 
-\noindent\textbf{2.22.1} \texttt{jal} uses a 26-bit word address. The
-target address is formed by concatenating the upper 4 bits of PC+4 with the
-26-bit field shifted left by 2:
-\[
-  \text{Range} = [\texttt{0x00000000},\; \texttt{0x0FFFFFFC}]
-\]
-(any address in the same 256 MB region as PC+4).
+\noindent\textbf{2.22.1} \texttt{jal} performs two operations
+(Verilog: \texttt{R[31]=PC+8; PC=JumpAddr}):
 
-\noindent\textbf{2.22.2} \texttt{beq} uses a 16-bit signed offset
-(word-aligned):
+\begin{enumerate}
+\item \textbf{Jump} --- target address (32~bits) is formed by
+  concatenating three parts:
+\begin{verbatim}
+  [31:28]  [27:2]          [1:0]
+  +------+------------------+----+
+  | PC+4 |     imm26        | 00 |   = JumpAddr
+  | 4bit |     26bit        | 2bit|
+  +------+------------------+----+
+\end{verbatim}
+  \vspace{-6pt}
+  The upper 4~bits come from PC+4 (the current 256\,MB region).
+  The lower 2~bits are always \texttt{00} (word-aligned).
+  Range: any word-aligned address in the same 256\,MB region as PC+4:
+  \[
+    [\texttt{0x00000000},\; \texttt{0x0FFFFFFC}]
+  \]
+\item \textbf{Link} (\textbf{not relevant to this problem} --- included
+  as background) --- saves the return address in
+  \texttt{\$ra}\,(\texttt{\$31}).
+  The return address is \textbf{PC+8} (not PC+4), because of the
+  \emph{branch delay slot}: the instruction at PC+4 always executes
+  before the jump takes effect, so the caller resumes at PC+8.
+  This does not affect the \emph{range} of addresses \texttt{jal}
+  can jump to.
+\end{enumerate}
+\begin{verbatim}
+  PC    :  jal target      <- this instruction
+  PC+4  :  add ...         <- delay slot (always executes)
+  PC+8  :  ...             <- return here ($ra = PC+8)
+\end{verbatim}
+
+\noindent\textbf{2.22.2} \texttt{beq} uses a 16-bit \textbf{signed}
+offset (I-type immediate).  The offset is in \emph{words} (shifted
+left by~2), and relative to PC+4:
 \[
-  \text{Range} = [\text{PC}+4 - 2^{17},\; \text{PC}+4 + 2^{17}-4]
-  = [\texttt{0x003E0004},\; \texttt{0x00420000}]
+  \text{BranchAddr} = \text{PC}+4 + \text{sign\_ext}(\textit{imm16}) \times 4
 \]
-($\pm 128$ KB from PC+4.)
+
+\begin{verbatim}
+  [31:26] [25:21] [20:16] [15:0]
+  +------+-------+-------+------------------+
+  | beq  |  rs   |  rt   | imm16 (signed)   |
+  | 6bit |  5bit |  5bit | 16bit            |
+  +------+-------+-------+------------------+
+\end{verbatim}
+\vspace{-6pt}
+
+The 16-bit signed immediate ranges from $-2^{15}$ to $+2^{15}-1$
+($-32{,}768$ to $+32{,}767$ words).
+Multiplied by~4 (word $\to$ byte):
+$-2^{17}$ to $+2^{17}-4$ bytes ($\pm 128$\,KB).
+
+\begin{align}
+  \text{Lower} &= \text{PC}+4 + (-2^{17})
+    = \texttt{0x00400004} - \texttt{0x20000}
+    = \texttt{0x003E0004} \notag\\
+  \text{Upper} &= \text{PC}+4 + (2^{17}-4)
+    = \texttt{0x00400004} + \texttt{0x1FFFC}
+    = \texttt{0x00420000} \notag
+\end{align}
+\[
+  \text{Range} = [\texttt{0x003E0004},\; \texttt{0x00420000}]
+\]
+(\texttt{beq} also has a branch delay slot.)
+
+\begin{flushright}
+\begin{minipage}{0.92\linewidth}
+\scriptsize
+\textbf{Note: \texttt{jal} vs.\ \texttt{beq} --- addressing modes}\par\smallskip
+Both multiply the stored value by~4 ($\times 4$, i.e.\ append
+\texttt{00}) because all MIPS instructions are word-aligned.
+However, the address \emph{calculation} is fundamentally different:
+
+\smallskip
+\begin{tabular}{@{}l l l@{}}
+\toprule
+& \texttt{jal} (pseudo-direct) & \texttt{beq} (PC-relative) \\
+\midrule
+Operation & bit concatenation & addition \\
+Formula &
+  \texttt{\{PC+4[31:28], imm26, 00\}} &
+  $\text{PC+4} + \text{sign\_ext}(\textit{imm16}) \times 4$ \\
+Backward jump? & No (no sign concept) & Yes (signed offset) \\
+\bottomrule
+\end{tabular}
+
+\smallskip
+\texttt{beq} uses addition with a signed offset because loops need
+to branch \emph{backward}. Concatenation has no sign concept and
+cannot express a negative direction.
+
+\smallskip
+Example --- \texttt{beq} with \texttt{imm16 = 0xFFFF} ($-1$):
+$\text{sign\_ext}(\texttt{0xFFFF}) \times 4 = -4$,
+so $\text{BranchAddr} = \text{PC}+4-4 = \text{PC}$
+(jumps back to itself --- infinite loop).
+\end{minipage}
+\end{flushright}
 
 %-----------------------------------------------------------------------------
 \subsection*{2.23 --- Proposed \texttt{rpt} Instruction}
