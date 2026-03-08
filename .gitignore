@@ -4,8 +4,9 @@
 # But not directories (so git can recurse into them)
 !*/
 
-# But not .tex files
+# But not .tex and image files
 !*.tex
+!*.png
 
 # But not this .gitignore
 !.gitignore
