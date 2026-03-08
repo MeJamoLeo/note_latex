@@ -760,13 +760,27 @@ Opcode 3 in MIPS is \texttt{jal} (jump and link), which uses J-type format:
   op=3   target address = 0
 \end{verbatim}
 
-The 26-bit target address field is all zeros. The full jump target is formed by:
-\[
-  \text{target} = \{\text{PC}[31{:}28],\; \texttt{00\,0000\,0000\,0000\,0000\,0000\,0000},\; 00\}
-\]
+The 26-bit target address field is all zeros ($\textit{imm26} = 0$).
 
-The instruction is: \textbf{\texttt{jal 0x00000000}} (jump and link to address 0,
-within the current 256 MB region defined by the upper 4 bits of PC+4).
+The instruction is: \textbf{\texttt{jal 0}} (jump and link with
+$\textit{imm26} = 0$).
+
+\medskip
+Note: the instruction encoding alone gives only 28~bits of the target
+address ($\textit{imm26} \ll 2 = \texttt{0x0000000}$).
+The full 32-bit jump address requires the upper 4~bits from PC:
+\begin{verbatim}
+  [31:28]        [27:2]            [1:0]
+  +-------------+-------------------+----+
+  | (PC+4)[31:28] |   imm26 (= 0)   | 00 |
+  |    4 bit      |     26 bit      | 2bit|
+  +-------------+-------------------+----+
+\end{verbatim}
+\vspace{-6pt}
+Therefore the actual runtime target depends on the current PC region.
+For example, if $\text{PC} = \texttt{0x00400000}$, the target is
+\texttt{0x00000000}; if $\text{PC} = \texttt{0x10000000}$, the target
+is \texttt{0x10000000}.
 
 %-----------------------------------------------------------------------------
 \subsection*{3.22: Bit Pattern as Floating Point}
@@ -782,6 +796,13 @@ IEEE 754 single precision fields:
   \item Exponent: $\texttt{00011000}_2 = 24_{10}$.
         Biased exponent with bias 127:
         \[ E = 24 - 127 = -103 \]
+        Binary subtraction (larger $-$ smaller, result is negative):
+\begin{verbatim}
+    0111 1111   (bias = 127)
+  - 0001 1000   (stored = 24)
+  -----------
+    0110 0111   = 103    ->  actual exponent = -103
+\end{verbatim}
   \item Mantissa: $\texttt{00000000000000000000000}_2 = 0$.
         With hidden 1: significand $= 1.0$.
 \end{itemize}
@@ -792,6 +813,37 @@ Value (since the exponent field is nonzero, this is a normal number):
 \]
 
 This is a very small positive float.
+
+\begin{flushright}
+\begin{minipage}{0.92\linewidth}
+\scriptsize
+\textbf{Background: why IEEE 754 uses biased exponent, not 2's complement}\par\smallskip
+\begin{tabular}{@{}l l l@{}}
+\toprule
+& 2's complement & Biased (excess-127) \\
+\midrule
+MSB weight & $-2^{7} = -128$ & $+2^{7} = +128$ \\
+Min value & $-128$ & $-127$ \\
+Max value & $+127$ & $+128$ \\
+Zero & \texttt{0000\,0000} only & \texttt{0111\,1111} (= stored 127) \\
+\bottomrule
+\end{tabular}
+
+\smallskip
+\textbf{Why $-128$ in 2's complement (not $-127$)?}\par
+If MSB weight were $-127$: \texttt{1111\,1111} $= -127+127 = 0$,
+creating two representations of zero (\texttt{0000\,0000} and
+\texttt{1111\,1111}). Using $-128$ avoids this:
+\texttt{1111\,1111} $= -128+127 = -1 \ne 0$.
+
+\smallskip
+\textbf{Why biased for FP exponents?}\par
+With biased encoding, the stored exponent is an unsigned integer.
+This allows FP numbers to be compared using a simple unsigned integer
+comparator (exponent bits can be compared directly without sign logic),
+which simplifies hardware.
+\end{minipage}
+\end{flushright}
 
 %-----------------------------------------------------------------------------
 \subsection*{3.23: IEEE 754 Single Precision Encoding}
@@ -1057,74 +1109,135 @@ Hex:
 
 Add $A = 2.6125 \times 10^{1} = 26.125$ and $B = 4.150390625 \times 10^{-1}
 = 0.4150390625$ in 16-bit half precision (Ex.\ 3.27: 1 sign, 5-bit exponent
-with excess-16 bias, 10-bit mantissa, hidden 1).
+with bias~15 (IEEE 754-2008), 10-bit mantissa, hidden 1).
 
 \noindent\textbf{Step 1: Convert to half precision.}
-\begin{itemize}
-  \item $26.125 = 11010.001_2 = 1.1010001_2 \times 2^4$.
-    \[
-      \text{Sign} = 0,\quad
-      \text{Exp} = 4 + 16 = 20 = 10100_2,\quad
-      \text{Mantissa} = 1010001000
-    \]
-  \item $0.4150390625 = 0.0110101_2 = 1.10101_2 \times 2^{-2}$.
-    \[
-      \text{Sign} = 0,\quad
-      \text{Exp} = -2 + 16 = 14 = 01110_2,\quad
-      \text{Mantissa} = 1010100000
-    \]
-\end{itemize}
+
+\textit{A = 26.125:}\quad
+Integer part $26 \div 2$ repeatedly:
+\begin{verbatim}
+  26 / 2 = 13 r 0
+  13 / 2 =  6 r 1
+   6 / 2 =  3 r 0
+   3 / 2 =  1 r 1
+   1 / 2 =  0 r 1    -> 11010
+\end{verbatim}
+\vspace{-6pt}
+Fraction part $0.125 \times 2$ repeatedly:
+\begin{verbatim}
+  0.125 x 2 = 0.25  -> 0
+  0.25  x 2 = 0.5   -> 0
+  0.5   x 2 = 1.0   -> 1   -> .001
+\end{verbatim}
+\vspace{-6pt}
+$26.125 = 11010.001_2 = 1.1010001_2 \times 2^4$.
+\[
+  \text{Sign} = 0,\quad
+  \text{Exp} = 4 + 15 = 19 = 10011_2,\quad
+  \text{Mantissa} = 1010001000
+\]
+
+\textit{B = 0.4150390625:}\quad $\times 2$ repeatedly:
+\begin{verbatim}
+  0.4150390625 x 2 = 0.830078125  -> 0
+  0.830078125  x 2 = 1.66015625   -> 1
+  0.66015625   x 2 = 1.3203125    -> 1
+  0.3203125    x 2 = 0.640625     -> 0
+  0.640625     x 2 = 1.28125      -> 1
+  0.28125      x 2 = 0.5625       -> 0
+  0.5625       x 2 = 1.125        -> 1
+  0.125        x 2 = 0.25         -> 0
+  0.25         x 2 = 0.5          -> 0
+  0.5          x 2 = 1.0          -> 1   -> .0110101001
+\end{verbatim}
+\vspace{-6pt}
+$0.4150390625 = 0.0110101001_2 = 1.10101001_2 \times 2^{-2}$.
+\[
+  \text{Sign} = 0,\quad
+  \text{Exp} = -2 + 15 = 13 = 01101_2,\quad
+  \text{Mantissa} = 1010100100
+\]
 
 \noindent\textbf{Step 2: Align exponents.}
 
 Shift $B$'s significand right by $4 - (-2) = 6$ positions to match $A$'s
 exponent of $4$:
+\begin{verbatim}
+  B before shift:  1.1010100100
+  B after  >>6:    0.0000011010 | 1  0  0100
+                                  G  R  sticky bits
+\end{verbatim}
+\vspace{-6pt}
+Guard $= 1$, round $= 0$, sticky $= \text{OR}(0,1,0,0) = 1$.
 \begin{align*}
-  A &= 1.1010001000 \times 2^4 \\
-  B &= 0.0000011010\;1\underbrace{00}_{\text{guard, round}} \times 2^4
-       \quad(\text{sticky} = 0)
+  A &= 1.1010001000 \mid \text{GRS}=000 \quad \times 2^4 \\
+  B &= 0.0000011010 \mid \text{GRS}=101 \quad \times 2^4
 \end{align*}
 
-\noindent\textbf{Step 3: Add significands.}
-\[
-  1.1010001000 + 0.0000011010 = 1.1010100010
-\]
-Guard $= 1$, round $= 0$, sticky $= 0$.
+\noindent\textbf{Step 3: Add significands} (including GRS bits).
+\begin{verbatim}
+    1.1010001000 | 0 0 0
+  + 0.0000011010 | 1 0 1
+  --------------------------
+    1.1010100010 | 1 0 1     GRS = 1,0,1
+\end{verbatim}
 
 \noindent\textbf{Step 4: Normalize.}
 
 Already normalized (leading 1 before the binary point).
 
-\noindent\textbf{Step 5: Round.}
+\noindent\textbf{Step 5: Round} (round to nearest even).
 
-GRS $= 100$, which is exactly halfway. The LSB of the retained mantissa is $0$.
-Round-to-nearest-even keeps LSB $= 0$, so we do \emph{not} round up.
+\smallskip
+\noindent
+\begin{tabular}{@{}c c c l l@{}}
+\toprule
+G & R & S & Meaning & Action \\
+\midrule
+0 & 0 & 0 & exactly zero & truncate \\
+0 & 0 & 1 & $< $ halfway & truncate \\
+0 & 1 & 0 & $< $ halfway & truncate \\
+0 & 1 & 1 & $< $ halfway & truncate \\
+1 & 0 & 0 & exactly halfway & tie $\to$ round to even (LSB $= 0$) \\
+1 & 0 & 1 & $> $ halfway & round up \\
+1 & 1 & 0 & $> $ halfway & round up \\
+1 & 1 & 1 & $> $ halfway & round up \\
+\bottomrule
+\end{tabular}
+\smallskip
 
-Result mantissa: $1010100010$ (10 bits after hidden 1).
+GRS $= 101$: guard $= 1$ and round$\mid$sticky $= 1$
+$\Rightarrow$ more than halfway $\Rightarrow$ \textbf{round up}.
+\[
+  1.1010100010 + 0.0000000001 = 1.1010100011
+\]
+
+Result mantissa: $1010100011$ (10 bits after hidden 1).
 
 \noindent\textbf{Result:}
 \[
   \text{Sign} = 0,\quad
-  \text{Exp} = 10100_2,\quad
-  \text{Mantissa} = 1010100010
+  \text{Exp} = 10011_2 \;(= 4 + 15 = 19),\quad
+  \text{Mantissa} = 1010100011
 \]
 
 Bit pattern:
 \[
-  \texttt{0\,10100\,1010100010}
-  = \texttt{01010010\,10100010}
-  = \texttt{0x52A2}
+  \texttt{0\,10011\,1010100011}
+  = \texttt{01001110\,10100011}
+  = \texttt{0x4EA3}
 \]
 
 Decimal value:
 \[
-  1.1010100010_2 \times 2^4
-  = 11010.100010_2
-  = 26.53125
+  1.1010100011_2 \times 2^4
+  = 11010.100011_2
+  = 26.546875
 \]
 
 The exact result is $26.125 + 0.4150390625 = 26.5400390625$. The half
-precision result $26.53125$ has a small rounding error due to limited precision.
+precision result $26.546875$ has a small rounding error ($0.0068$) due to
+limited precision.
 
 %-----------------------------------------------------------------------------
 \subsection*{3.30: Half Precision Multiplication}
@@ -1340,9 +1453,12 @@ Convert both values:
 \end{align*}
 
 Exponents match, so add directly:
-\[
-  1.1001100000 + 1.0110000000 = 10.1111100000
-\]
+\begin{verbatim}
+    1.1001100000
+  + 1.0110000000
+  ----------------
+   10.1111100000
+\end{verbatim}
 
 Normalize:
 \[
@@ -1379,23 +1495,31 @@ After shifting 11 places, the significand is essentially 0 at 10-bit precision
 bits.
 
 Sum:
-\[
-  \approx 1.1011101011 \times 2^{10}
-\]
+\begin{verbatim}
+    1.1011101011 | 0 0 0
+  + 0.0000000000 | 1 0 1
+  ----------------------------
+    1.1011101011 | 1 0 1     GRS = 1,0,1
+\end{verbatim}
+\vspace{-6pt}
 
-GRS $= 001$: round down since $< 0.5$ ULP.
+GRS $= 101$: guard $= 1$ and sticky $= 1$
+$\Rightarrow$ more than halfway $\Rightarrow$ \textbf{round up}.
+\[
+  1.1011101011 + 0.0000000001 = 1.1011101100
+\]
 
 \noindent\textbf{Result:}
 \[
-  1.1011101011 \times 2^{10},\quad
+  1.1011101100 \times 2^{10},\quad
   \text{Sign} = 0,\quad
   \text{Exp} = 11010_2,\quad
-  \text{Mantissa} = 1011101011
+  \text{Mantissa} = 1011101100
 \]
 
-Bit pattern: $\texttt{0\,11010\,1011101011}$.
+Bit pattern: $\texttt{0\,11010\,1011101100}$.
 
-Decimal: $\mathbf{1771.0}$ (the small value was lost).
+Decimal: $1.1011101100_2 \times 2^{10} = 11011101100_2 = \mathbf{1772.0}$.
 
 %-----------------------------------------------------------------------------
 \subsection*{3.33: FP Addition Associativity (Right)}
@@ -1414,11 +1538,12 @@ in half precision.
 \]
 
 Align: shift $0.34375$ right by $10 - (-2) = 12$ positions to match exponent
-$2^{10}$. The entire significand is shifted out, so the value is lost.
+$2^{10}$. The hidden~1 lands at position~12 (round bit):
+GRS $= 0,1,1$ $\Rightarrow$ less than halfway $\Rightarrow$ truncate.
 
 Result:
 \[
-  \approx 1.1011101011 \times 2^{10} = 1771.0
+  1.1011101011 \times 2^{10} = 1771.0
 \]
 
 \noindent\textbf{Second addition:} $0.3984375 + 1771$.
@@ -1427,15 +1552,15 @@ Result:
   0.3984375 = 1.10011_2 \times 2^{-2}
 \]
 
-Align: shift right by $10 - (-2) = 12$ positions. Again, the entire significand
-is shifted out and the value is lost.
+Align: shift right by $10 - (-2) = 12$ positions. Again the hidden~1 lands at
+position~12: GRS $= 0,1,1$ $\Rightarrow$ truncate.
 
 Result:
 \[
-  \approx 1.1011101011 \times 2^{10} = 1771.0
+  1.1011101011 \times 2^{10} = 1771.0
 \]
 
-\noindent\textbf{Final result:} $\mathbf{1771.0}$, same as Problem~3.32.
+\noindent\textbf{Final result:} $\mathbf{1771.0}$.
 
 %-----------------------------------------------------------------------------
 \subsection*{3.34: FP Addition Associativity Check}
@@ -1443,21 +1568,25 @@ Result:
 \hypertarget{sol-3.34}{}
 \markright{3.34}
 
-\textbf{Yes}, in this case the results of 3.32 and 3.33 agree: both give
-$1771.0$.
+\textbf{No}, the results differ:
+\begin{itemize}
+  \item Problem~3.32 (left-to-right): $(A + B) + C = \mathbf{1772.0}$.
+        Adding the two small values first preserves their sum ($0.7421875$),
+        whose hidden~1 reaches the guard bit when aligning with $1771$,
+        producing GRS $= 101$ and rounding up.
+  \item Problem~3.33 (right-to-left): $A + (B + C) = \mathbf{1771.0}$.
+        Each small value is added to $1771$ individually; shifting by 12
+        pushes the hidden~1 past the guard bit (GRS $= 011$), so both are
+        truncated.
+\end{itemize}
 
-However, this is somewhat coincidental. Both small values are completely
-swamped by the large value due to the limited 11-bit significand. In general,
-floating-point addition is \textbf{not associative}. A different set of values
-could produce different results depending on grouping, since rounding occurs at
-each step.
-
-If computed exactly:
+This demonstrates that floating-point addition is \textbf{not associative}.
+The exact result is:
 \[
   0.3984375 + 0.34375 + 1771 = 1771.7421875
 \]
-This differs from $1771.0$. The loss of the small addends demonstrates the
-precision limitations of half-precision floating point.
+The left-to-right grouping ($1772.0$) is closer to the true value than the
+right-to-left grouping ($1771.0$).
 %-----------------------------------------------------------------------------
 \subsection*{3.35: FP Multiply Associativity (Left)}
 \addcontentsline{toc}{subsection}{3.35: FP Multiply Associativity (Left)}
