@@ -11,70 +11,77 @@
 \markright{4.1}
 \addcontentsline{toc}{subsection}{4.1 --- Control Signals for \texttt{and}}
 
-The instruction \texttt{and rd, rs1, rs2} performs
-\texttt{Reg[rd] = Reg[rs1] AND Reg[rs2]}.
-This is a standard R-type instruction that the single-cycle datapath
-(Figure 4.10) fully supports.
+Consider the instruction \texttt{and rd, rs1, rs2}, which computes
+\texttt{Reg[rd] = Reg[rs1] AND Reg[rs2]}.  This is an R-type instruction.
+
+\begin{center}
+  \includegraphics[width=0.55\textwidth]{fig4_10_memory_rtype_datapath}
+  \captionof{figure}{Figure 4.10 (reproduced): The datapath for the memory
+    instructions and the R-type instructions.}
+\end{center}
 
 \phantomsection\addcontentsline{toc}{subsubsection}{4.1.1}
 \medskip\noindent\textbf{4.1.1}
-The control unit generates the standard R-type control signals:
+The control signals generated for \texttt{and} (an R-type instruction)
+in Figure~4.10 are:
 
 \begin{center}
-\begin{tabular}{lc}
+\begin{tabular}{lcp{8cm}}
 \toprule
-\textbf{Signal} & \textbf{Value} \\
+\textbf{Signal} & \textbf{Value} & \textbf{Reason} \\
 \midrule
-RegDst   & 1 (write to rd) \\
-ALUSrc   & 0 (second operand from register) \\
-MemtoReg & 0 (result from ALU, not memory) \\
-RegWrite & 1 (write result to register file) \\
-MemRead  & 0 \\
-MemWrite & 0 \\
-Branch   & 0 \\
-ALUOp    & 10 (determined by funct field) \\
-Jump     & 0 \\
+RegWrite  & 1    & The result of the AND operation must be written back
+                    to the register file (into \texttt{rd}). \\
+ALUSrc    & 0    & The second ALU operand comes from a register
+                    (\texttt{Read Data 2}), not from the sign-extended
+                    immediate. \\
+ALU operation & 0000 & The ALU must perform the bitwise AND operation. \\
+MemRead   & 0    & No data is read from memory. \\
+MemWrite  & 0    & No data is written to memory. \\
+MemtoReg  & 0    & The value written back to the register file comes
+                    from the ALU result, not from data memory. \\
 \bottomrule
 \end{tabular}
 \end{center}
 
 \phantomsection\addcontentsline{toc}{subsubsection}{4.1.2}
 \medskip\noindent\textbf{4.1.2}
-The following resources perform a useful function for \texttt{and}:
+The resources that perform a \emph{useful} function for \texttt{and}:
 
 \begin{itemize}
-  \item \textbf{PC / Instruction Memory} --- fetches the instruction.
-  \item \textbf{Register File (read)} --- reads \texttt{rs1} and
-        \texttt{rs2}.
-  \item \textbf{ALU} --- performs the AND operation on the two register
-        values.
-  \item \textbf{Mux (RegDst)} --- selects rd as the write register.
-  \item \textbf{Mux (ALUSrc)} --- selects the register value (not the
-        sign-extended immediate) as the second ALU input.
-  \item \textbf{Mux (MemtoReg)} --- selects the ALU result (not memory
-        data) to write back.
-  \item \textbf{Register File (write)} --- writes the ALU result to rd.
-  \item \textbf{PC adder} --- computes PC+4 for the next instruction.
+  \item \textbf{Register file} --- reads \texttt{rs1} and \texttt{rs2}
+        (Read Data 1 and Read Data 2), and writes the result into
+        \texttt{rd} (RegWrite = 1).
+  \item \textbf{ALU} --- computes the bitwise AND of its two inputs and
+        produces the result.
+  \item \textbf{ALUSrc mux} --- selects the register value
+        (Read Data 2) as the second ALU input (ALUSrc = 0).
+  \item \textbf{MemtoReg mux} --- selects the ALU result as the data
+        to be written back to the register file (MemtoReg = 0).
 \end{itemize}
 
 \phantomsection\addcontentsline{toc}{subsubsection}{4.1.3}
 \medskip\noindent\textbf{4.1.3}
+
+\textbf{Resources that produce no output:}
+
 \begin{itemize}
-  \item \textbf{Produces no output:} None.  Every block in the datapath
-        produces some output every cycle (combinational logic always
-        propagates).
-  \item \textbf{Produces output that is not used:}
-    \begin{itemize}
-      \item The \textbf{sign-extend} unit sign-extends the lower 16 bits of
-            the instruction word, but ALUSrc = 0 means the mux does not
-            select it as an ALU input.
-      \item The \textbf{branch adder} (PC + sign-extended offset) computes a
-            branch target, but Branch = 0, so its output is not selected by
-            the PC mux.
-      \item The \textbf{Data Memory} receives an address and produces a read
-            output, but MemtoReg = 0 means the write-back mux selects the
-            ALU result instead.
-    \end{itemize}
+  \item \textbf{Data memory} --- MemRead = 0 and MemWrite = 0, so no
+        read or write operation occurs.  The data memory is completely
+        idle for this instruction.
+\end{itemize}
+
+\textbf{Resources that produce output that is not used:}
+
+\begin{itemize}
+  \item \textbf{Sign-extend unit} --- The sign-extend unit is
+        combinational and always produces a 32-bit sign-extended version
+        of bits [15:0] of the instruction.  However, because ALUSrc = 0,
+        the ALUSrc mux selects Read Data 2 instead, so the sign-extended
+        output is ignored.
+  \item \textbf{ALU Zero output} --- The ALU always produces the Zero
+        flag, but for \texttt{and} this signal is not used (it is only
+        relevant for branch instructions).
 \end{itemize}
 
 %-----------------------------------------------------------------------------
@@ -83,37 +90,60 @@ The following resources perform a useful function for \texttt{and}:
 \markright{4.2}
 \addcontentsline{toc}{subsection}{4.2 --- Don't Cares in Control}
 
-The ``don't cares'' (X) in the control signal truth table (Figure 4.18)
-occur when a signal's value has no effect on the instruction's result,
-because the controlled hardware either is not used or its output is
-ignored.
+\begin{center}
+  \includegraphics[width=0.65\textwidth]{fig4_18_control_signal_truth_table}
+  \captionof{figure}{Figure 4.18 (reproduced): The control function for the
+    simple single-cycle implementation.}
+\end{center}
 
-\begin{enumerate}
-  \item \textbf{RegDst --- X for sw, beq, j.}
-        These instructions do not write to the register file (RegWrite = 0).
-        Since no register is written, it does not matter which field
-        (rt or rd) is selected as the write-register number.
+Figure~4.18 contains four ``X'' (don't care) entries.  They all arise
+from the same underlying reason: \textbf{these signals only matter when
+the register file is written to (RegWrite = 1)}.  For instructions with
+RegWrite = 0, no value is written to any register, so it does not matter
+which register is selected as the destination or what data is routed to
+the write port.
 
-  \item \textbf{ALUSrc --- X for j.}
-        The jump instruction does not use the ALU at all.  The jump target
-        is formed from the upper bits of PC and the 26-bit address field,
-        bypassing the ALU entirely.  Therefore, it does not matter whether
-        the ALU's second input comes from a register or the sign-extended
-        immediate.
+\medskip
+\begin{center}
+\begin{tabular}{llp{8.5cm}}
+\toprule
+\textbf{Instruction} & \textbf{Don't care} & \textbf{Explanation} \\
+\midrule
+\texttt{sw} & RegDst = X &
+  \texttt{sw} does not write to the register file (RegWrite = 0).
+  RegDst controls whether the write-register number comes from
+  \texttt{rt} (bits [20:16]) or \texttt{rd} (bits [15:11]).
+  Since no register is written, the mux selection is irrelevant. \\[6pt]
+\texttt{sw} & MemtoReg = X &
+  MemtoReg selects whether the ALU result or the data-memory output is
+  sent to the register file's write-data port.  Since \texttt{sw} has
+  RegWrite = 0, nothing is written regardless of what appears on the
+  write-data bus. \\[6pt]
+\texttt{beq} & RegDst = X &
+  \texttt{beq} does not write to the register file (RegWrite = 0).
+  The write-register selection is therefore irrelevant, same as
+  for \texttt{sw}. \\[6pt]
+\texttt{beq} & MemtoReg = X &
+  As with \texttt{sw}, since RegWrite = 0 for \texttt{beq}, it does not
+  matter which value (ALU result or memory read data) is presented to the
+  register file's write-data input. \\
+\bottomrule
+\end{tabular}
+\end{center}
 
-  \item \textbf{MemtoReg --- X for sw, beq, j.}
-        These instructions do not write to the register file (RegWrite = 0).
-        Since no value is written back to a register, the mux that selects
-        between the ALU result and the memory output can be in any state.
-
-  \item \textbf{ALUOp --- XX for j.}
-        The jump instruction does not use the ALU, so the ALU operation
-        is irrelevant.  Whatever the ALU computes is ignored.
-\end{enumerate}
-
-\noindent In each case, the don't care arises because a downstream mux or
-write-enable signal prevents the controlled value from affecting any
-architectural state.
+\medskip\noindent
+\textbf{Summary:} In both \texttt{sw} and \texttt{beq}, RegWrite = 0,
+which disables the register file write.  This makes \emph{both} RegDst
+and MemtoReg don't cares, because:
+\begin{itemize}
+  \item RegDst feeds the write-register mux, which selects \emph{where}
+        to write --- irrelevant if nothing is written.
+  \item MemtoReg feeds the write-data mux, which selects \emph{what}
+        to write --- also irrelevant if nothing is written.
+\end{itemize}
+R-format and \texttt{lw} both have RegWrite = 1, so they \emph{must}
+set RegDst and MemtoReg to specific values to ensure the correct
+register receives the correct data.
 
 %-----------------------------------------------------------------------------
 \subsection*{4.3 --- Instruction Mix Resource Usage}
@@ -161,6 +191,13 @@ by the ALUSrc mux.
 The sign-extend unit consumes a small amount of power during these cycles
 but does not affect correctness---the unwanted output is gated off by the
 mux.
+
+\begin{center}
+  \includegraphics[width=0.45\textwidth]{fig4_24_datapath_with_jump}
+  \captionof{figure}{Figure 4.24: Jump uses a dedicated path
+    (instruction [25:0] shifted left 2, concatenated with PC+4[31:28])
+    to determine the next PC, bypassing the ALU entirely.}
+\end{center}
 
 %-----------------------------------------------------------------------------
 \subsection*{4.4 --- Stuck-at-0 Fault Analysis}
