@@ -6,95 +6,76 @@
 \addcontentsline{toc}{section}{Chapter 4 Solutions}
 
 %-----------------------------------------------------------------------------
-\subsection*{4.1 --- Control Signals for \texttt{lw2}}
+\subsection*{4.1 --- Control Signals for \texttt{and}}
 \hypertarget{sol-4.1}{}
 \markright{4.1}
-\addcontentsline{toc}{subsection}{4.1 --- Control Signals for \texttt{lw2}}
+\addcontentsline{toc}{subsection}{4.1 --- Control Signals for \texttt{and}}
 
-The instruction \texttt{lw2 \$t1, \$s1, \$s2} performs
-\texttt{\$t1 = Mem[\$s1 + Mem[\$s2]]}.
-This requires \emph{two} data-memory reads in a single cycle, which the
-standard single-cycle datapath (Figure 4.10/4.17) cannot support---it has
-only one data-memory port.
-
-Because \texttt{lw2} is not a standard MIPS instruction, there is no valid
-opcode the existing control unit can decode to produce the correct behavior.
-If we assume the instruction is encoded in an R-type format (three register
-fields: rs = \texttt{\$s1}, rt = \texttt{\$s2}, rd = \texttt{\$t1}), the
-control unit would generate R-type signals.  We analyze the instruction
-under that assumption.
+The instruction \texttt{and rd, rs1, rs2} performs
+\texttt{Reg[rd] = Reg[rs1] AND Reg[rs2]}.
+This is a standard R-type instruction that the single-cycle datapath
+(Figure 4.10) fully supports.
 
 \phantomsection\addcontentsline{toc}{subsubsection}{4.1.1}
 \medskip\noindent\textbf{4.1.1}
-If the control unit treats \texttt{lw2} as an R-type instruction, it
-generates:
+The control unit generates the standard R-type control signals:
 
 \begin{center}
-\begin{tabular}{lcc}
+\begin{tabular}{lc}
 \toprule
-\textbf{Signal} & \textbf{R-type value} & \textbf{Value needed for lw2} \\
+\textbf{Signal} & \textbf{Value} \\
 \midrule
-RegDst   & 1  & 1 (write to rd = \texttt{\$t1}) \\
-ALUSrc   & 0  & 0 first, then 1 (two ALU uses) \\
-MemtoReg & 0  & 1 (result comes from memory) \\
-RegWrite & 1  & 1 (write to \texttt{\$t1}) \\
-MemRead  & 0  & 1 (need two memory reads) \\
-MemWrite & 0  & 0 \\
-Branch   & 0  & 0 \\
-ALUOp    & 10 & 00 (addition for address calc) \\
-Jump     & 0  & 0 \\
+RegDst   & 1 (write to rd) \\
+ALUSrc   & 0 (second operand from register) \\
+MemtoReg & 0 (result from ALU, not memory) \\
+RegWrite & 1 (write result to register file) \\
+MemRead  & 0 \\
+MemWrite & 0 \\
+Branch   & 0 \\
+ALUOp    & 10 (determined by funct field) \\
+Jump     & 0 \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-The existing control unit \emph{cannot} produce the correct signals for this
-instruction.  In particular, MemRead and MemtoReg would be 0 (R-type
-defaults), but the instruction needs them to be 1.  Furthermore, two
-separate memory reads are required, and the single-cycle datapath provides
-only one data-memory access per cycle.
-
 \phantomsection\addcontentsline{toc}{subsubsection}{4.1.2}
 \medskip\noindent\textbf{4.1.2}
-The following resources perform a useful function for \texttt{lw2}:
+The following resources perform a useful function for \texttt{and}:
 
 \begin{itemize}
   \item \textbf{PC / Instruction Memory} --- fetches the instruction.
-  \item \textbf{Register File (read)} --- reads \texttt{\$s1} and
-        \texttt{\$s2}.
-  \item \textbf{Sign-extend} --- not needed (R-type format has no
-        immediate), so it does \emph{not} perform a useful function.
-  \item \textbf{ALU} --- needed to compute \texttt{\$s1 + Mem[\$s2]}, but
-        would also be needed for the first address (just \texttt{\$s2}).
-        In the existing datapath only one ALU operation can occur.
-  \item \textbf{Data Memory} --- needed for both reads, but only one can
-        occur.
-  \item \textbf{Register File (write)} --- writes the final result to
-        \texttt{\$t1}.
+  \item \textbf{Register File (read)} --- reads \texttt{rs1} and
+        \texttt{rs2}.
+  \item \textbf{ALU} --- performs the AND operation on the two register
+        values.
+  \item \textbf{Mux (RegDst)} --- selects rd as the write register.
+  \item \textbf{Mux (ALUSrc)} --- selects the register value (not the
+        sign-extended immediate) as the second ALU input.
+  \item \textbf{Mux (MemtoReg)} --- selects the ALU result (not memory
+        data) to write back.
+  \item \textbf{Register File (write)} --- writes the ALU result to rd.
   \item \textbf{PC adder} --- computes PC+4 for the next instruction.
 \end{itemize}
 
 \phantomsection\addcontentsline{toc}{subsubsection}{4.1.3}
 \medskip\noindent\textbf{4.1.3}
 \begin{itemize}
-  \item \textbf{Produces no output:} The sign-extend unit receives the
-        16-bit immediate field, which is the shamt/funct portion of an
-        R-type encoding.  It still produces an output (sign-extends those
-        bits), but the output is meaningless for this instruction.
+  \item \textbf{Produces no output:} None.  Every block in the datapath
+        produces some output every cycle (combinational logic always
+        propagates).
   \item \textbf{Produces output that is not used:}
     \begin{itemize}
+      \item The \textbf{sign-extend} unit sign-extends the lower 16 bits of
+            the instruction word, but ALUSrc = 0 means the mux does not
+            select it as an ALU input.
       \item The \textbf{branch adder} (PC + sign-extended offset) computes a
-            branch target, but its output is not selected because Branch = 0.
-      \item The \textbf{sign-extend} unit produces output, but ALUSrc = 0
-            means the mux does not select it.
-      \item Under R-type control signals, the \textbf{Data Memory} has
-            MemRead = 0, so it produces no useful read output, even though
-            \texttt{lw2} needs two memory reads.
+            branch target, but Branch = 0, so its output is not selected by
+            the PC mux.
+      \item The \textbf{Data Memory} receives an address and produces a read
+            output, but MemtoReg = 0 means the write-back mux selects the
+            ALU result instead.
     \end{itemize}
 \end{itemize}
-
-The fundamental problem is that the single-cycle datapath cannot perform
-two memory reads in one cycle.  Implementing \texttt{lw2} would require
-either a multi-cycle design or a second data-memory port.
 
 %-----------------------------------------------------------------------------
 \subsection*{4.2 --- Don't Cares in Control}
