@@ -322,31 +322,29 @@ Trace the path through Figure~4.17 (top-left to top-right):
 
 \phantomsection\addcontentsline{toc}{subsubsection}{4.5.3}
 \medskip\noindent\textbf{4.5.3}
-There are three main muxes in the datapath:
+Figure~4.17 has four muxes:
 
 \begin{center}
 \begin{tabular}{lcccc}
 \toprule
-\textbf{Mux} & \textbf{Input 0} & \textbf{Input 1} & \textbf{Select} & \textbf{Output} \\
+\textbf{Mux} & \textbf{Input 0} & \textbf{Input 1} & \textbf{Sel} & \textbf{Output} \\
 \midrule
-RegDst mux   & rt = 18 & rd = 16 & 1 & 16 (\texttt{\$s0}) \\
-ALUSrc mux   & Read Data 2 = [\texttt{\$s2}] & Sign-ext imm & 0 & [\texttt{\$s2}] \\
-MemtoReg mux & ALU result & Mem read data & 0 & ALU result \\
+RegDst   & rt (\texttt{\$s2}) & rd (\texttt{\$s0}) & 1 & \texttt{\$s0} \\
+ALUSrc   & Reg[\texttt{\$s2}] & SignExt(imm) & 0 & Reg[\texttt{\$s2}] \\
+MemtoReg & ALU result & (unused) & 0 & ALU result \\
+Branch   & PC + 4 & branch target & 0 & PC + 4 \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-Additionally, the PC-source mux:
-\begin{itemize}
-  \item Input 0 = PC + 4, Input 1 = branch target (PC + 4 + offset$\times$4).
-  \item Select = Branch AND Zero = 0.  Output = PC + 4.
-\end{itemize}
+\noindent The Branch mux select = Branch AND Zero = $0$ AND $(\cdot)$ = 0.
 
-And the Jump mux:
+\medskip\noindent\textbf{Register file outputs:}
 \begin{itemize}
-  \item Input 0 = output of PC-source mux = PC + 4.
-        Input 1 = jump target.
-  \item Select = Jump = 0.  Output = PC + 4.
+  \item Read Data 1: Read Register 1 = rs = \texttt{\$s1}
+        $\;\Rightarrow\;$ output = Reg[\texttt{\$s1}]
+  \item Read Data 2: Read Register 2 = rt = \texttt{\$s2}
+        $\;\Rightarrow\;$ output = Reg[\texttt{\$s2}]
 \end{itemize}
 
 \phantomsection\addcontentsline{toc}{subsubsection}{4.5.4}
