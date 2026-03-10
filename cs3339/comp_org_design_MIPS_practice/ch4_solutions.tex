@@ -297,17 +297,28 @@ producing ALU control = \texttt{0010} (addition).
 
 \phantomsection\addcontentsline{toc}{subsubsection}{4.5.2}
 \medskip\noindent\textbf{4.5.2}
-The new PC value is:
-\[
-  \text{PC}_{\text{new}} = \text{PC} + 4
-\]
+The new PC value is $\text{PC}_{\text{new}} = \text{PC} + 4$.
 
-Path: The current PC feeds the instruction memory \emph{and} the top adder,
-which computes PC + 4.  Since Branch = 0 and Jump = 0, the branch-target
-mux selects PC + 4, and the jump mux also selects that value.  The result
-is written to the PC register on the next rising clock edge.
+Trace the path through Figure~4.17 (top-left to top-right):
 
-No branch is taken because Branch AND Zero = $0 \text{ AND } (\cdot) = 0$.
+\begin{enumerate}
+  \item The current \textbf{PC} feeds the top-left \textbf{Add} block.
+        The other input is the constant~\textbf{4}.
+        This adder outputs $\text{PC}+4$.
+  \item $\text{PC}+4$ connects to \textbf{input~0} of the top-right
+        \textbf{MUX} (the PC-source mux).
+  \item \textbf{Input~1} of that MUX receives the branch target address
+        ($\text{PC}+4+\text{offset}$), but it is \emph{not} selected
+        for this instruction.
+  \item The MUX select signal comes from the \textbf{AND gate} that
+        combines \textbf{Branch} and the ALU \textbf{Zero} output.
+        For \texttt{add}, Branch $= 0$, so
+        $\text{Branch} \;\texttt{AND}\; \text{Zero}
+        = 0 \;\texttt{AND}\; (\cdot) = 0$.
+  \item MUX select $= 0$ $\;\Rightarrow\;$ the mux outputs
+        $\text{PC}+4$, which is written into the PC register on the
+        next rising clock edge.
+\end{enumerate}
 
 \phantomsection\addcontentsline{toc}{subsubsection}{4.5.3}
 \medskip\noindent\textbf{4.5.3}
