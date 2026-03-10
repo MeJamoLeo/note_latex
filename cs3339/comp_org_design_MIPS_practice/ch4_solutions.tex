@@ -349,22 +349,24 @@ Branch   & PC + 4 & branch target & 0 & PC + 4 \\
 
 \phantomsection\addcontentsline{toc}{subsubsection}{4.5.4}
 \medskip\noindent\textbf{4.5.4}
-\textbf{Register File read outputs:}
-\begin{itemize}
-  \item Read Register 1 = rs = 17 $\Rightarrow$ Read Data 1 = contents of \texttt{\$s1}
-  \item Read Register 2 = rt = 18 $\Rightarrow$ Read Data 2 = contents of \texttt{\$s2}
-\end{itemize}
+\textbf{ALU inputs and outputs:}
 
-\textbf{ALU inputs:}
-\begin{itemize}
-  \item Input A = Read Data 1 = contents of \texttt{\$s1}
-  \item Input B = output of ALUSrc mux = Read Data 2 = contents of \texttt{\$s2}
-        (since ALUSrc = 0)
-  \item ALU control = \texttt{0010} (add)
-  \item ALU result = \texttt{\$s1} + \texttt{\$s2}
-  \item Zero flag = 1 if the result is zero, 0 otherwise (not used by this
-        instruction)
-\end{itemize}
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+\textbf{Signal} & \textbf{Value} \\
+\midrule
+Input A     & Read Data 1 = Reg[\texttt{\$s1}] \\
+Input B     & ALUSrc mux output = Reg[\texttt{\$s2}] \quad (ALUSrc = 0) \\
+ALU control & \texttt{0010} (add) \\
+ALU result  & Reg[\texttt{\$s1}] + Reg[\texttt{\$s2}] \\
+Zero        & 1 if result $= 0$, else 0 \quad (not used) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent\textbf{Read Data outputs} (same as 4.5.3):
+Read Data 1 = Reg[\texttt{\$s1}], Read Data 2 = Reg[\texttt{\$s2}].
 
 \phantomsection\addcontentsline{toc}{subsubsection}{4.5.5}
 \medskip\noindent\textbf{4.5.5}
