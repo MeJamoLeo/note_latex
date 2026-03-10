@@ -370,23 +370,26 @@ Read Data 1 = Reg[\texttt{\$s1}], Read Data 2 = Reg[\texttt{\$s2}].
 
 \phantomsection\addcontentsline{toc}{subsubsection}{4.5.5}
 \medskip\noindent\textbf{4.5.5}
-The Register File write inputs are:
+All inputs to the Register File:
 
 \begin{center}
-\begin{tabular}{lc}
+\begin{tabular}{ll}
 \toprule
 \textbf{Input} & \textbf{Value} \\
 \midrule
-Write Register & 16 (from RegDst mux, selecting rd = \texttt{\$s0}) \\
-Write Data     & ALU result = \texttt{\$s1} + \texttt{\$s2} \\
-               & (from MemtoReg mux, selecting ALU result) \\
-RegWrite       & 1 (write is enabled) \\
+Read Register 1  & rs = \texttt{\$s1} \\
+Read Register 2  & rt = \texttt{\$s2} \\
+Write Register   & RegDst mux output = \texttt{\$s0}
+                   \quad (RegDst = 1 $\to$ rd) \\
+Write Data       & MemtoReg mux output = Reg[\texttt{\$s1}] + Reg[\texttt{\$s2}]
+                   \quad (MemtoReg = 0 $\to$ ALU result) \\
+RegWrite         & 1 (write enabled) \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-At the next rising clock edge, the value \texttt{\$s1} + \texttt{\$s2} is
-written into register \texttt{\$s0} (register 16).
+\noindent At the next rising clock edge,
+Reg[\texttt{\$s1}] + Reg[\texttt{\$s2}] is written into \texttt{\$s0}.
 %-----------------------------------------------------------------------------
 \subsection*{4.6 --- Adding I-type Instructions}
 \hypertarget{sol-4.6}{}
