@@ -1,0 +1,238 @@
+\documentclass[12pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{enumitem}
+\usepackage{xcolor}
+
+\pagestyle{empty}
+
+\begin{document}
+
+\subsection*{HW6}
+
+\begin{enumerate}
+  %% HW6-1
+  \item An automobile dealer has found that $X$, the number of cars customers buy each week, follows the probability distribution
+    \[
+      f(x) = \begin{cases} \dfrac{kx^2}{x!}, & x = 1, 2, 3, 4. \\[6pt] 0, & \text{otherwise.} \end{cases}
+    \]
+    \begin{enumerate}[label=(\alph*)]
+      \item Find $k$.
+      \item Find the probability the dealer sells at least two cars in a week.
+      \item Find $F(x)$, the cumulative distribution function.
+      \item Graph $F(x)$.
+    \end{enumerate}
+
+\newpage
+
+  %% HW6-2
+  \item A random variable, $X$, has the distribution function
+    \[
+      F(x) = \begin{cases} 0, & x < -1 \\[4pt] \dfrac{1}{3}, & -1 \le x < 0 \\[6pt] \dfrac{5}{6}, & 0 \le x < 2 \\[6pt] 1, & x \ge 2 \end{cases}
+    \]
+    Find the probability distribution function, $f(x)$.
+
+\newpage
+
+  %% HW6-3
+  \item A bag contains eight numbered pieces of paper using numbers 1, 2, 3, 4, 5, 6, 7, and 8. Let $X$ be the number on a randomly selected piece of paper.
+    \begin{enumerate}[label=(\alph*)]
+      \item Find the probability mass function, $f(x)$.
+      \item Find $\mathbb{E}(X)$, the mean of $X$.
+    \end{enumerate}
+
+\newpage
+
+  %% HW6-4
+  \item A term life insurance policy will pay a beneficiary a certain sum of money upon the death of the policyholder. These policies have premiums that must be paid annually. Suppose a life insurance company sells a \$200,000 one-year term life insurance policy to a 49-year-old female for \$600. According to the \textit{National Vital Statistics Report}, Vol.~47, No.~28, the probability the female will survive the year is 0.9975.
+    \begin{enumerate}[label=(\alph*)]
+      \item Compute the expected profit to the insurance company for selling such a policy.
+      \item Interpret the value of expected profit in (a) in the context of the problem.
+    \end{enumerate}
+
+\newpage
+
+  %% HW6-5
+  \item \textit{Do all random variables have a mean?} Let $X$ be a discrete random variable having the probability mass function
+    \[
+      f(x) = \frac{6}{\pi^2 x^2}, \quad x = 1, 2, 3, \cdots
+    \]
+    Show that $\mathbb{E}(X)$ does not exist (i.e., it is not finite). \hfill \textcolor{blue}{Hint: Harmonic series diverges.}
+
+\newpage
+
+\end{enumerate}
+
+\subsection*{HW7}
+
+\begin{enumerate}
+  %% HW7-1
+  \item A small manufacturing firm sells 1 machine per month with probability 0.4; it sells 2 machines per month with probability 0.2; it never sells more than 2 machines per month. If $X$ represents the number of machines sold per month,
+    \begin{enumerate}[label=(\alph*)]
+      \item Find the mean and variance of $X$.
+      \item If the monthly profit is $2X^2 + 3X + 1$ (in thousands of dollars), find the expected monthly profit.
+    \end{enumerate}
+
+\newpage
+
+  %% HW7-2
+  \item A coin, loaded to show heads with probability $2/3$, is tossed until heads appear or until 5 tosses have been made. Let $X$ denote the number of tosses made. Find the mean and variance of $X$.
+
+\newpage
+
+  %% HW7-3
+  \item Given $\mathbb{E}(2X + 5) = 10$ and $\mathbb{E}\!\left((2X + 5)^2\right) = 125$. Determine
+    \begin{enumerate}[label=(\alph*)]
+      \item The mean of $X$, $\mu_X$.
+      \item The variance of $2X + 5$, $\sigma_{2X+5}^2$.
+      \item The variance and standard deviation of $X$, $\sigma_X^2$ and $\sigma_X$.
+    \end{enumerate}
+
+\newpage
+
+  %% HW7-4
+  \item Label the sides of a fair 4-sided die (tetrahedron) with numbers 1, 2, 3, and 4. Roll the die and let $X$ be the number facing down.
+    \begin{enumerate}[label=(\alph*)]
+      \item Find the mean and variance of $X$.
+      \item What is variance of $3X - 2$?
+    \end{enumerate}
+
+\newpage
+
+  %% HW7-5
+  \item In a small voting precinct, 160 voters favor a candidate and 40 voters oppose the candidate. A sample of 3 voters is selected at random.
+    \begin{enumerate}[label=(\alph*)]
+      \item What is the exact probability that all voters in the sample will oppose the candidate?
+      \item Exactly what underlying distribution is used in (a)? Find the mean and variance of the distribution.
+    \end{enumerate}
+
+\newpage
+
+  %% HW7-6
+  \item A class of 35 students consists of 20 females and 15 males. Select one student at random from the class. Let $X = 1$ if a female student is selected and $X = 0$ otherwise.
+    \begin{enumerate}[label=(\alph*)]
+      \item Determine the distribution of $X$ including name of the distribution and value(s) of parameter(s).
+      \item Find the mean, and variance of $X$.
+    \end{enumerate}
+
+\newpage
+
+\end{enumerate}
+
+\subsection*{HW8}
+
+\begin{enumerate}
+  %% HW8-1
+  \item The probability of being able to log on a computer system from a remote terminal during a busy period is 0.7. Suppose that 10 independent attempts are made and that $X$ denotes the number of successful attempts.
+    \begin{enumerate}[label=(\alph*)]
+      \item Write an expression for the probability distribution function, $f(x)$.
+      \item Find $P(X \ge 5)$.
+      \item Find the mean and standard deviation for $X$.
+    \end{enumerate}
+
+\newpage
+
+  %% HW8-2
+  \item An airline knows that 10\% of the people holding reservations on a given flight will not appear. The plane holds 93 people. If 95 reservations have been sold, find the probability that the airline will be able to accommodate everyone appearing for the flight.
+
+\newpage
+
+  %% HW8-3
+  \item In a small voting precinct, 160 voters favor a candidate and 40 voters oppose the candidate. A sample of 3 voters is selected at random.
+    \begin{enumerate}[label=(\alph*)]
+      \item Use a binomial probability to approximate the probability that all three voters selected oppose the candidate.
+      \item Is the criterion for a good approximation met? Is the approximated probability in (a) close to 0.0075, the true probability from HW7 Problem 5(a)?
+    \end{enumerate}
+
+\newpage
+
+  %% HW8-4
+  \item Label the sides of a fair 4-sided die (tetrahedron) with numbers 1, 2, 3, and 4. Roll the die and let $X$ be the number facing down. Determine the MGF of $X$.
+
+\newpage
+
+\end{enumerate}
+
+\subsection*{HW9}
+
+\begin{enumerate}
+  %% HW9-1
+  \item Derive the mean and variance for a discrete distribution based on its moment generating function $M_X(t) = e^{-3t + 2\,t^2}$, $t \in (-\infty, \infty)$.
+
+\newpage
+
+  %% HW9-2
+  \item For each of the following, identify the distribution based on the MGF. Be sure to specify name of distribution and value(s) of parameter(s).
+    \begin{enumerate}[label=(\alph*)]
+      \item $M_X(t) = \dfrac{1}{2}\,e^{t} + \dfrac{1}{2}\,e^{2\,t}$, $t \in (-\infty, \infty)$.
+      \item $M_X(t) = (0.4 + 0.6\,e^{t})^{12}$, $t \in (-\infty, \infty)$.
+      \item $M_X(t) = 0.2\,e^{t} + 0.8$, $t \in (-\infty, \infty)$.
+    \end{enumerate}
+
+\newpage
+
+  %% HW9-3
+  \item The probability of being able to log on a computer system from a remote terminal during a busy period is 0.7. Suppose that 10 independent attempts are made and that $X$ denotes the number of successful attempts.
+
+    Now suppose that $Y$ represents the number of attempts up to and including the first successful attempt. Write an expression for the probability distribution function, $g(y)$.
+    \begin{enumerate}[label=(\alph*)]
+      \setcounter{enumii}{3}
+      \item Find $P(Y = 6)$ and $P(Y \ge 5)$.
+      \item Find the mean and standard deviation for $Y$.
+    \end{enumerate}
+
+\newpage
+
+  %% HW9-4
+  \item To become an actuary, one must pass a series of 9 examinations. Suppose that 60\% of those taking each examination pass it and that passing the examinations are independent of each other. What is the probability a person passes the 9th examination, and so has passed all the examinations, on the 15th attempt?
+
+\newpage
+
+\end{enumerate}
+
+\subsection*{HW10}
+
+\begin{enumerate}
+  %% HW10-1
+  \item A TV interviewer must conduct \textcolor{blue}{six} interviews. Suppose the probability a person agrees to be interviewed is $2/3$.
+    \begin{enumerate}[label=(\alph*)]
+      \item What is the probability the interviewer will ask 9 people in all to be interviewed?
+      \item How many people can the interviewer expect to ask to be interviewed?
+    \end{enumerate}
+
+\newpage
+
+  %% HW10-2
+  \item In a manufacturing process, the probability a produced item is good is 0.97. Assuming the items produced are independent, what is the probability that exactly five defective items precede the 100th good item?
+
+\newpage
+
+  %% HW10-3
+  \item Deaths in a small city occur at a rate of 5 per week and are known to follow a Poisson distribution.
+    \begin{enumerate}[label=(\alph*)]
+      \item What is the expected number of deaths in a 3-day period?
+      \item What is the probability no one dies in a 3-day period?
+    \end{enumerate}
+    \begin{enumerate}[label=(\alph*)]
+      \setcounter{enumii}{3}
+      \item What is the probability that number of deaths in a 3-day period is greater than $\mu - \sigma$?
+    \end{enumerate}
+
+\newpage
+
+  %% HW10-4
+  \item The number of typographical errors per page in a book follows a Poisson distribution with parameter $3/4$. What is the probability that there is a total of 10 errors on 10 randomly selected pages in the book?
+
+\newpage
+
+  %% HW10-5
+  \item For each of the following, identify the distribution based on the MGF. Be sure to specify name of distribution and value(s) of parameter(s).
+    \begin{enumerate}[label=(\alph*)]
+      \item $M_X(t) = \dfrac{0.7\,e^{t}}{1 - 0.3\,e^{t}}$, $t < -\ln 0.3$.
+      \item $M_X(t) = e^{2.3(e^{t} - 1)}$, $t \in (-\infty, \infty)$.
+      \item $M_X(t) = \left(\dfrac{0.9\,e^{t}}{1 - 0.1\,e^{t}}\right)^{10}$, $t < -\ln 0.1$.
+    \end{enumerate}
+
+\end{enumerate}
+
+\end{document}

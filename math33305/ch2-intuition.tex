@@ -1,0 +1,555 @@
+\documentclass{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, calc, shapes.geometric}
+
+% Japanese support
+\usepackage{xeCJK}
+\setCJKmainfont{Hiragino Mincho ProN}
+\setCJKsansfont{Hiragino Kaku Gothic ProN}
+
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Var}{\operatorname{Var}}
+\newcommand{\R}{\mathbb{R}}
+
+\newtheorem{example}{例}[section]
+\theoremstyle{remark}
+\newtheorem*{point}{ポイント}
+
+\title{Chapter 2：テキサスホールデムで理解する離散確率分布}
+\author{MATH 33305}
+\date{\today}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+
+% ============================================================
+\section*{前提知識：テキサスホールデムの基本}
+% ============================================================
+
+\begin{itemize}
+  \item 52枚のデッキ（4スート $\times$ 13ランク）を使う。
+  \item 各プレイヤーに\textbf{ホールカード}（手札）が2枚配られる。
+  \item コミュニティカード（共有）が最大5枚出る：
+        フロップ（3枚）→ ターン（1枚）→ リバー（1枚）。
+  \item 手札2枚 + コミュニティ5枚の計7枚から最強の5枚を選ぶ。
+  \item ハンドの強さ：ロイヤルフラッシュ $>$ ストレートフラッシュ $>$ フォーカード $>$ フルハウス $>$ フラッシュ $>$ ストレート $>$ スリーカード $>$ ツーペア $>$ ワンペア $>$ ハイカード。
+\end{itemize}
+
+\newpage
+
+% ============================================================
+\section{確率変数 (Random Variable) とは}
+% ============================================================
+
+\textbf{一言で：}ポーカーの結果に数字を割り当てるルール。
+
+\begin{example}[ハンドの結果を数値化]
+  1ハンドの結果は「勝ち・負け・引き分け」だが、これは数字じゃない。
+  そこでチップの増減を $X$ とする：
+  \[
+    X = \text{そのハンドで増えた（または減った）チップ量}
+  \]
+  ポット\$200を取れば $X = +\$200$、\$100ベットしてフォールドされなくて負けたら $X = -\$100$。
+
+  「ポーカーの結果」→「チップの数字」に変換。この $X$ が確率変数 (random variable)。
+\end{example}
+
+\begin{example}[色々な確率変数]
+  同じゲームでも、何を数えるかで別の確率変数になる：
+  \begin{itemize}
+    \item $X =$ ホールカード2枚のうちスペードの枚数 → $X \in \{0, 1, 2\}$
+    \item $Y =$ コミュニティカード5枚のうちハートの枚数 → $Y \in \{0, 1, 2, 3, 4, 5\}$
+    \item $W =$ 今夜のセッションで勝つハンド数 → $W \in \{0, 1, 2, \ldots\}$
+  \end{itemize}
+\end{example}
+
+\begin{point}
+  確率変数は「ゲームの結果 $\to$ 数字」の翻訳機。数字にすることで、期待値や分散を計算してプレイを最適化できるようになる。
+\end{point}
+
+% ============================================================
+\section{PMF と CDF：確率の2つの見せ方}
+% ============================================================
+
+\subsection{PMF (Probability Mass Function, 確率質量関数)}
+
+\textbf{一言で：}$f(x) = P(X = x)$。「$X$ がちょうどその値になる確率」。
+
+\begin{example}[ホールカードのペア]
+  $X =$ ホールカード2枚のうちペアになっている枚数（0枚か2枚）。
+  \begin{center}
+    \begin{tabular}{c|cc}
+      $x$ & 0（ペアでない） & 2（ポケットペア） \\ \hline
+      $f(x)$ & $\dfrac{1216}{1326} \approx 0.941$ & $\dfrac{78}{1326} + \dfrac{32}{1326} \approx 0.059$
+    \end{tabular}
+  \end{center}
+
+  正確には：52枚から2枚の組み合わせは $\binom{52}{2} = 1326$ 通り。
+  ペアは $13 \times \binom{4}{2} = 78$ 通り。
+
+  $f(2) = 78/1326 \approx 5.9\%$。→ 約17ハンドに1回ポケットペアが来る。
+\end{example}
+
+\begin{example}[ホールカードのスート]
+  $X =$ ホールカード2枚が同じスート（suited）かどうか。$X = 1$ならsuited、$X = 0$ならoffsuit。
+  \begin{center}
+    \begin{tabular}{c|cc}
+      $x$ & 0 (offsuit) & 1 (suited) \\ \hline
+      $f(x)$ & $936/1326 \approx 0.706$ & $312/1326 + 78/1326 \approx 0.294$
+    \end{tabular}
+  \end{center}
+
+  正確には：suitedは $13 \times 12 / 2 \times 4 = 312$（ペアでない）$+ 0$（ペアはsuited不可）。
+  $f(1) = 312/1326 \approx 23.5\%$。→ 約4回に1回suitedハンドが来る。
+\end{example}
+
+\subsection{CDF (Cumulative Distribution Function, 累積分布関数)}
+
+\textbf{一言で：}$F(x) = P(X \le x)$。「$X$ がその値\textbf{以下}の確率」。
+
+\begin{example}[セッションの勝ちハンド数]
+  5ハンドプレイして、勝ったハンド数 $X$ のPMFとCDFが以下だとする：
+  \begin{center}
+    \begin{tabular}{c|cccccc}
+      $x$          & 0    & 1    & 2    & 3    & 4    & 5 \\ \hline
+      $f(x)$ (PMF) & 0.05 & 0.15 & 0.35 & 0.25 & 0.15 & 0.05 \\ \hline
+      $F(x)$ (CDF) & 0.05 & 0.20 & 0.55 & 0.80 & 0.95 & 1.00
+    \end{tabular}
+  \end{center}
+
+  \textbf{CDFの嬉しさ：}範囲の確率が引き算一発。
+  \begin{itemize}
+    \item 「2勝以下の確率」$= F(2) = 0.55$
+    \item 「3勝以上の確率」$= 1 - F(2) = 0.45$
+    \item 「2勝から4勝の確率」$= F(4) - F(1) = 0.95 - 0.20 = 0.75$
+  \end{itemize}
+\end{example}
+
+\begin{point}
+  PMF = 「ちょうどその値」の確率。CDF = 「以下」の確率。\\
+  同じ情報の見せ方が違うだけ。PMFを左から足していけばCDFになる。
+\end{point}
+
+% ============================================================
+\section{期待値 (Expected Value) $\mu = \E(X)$}
+% ============================================================
+
+\textbf{一言で：}何千ハンドもプレイしたときの1ハンドあたりの平均。
+
+\begin{example}[コールすべきか？]
+  リバーで相手がオールイン。ポットに\$300ある。コールするには\$100必要。
+
+  相手のブラフ率は30\%と読んでいる。$X =$ コールした場合のチップ増減。
+
+  \begin{center}
+    \begin{tabular}{c|cc}
+      結果 & 勝ち（相手がブラフ） & 負け（相手が本物） \\ \hline
+      $X$    & $+\$300$ & $-\$100$ \\
+      確率 & $0.30$ & $0.70$
+    \end{tabular}
+  \end{center}
+
+  \[
+    \mu = \E(X) = 300 \times 0.30 + (-100) \times 0.70 = 90 - 70 = +\$20
+  \]
+
+  期待値 $+\$20$ → \textbf{長期的にはコールが得}。1回は負けるかもしれないが、
+  同じ状況で毎回コールすれば平均\$20ずつ増える。
+
+  フォールドすれば $X = 0$（確実）。$+\$20 > 0$ だからコールが正しい。
+\end{example}
+
+\begin{example}[トーナメントのバイイン]
+  バイイン\$100のトーナメント。賞金構造：
+  \begin{center}
+    \begin{tabular}{c|ccc}
+      結果 & 1位 & 2〜3位 & それ以外 \\ \hline
+      賞金 $x$ & \$1000 & \$300 & \$0 \\
+      確率   & 0.02 & 0.05 & 0.93
+    \end{tabular}
+  \end{center}
+  \[
+    \E(\text{賞金}) = 1000 \times 0.02 + 300 \times 0.05 + 0 \times 0.93 = 20 + 15 = \$35
+  \]
+  バイイン\$100払って期待賞金\$35 → \textbf{期待値は$-\$65$}。
+  長期的にはカジノ（主催者）が得をするようにできている。
+\end{example}
+
+\begin{point}
+  ポーカーの全ての判断は期待値で下す。「この1回の結果」ではなく「同じ状況を
+  1000回繰り返したらどうなるか」で考える。これが $\E(X)$ の本質。
+\end{point}
+
+% ============================================================
+\section{分散 (Variance) $\sigma^2$ と標準偏差 (Standard Deviation) $\sigma$}
+% ============================================================
+
+\textbf{一言で：}$\sigma^2$ = 結果のブレ幅。$\sigma$ = それを元の単位に戻したもの。
+
+\begin{example}[タイトvs ルースプレイヤー]
+  2人のプレイヤーが同じテーブルにいる。どちらも1ハンドあたりの期待値は $+\$5$。
+
+  \textbf{タイト太郎（堅実型）：}プレミアムハンドだけプレイ。
+  \begin{center}
+    \begin{tabular}{c|cc}
+      $X$ & $+\$20$ & $-\$10$ \\ \hline
+      確率 & $0.50$ & $0.50$
+    \end{tabular}
+  \end{center}
+  $\mu = 20 \times 0.5 + (-10) \times 0.5 = +\$5$。
+
+  $\sigma^2 = (20-5)^2 \times 0.5 + (-10-5)^2 \times 0.5 = 112.5 + 112.5 = 225$。
+
+  $\sigma = \$15$。
+
+  \medskip
+  \textbf{ルース花子（攻撃型）：}幅広いハンドをプレイ。大きなポットを狙う。
+  \begin{center}
+    \begin{tabular}{c|cc}
+      $X$ & $+\$505$ & $-\$495$ \\ \hline
+      確率 & $0.50$ & $0.50$
+    \end{tabular}
+  \end{center}
+  $\mu = 505 \times 0.5 + (-495) \times 0.5 = +\$5$。
+
+  $\sigma^2 = (505-5)^2 \times 0.5 + (-495-5)^2 \times 0.5 = 125000 + 125000 = 250000$。
+
+  $\sigma = \$500$。
+
+  \medskip
+  \begin{center}
+    \begin{tabular}{lcc}
+      \toprule
+       & タイト太郎 & ルース花子 \\ \midrule
+      $\mu$ & $+\$5$ & $+\$5$ \\
+      $\sigma$ & $\$15$ & $\$500$ \\
+      \bottomrule
+    \end{tabular}
+  \end{center}
+
+  どちらも長期的に同じだけ勝てるが、花子は\textbf{短期的に大きく上下する}。
+  バンクロールが少ないと花子のスタイルは破産リスクが高い。
+
+  \textbf{$\mu$だけでは見えない「リスク」を$\sigma$が数値化する。}
+\end{example}
+
+\begin{point}
+  ポーカー用語で言えば：
+  \begin{itemize}
+    \item $\mu$ = ウィンレート（時給）
+    \item $\sigma$ = スイング（上下の振れ幅）
+  \end{itemize}
+  良いプレイヤーは $\mu > 0$ かつ $\sigma$ をコントロールする。
+\end{point}
+
+% ============================================================
+\section{6つの分布をテキサスホールデムで見る}
+% ============================================================
+
+% --------------------------------
+\subsection{Bernoulli（ベルヌーイ分布）--- 1ハンドの勝敗}
+
+\textbf{状況：}ヘッズアップ（1対1）で1ハンドだけプレイ。勝率 $p = 0.6$。
+
+$X = \begin{cases} 1 & \text{勝ち} \\ 0 & \text{負け} \end{cases}$
+
+$X \sim \text{Ber}(0.6)$。\textbf{1回だけ}の二択。
+
+$\mu = p = 0.6$、$\sigma^2 = pq = 0.6 \times 0.4 = 0.24$。
+
+% --------------------------------
+\subsection{Binomial（二項分布）--- $n$ハンド中の勝ち数}
+
+\textbf{状況：}同じ相手とヘッズアップで\textbf{50ハンド}プレイ。
+各ハンドは独立で勝率 $p = 0.6$。
+
+$X = $ 50ハンド中の勝ちハンド数。
+
+$X \sim \text{Bin}(50, 0.6)$。
+
+$\mu = np = 30$勝、$\sigma^2 = npq = 12$、$\sigma \approx 3.46$。
+
+\textbf{Bernoulliとの違い：}Bernoulliの「1ハンド」を50回繰り返して勝ち数を合計したもの。
+
+\medskip
+\textbf{使う条件チェック：}
+\begin{enumerate}
+  \item 固定回数（50ハンド）→ \checkmark
+  \item 各回2択（勝ち/負け）→ \checkmark
+  \item 確率が毎回同じ（$p=0.6$）→ \checkmark
+  \item 各ハンドが独立 → \checkmark
+\end{enumerate}
+
+% --------------------------------
+\subsection{Hypergeometric（超幾何分布）--- デッキから引く}
+
+\textbf{状況：}あなたのホールカードはハートが2枚（$\heartsuit A$, $\heartsuit K$）。
+フラッシュにはあと3枚ハートが必要。
+
+デッキの残り50枚中ハートは11枚。フロップで\textbf{3枚が同時にめくられる}（戻さない）。
+
+$X = $ フロップ3枚中のハートの枚数。
+
+$X \sim \text{HG}(N=50, N_1=11, n=3)$。
+
+$\mu = 3 \times \frac{11}{50} = 0.66$枚。
+
+フロップでフラッシュ完成 = $P(X \ge 3)$：
+\[
+  P(X = 3) = \frac{\binom{11}{3}\binom{39}{0}}{\binom{50}{3}} = \frac{165}{19600} \approx 0.84\%
+\]
+
+\textbf{Binomialとの違い：}
+\begin{center}
+  \begin{tabular}{lcc}
+    \toprule
+    & Binomial & Hypergeometric \\ \midrule
+    カードの引き方 & 引いて戻して次を引く & 引いたら戻さない \\
+    各回の確率 & 毎回同じ & 引くたびに変わる \\
+    典型的な場面 & ハンドごとの勝敗 & 1つのデッキからの配り \\
+    \bottomrule
+  \end{tabular}
+\end{center}
+
+\textbf{ポーカーは基本的にHypergeometric。} デッキからカードを配るのは「戻さない抽出」だから。ただし残りデッキが大きいとBinomialで近似できる。
+
+% --------------------------------
+\subsection{Geometric（幾何分布）--- 初めてのポケットAA}
+
+\textbf{状況：}ポケットエース（AA）が来る確率は $p = 1/221 \approx 0.0045$。
+\textbf{最初に}AAが配られるまで何ハンドかかるか。
+
+$X = $ AAが初めて来るまでのハンド数。
+
+$X \sim \text{Geometric}(1/221)$。$X = 1, 2, 3, \ldots$（上限なし）
+
+$\mu = 1/p = 221$ハンド。→ 平均221ハンドに1回AAが来る。
+
+\begin{itemize}
+  \item $P(X = 1) = 1/221 \approx 0.45\%$（最初のハンドでAA）
+  \item $P(X > 221) = (220/221)^{221} \approx 36.8\%$（221ハンド過ぎてもまだ来ない確率）
+  \item $P(X > 500) = (220/221)^{500} \approx 10.3\%$（500ハンドでもまだ来ない！）
+\end{itemize}
+
+\textbf{Binomialとの違い：}
+\begin{center}
+  \begin{tabular}{lcc}
+    \toprule
+    & Binomial & Geometric \\ \midrule
+    決まっているもの & ハンド数 $n$ & 成功回数（$=1$） \\
+    数えるもの & AAが来た回数 & AAが来るまでのハンド数 \\
+    $X$ の範囲 & $0, 1, \ldots, n$ & $1, 2, 3, \ldots$（上限なし）\\
+    \bottomrule
+  \end{tabular}
+\end{center}
+
+% --------------------------------
+\subsection{Negative Binomial（負の二項分布）--- $r$回目のポケットAA}
+
+\textbf{状況：}今夜、AAを\textbf{3回もらう}まで何ハンドかかるか。$p = 1/221$。
+
+$X = $ AAが3回目に来るまでのハンド数。
+
+$X \sim \text{NB}(r=3, p=1/221)$。$X = 3, 4, 5, \ldots$
+
+$\mu = r/p = 3 \times 221 = 663$ハンド。
+
+\textbf{Geometricとの違い：}Geometricは「\textbf{1回目の}AA」。Negative Binomialは「\textbf{$r$回目の}AA」。
+Geometric $= $ NB with $r=1$。
+
+% --------------------------------
+\subsection{Poisson（ポアソン分布）--- テーブルでのオールイン頻度}
+
+\textbf{状況：}あるテーブルでは、1時間に平均 $\lambda = 2.5$ 回オールインが起きる。
+次の1時間で起きるオールインの回数は？
+
+$X = $ 次の1時間のオールイン回数。
+
+$X \sim \text{Poisson}(2.5)$。$X = 0, 1, 2, \ldots$
+
+$\mu = \lambda = 2.5$回、$\sigma^2 = \lambda = 2.5$。
+
+\begin{itemize}
+  \item $P(X = 0) = e^{-2.5} \approx 8.2\%$（1時間オールインなし）
+  \item $P(X \ge 5) = 1 - P(X \le 4) \approx 10.9\%$（5回以上のアクション満載な時間）
+\end{itemize}
+
+\textbf{Binomialとの違い：}
+\begin{center}
+  \begin{tabular}{lcc}
+    \toprule
+    & Binomial & Poisson \\ \midrule
+    試行回数 $n$ & 決まっている & ない（連続的に起きる） \\
+    必要な情報 & $n$ と $p$ & $\lambda$（平均回数）だけ \\
+    典型的な場面 & $n$ハンドの勝敗 & 時間あたりのイベント数 \\
+    \bottomrule
+  \end{tabular}
+\end{center}
+
+「1時間にオールインは何回？」には「試行回数」がない。各瞬間にオールインが起きるかどうかが連続的に積み重なっている。こういう場面がPoisson。
+
+% ============================================================
+\section{まとめ：ホールデムで全部見る}
+% ============================================================
+
+\begin{center}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{lll}
+  \toprule
+  \textbf{分布} & \textbf{質問} & \textbf{$X$} \\ \midrule
+  Bernoulli & この1ハンド、勝つ？ & 勝ち/負け \\
+  Binomial & 50ハンド中、何回勝つ？ & 勝ちハンド数 \\
+  Hypergeometric & フロップ3枚中ハートは何枚？ & ハートの枚数 \\
+  Geometric & AAが初めて来るのは何ハンド目？ & ハンド番号 \\
+  Neg.\ Binomial & AAが3回来るのは何ハンド目？ & ハンド番号 \\
+  Poisson & 次の1時間にオールインは何回？ & オールイン回数 \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+\begin{point}
+  全部ポーカーの話だが、\textbf{何を聞いているかが違う}から分布が変わる。
+  分布を見抜くコツは「$X$が何を数えているか」と「何が固定されているか」に注目すること。
+\end{point}
+
+% ============================================================
+\section{Skewness（歪度）と Kurtosis（尖度）}
+% ============================================================
+
+\subsection{Skewness（歪度）：結果の偏り方}
+
+\begin{example}[キャッシュゲーム vs トーナメント]
+
+  \textbf{キャッシュゲーム：}勝ちも負けもだいたい同じ幅。
+  $+\$50$ 勝つ日も $-\$50$ 負ける日もある。分布はほぼ左右対称。
+  → skewness $\approx 0$。
+
+  \textbf{トーナメント：}大半は負け（バイイン没収）。たまに大きな賞金。
+  \begin{itemize}
+    \item 90\%の確率で $-\$100$（バイイン分負け）
+    \item 8\%の確率で $+\$200$
+    \item 2\%の確率で $+\$5000$（優勝）
+  \end{itemize}
+  右側に極端に大きい値 → \textbf{右に歪んでいる (right-skewed)} → skewness $> 0$。
+
+  トーナメントプロの収益は「ほとんど負けて、たまにドカンと勝つ」形。
+\end{example}
+
+\subsection{Kurtosis（尖度）：極端な結果の出やすさ}
+
+\begin{example}[低レートvs 高レート]
+  どちらもウィンレート $\mu = +\$10$/時間、$\sigma = \$50$ だが：
+
+  \textbf{\$1/\$2（低レート）：}
+  大きなポットが少ない。結果は平均付近に集中。極端なスイングが少ない。
+  → kurtosis 小（$\approx 3$、普通）。
+
+  \textbf{\$25/\$50（高レート）：}
+  普段は小さいポットだが、たまに1ハンドで\$5000動く。
+  「普段は普通、時々とんでもない」パターン。
+  → kurtosis 大（$> 3$、裾が重い）。
+
+  \begin{center}
+    \begin{tabular}{lcc}
+      \toprule
+      & \$1/\$2 & \$25/\$50 \\ \midrule
+      $\mu$ & $+\$10$/h & $+\$10$/h \\
+      $\sigma$ & \$50 & \$50 \\
+      kurtosis & $\approx 3$ & $\gg 3$ \\
+      \bottomrule
+    \end{tabular}
+  \end{center}
+
+  $\mu$も$\sigma$も同じなのに、「人生を変えるハンド」が出る頻度が違う。
+  \textbf{この違いはkurtosisでしか捉えられない。}
+\end{example}
+
+\subsection{4つのMomentのまとめ}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{clll}
+  \toprule
+  $r$ & \textbf{名前} & \textbf{質問} & \textbf{ポーカーでの意味} \\ \midrule
+  1 & Mean（平均） & 中心はどこ？ & ウィンレート \\
+  2 & Variance（分散） & どれくらいブレる？ & スイングの大きさ \\
+  3 & Skewness（歪度） & 勝ち負けどっちに偏る？ & トーナメント型か安定型か \\
+  4 & Kurtosis（尖度） & 極端な結果は出やすい？ & 爆発ハンドの頻度 \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+% ============================================================
+\section{近似 (Approximation)}
+% ============================================================
+
+\subsection{Hypergeometric $\approx$ Binomial}
+
+\begin{example}[マルチテーブルトーナメント]
+  参加者1000人。30\%がアマチュア。ランダムに10人テーブルを作る。
+
+  正確には $X \sim \text{HG}(1000, 300, 10)$。
+  だが $n/N = 10/1000 = 0.01 \le 0.05$ なので
+  $\text{Bin}(10, 0.3)$ で近似可能。
+
+  1000人から10人取っても全体の比率はほぼ変わらない。
+  「戻す/戻さない」の差が無視できるほど母集団が大きい。
+\end{example}
+
+\subsection{Binomial $\approx$ Poisson}
+
+\begin{example}[レアハンドの出現]
+  10000ハンドプレイ。各ハンドでロイヤルフラッシュが出る確率 $p \approx 0.000154\%$。
+
+  正確には $X \sim \text{Bin}(10000, 0.00000154)$ だが計算が大変。
+
+  $\lambda = np = 10000 \times 0.00000154 \approx 0.0154$
+
+  $X \approx \text{Poisson}(0.0154)$。
+
+  $P(X = 0) = e^{-0.0154} \approx 98.5\%$（10000ハンドでロイヤルフラッシュなし）。
+
+  $n$が大きく$p$が極小のとき、Poissonで楽に計算できる。
+\end{example}
+
+% ============================================================
+\section{Tchebycheff's Inequality（チェビシェフの不等式）}
+% ============================================================
+
+\textbf{一言で：}分布の形がわからなくても使える、スイングの保証。
+
+\[
+  P(\mu - k\sigma \le X \le \mu + k\sigma) \ge 1 - \frac{1}{k^2}
+\]
+
+\begin{example}[バンクロール管理]
+  あなたのウィンレート $\mu = +\$20$/h、標準偏差 $\sigma = \$100$/h。
+
+  分布の形はわからないが：
+  \begin{center}
+    \begin{tabular}{ccc}
+      \toprule
+      $k$ & 1時間の結果の範囲 & この範囲に入る確率 \\ \midrule
+      2 & $20 \pm 200 = [-\$180, +\$220]$ & $\ge 75\%$ \\
+      3 & $20 \pm 300 = [-\$280, +\$320]$ & $\ge 89\%$ \\
+      \bottomrule
+    \end{tabular}
+  \end{center}
+
+  つまり「1時間で\$280以上負けることは最大でも11\%」と言える。
+
+  これを使ってバンクロール（軍資金）の必要額を見積もれる：
+  \textbf{\$280の下振れに10回耐えるには最低\$2800必要}、のような判断ができる。
+
+  \textbf{嬉しさ：}最悪ケースの保証。どんな分布でもこの不等式は成り立つ。
+\end{example}
+
+\end{document}

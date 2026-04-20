@@ -1,0 +1,56 @@
+\documentclass[12pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{enumitem}
+\usepackage{xcolor}
+
+\pagestyle{empty}
+
+\begin{document}
+
+\subsection*{HW10}
+
+\begin{enumerate}
+  %% HW10-1
+  \item A TV interviewer must conduct \textcolor{blue}{six} interviews. Suppose the probability a person agrees to be interviewed is $2/3$.
+    \begin{enumerate}[label=(\alph*)]
+      \item What is the probability the interviewer will ask 9 people in all to be interviewed?
+      \item How many people can the interviewer expect to ask to be interviewed?
+    \end{enumerate}
+
+\newpage
+
+  %% HW10-2
+  \item In a manufacturing process, the probability a produced item is good is 0.97. Assuming the items produced are independent, what is the probability that exactly five defective items precede the 100th good item?
+
+\newpage
+
+  %% HW10-3
+  \item Deaths in a small city occur at a rate of 5 per week and are known to follow a Poisson distribution.
+    \begin{enumerate}[label=(\alph*)]
+      \item What is the expected number of deaths in a 3-day period?
+      \item What is the probability no one dies in a 3-day period?
+    \end{enumerate}
+    \begin{enumerate}[label=(\alph*)]
+      \setcounter{enumii}{3}
+      \item What is the probability that number of deaths in a 3-day period is greater than $\mu - \sigma$?
+    \end{enumerate}
+
+\newpage
+
+  %% HW10-4
+  \item The number of typographical errors per page in a book follows a Poisson distribution with parameter $3/4$. What is the probability that there is a total of 10 errors on 10 randomly selected pages in the book?
+
+\newpage
+
+  %% HW10-5
+  \item For each of the following, identify the distribution based on the MGF. Be sure to specify name of distribution and value(s) of parameter(s).
+    \begin{enumerate}[label=(\alph*)]
+      \item $M_X(t) = \dfrac{0.7\,e^{t}}{1 - 0.3\,e^{t}}$, $t < -\ln 0.3$.
+      \item $M_X(t) = e^{2.3(e^{t} - 1)}$, $t \in (-\infty, \infty)$.
+      \item $M_X(t) = \left(\dfrac{0.9\,e^{t}}{1 - 0.1\,e^{t}}\right)^{10}$, $t < -\ln 0.1$.
+    \end{enumerate}
+
+\end{enumerate}
+
+\end{document}

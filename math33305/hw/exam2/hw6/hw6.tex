@@ -1,0 +1,64 @@
+\documentclass[12pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{enumerate}
+
+\pagestyle{empty}
+
+\begin{document}
+
+\begin{center}
+  \textbf{\large MATH 3305 (Spring 26) \hfill Instructor: Zhao}\\[4pt]
+  \textbf{\large Homework \#6 \hfill Due: Tue 3/10 (Assigned 3/3)}
+\end{center}
+
+\bigskip
+
+\begin{enumerate}
+  \item Page 70, Exercise 2.2.5 (page 186 of library e-book). PLUS (d) Graph $F(x)$.
+
+    An automobile dealer has found that $X$, the number of cars customers buy each week, follows the probability distribution
+    \[
+      f(x) = \begin{cases} \dfrac{kx^2}{x!}, & x = 1, 2, 3, 4. \\[6pt] 0, & \text{otherwise.} \end{cases}
+    \]
+    \begin{enumerate}[(a)]
+      \item Find $k$.
+      \item Find the probability the dealer sells at least two cars in a week.
+      \item Find $F(x)$, the cumulative distribution function.
+      \item Graph $F(x)$.
+    \end{enumerate}
+
+    Note: you may use R function \texttt{plot(stepfun(x, F, right=T), ylab="$F(x)$", main="your title")}, where \texttt{x} and \texttt{F} are two vectors of values. For example, $x = c(1,2,5)$, $F = c(0, 0.3, 0.5, 1.0)$.
+
+  \item Page 71, Exercise 2.2.13 (page 187 of library e-book).
+
+    A random variable, $X$, has the distribution function
+    \[
+      F(x) = \begin{cases} 0, & x < -1 \\[4pt] \dfrac{1}{3}, & -1 \le x < 0 \\[6pt] \dfrac{5}{6}, & 0 \le x < 2 \\[6pt] 1, & x \ge 2 \end{cases}
+    \]
+    Find the probability distribution function, $f(x)$.
+
+  \item A bag contains eight numbered pieces of paper using numbers 1, 2, 3, 4, 5, 6, 7, and 8. Let $X$ be the number on a randomly selected piece of paper.
+    \begin{enumerate}[(a)]
+      \item Find the probability mass function, $f(x)$.
+      \item Find $\mathbb{E}(X)$, the mean of $X$.
+    \end{enumerate}
+
+  \item A term life insurance policy will pay a beneficiary a certain sum of money upon the death of the policyholder. These policies have premiums that must be paid annually. Suppose a life insurance company sells a \$200,000 one-year term life insurance policy to a 49-year-old female for \$600. According to the \textit{National Vital Statistics Report}, Vol.~47, No.~28, the probability the female will survive the year is 0.9975.
+    \begin{enumerate}[(a)]
+      \item Compute the expected profit to the insurance company for selling such a policy.
+      \item Interpret the value of expected profit in (a) in the context of the problem.
+    \end{enumerate}
+
+  \item \textit{Do all random variables have a mean?} Let $X$ be a discrete random variable having the probability mass function
+    \[
+      f(x) = \frac{6}{\pi^2 x^2}, \quad x = 1, 2, 3, \cdots
+    \]
+    Show that $\mathbb{E}(X)$ does not exist (i.e., it is not finite). \hfill \textcolor{blue}{Hint: Harmonic series diverges.}
+\end{enumerate}
+
+\begin{center}
+  \textbf{\large Show work!}
+\end{center}
+
+\end{document}
