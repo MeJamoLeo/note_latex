@@ -1,0 +1,79 @@
+\documentclass[12pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{enumerate}
+
+\pagestyle{empty}
+
+\begin{document}
+
+\begin{center}
+  \textbf{\large MATH 3305 (Spring 26) \hfill Instructor: Zhao}\\[4pt]
+  \textbf{\large Homework \#11 \hfill Due: Fri 4/17 (Assigned 4/9)}
+\end{center}
+
+\bigskip
+
+\begin{enumerate}
+  \item Classify the following random variable as either discrete or continuous:
+    \begin{enumerate}[(a)]
+      \item $X =$ distance (in yards) walked by a randomly selected person tomorrow.
+      \item $X =$ age at which a randomly selected person dies.
+      \item $X =$ amount of rainfall in San Marcos next month.
+    \end{enumerate}
+
+  \item Page 153 (358 e-book), Exercise 3.1.2. \textbf{PLUS} (d) Sketch the graph of $f(x)$.
+
+    A random variable $X$ has probability density function
+    \[
+      f(x) = \begin{cases} k(x^2 - x^3), & 0 \le x \le 1 \\[4pt] 0, & \text{otherwise.} \end{cases}
+    \]
+    \begin{enumerate}[(a)]
+      \item Find $k$.
+      \item Find $P\!\left(X \ge \tfrac{3}{4}\right)$.
+      \item Calculate $P\!\left(X \ge \tfrac{3}{4} \;\big|\; X \ge \tfrac{1}{2}\right)$.
+      \item Sketch the graph of $f(x)$.
+    \end{enumerate}
+
+  \item Page 154 (359 e-book), Exercise 3.1.4. \textbf{PLUS} (c) Let $Y = \dfrac{1}{X^{2.5}}$. Find the expected value of $Y$.
+
+    A random variable $X$ has probability density function
+    \[
+      f(x) = \begin{cases} 4x^3, & 0 \le x \le 1 \\[4pt] 0, & \text{otherwise.} \end{cases}
+    \]
+    \begin{enumerate}[(a)]
+      \item Find the mean, $\mu$, and the variance, $\sigma^2$, for $X$.
+      \item Calculate exactly $P(\mu - 2\sigma \le X \le \mu + 2\sigma)$ and compare your answer with the result given by Tchebycheff's inequality.
+      \item Let $Y = \dfrac{1}{X^{2.5}}$. Find the expected value of $Y$.
+    \end{enumerate}
+
+  \item Referring to Exercise 3.1.12, do the following:
+    \begin{enumerate}[(a)]
+      \item Find $F(y)$, the cumulative distribution function of $Y$, as a piecewise function.
+      \item Find $P(25 \le Y \le 40)$.
+      \item Among five randomly selected mice, what is the probability that at least one of them spends between 25 and 40 seconds to reach a reward of food?
+    \end{enumerate}
+
+    \textit{Exercise 3.1.12:} As a measure of intelligence, mice are timed when going through a maze to reach a reward of food. The time (in seconds) required for any mouse is a random variable $Y$ with probability density function
+    \[
+      f(y) = \begin{cases} \dfrac{10}{y^2}, & y \ge 10 \\[6pt] 0, & \text{otherwise.} \end{cases}
+    \]
+
+  \item The cumulative distribution of continuous random variable $X$ is given by
+    \[
+      F(x) = \frac{1}{1 + e^{-x}}, \quad -\infty < x < \infty.
+    \]
+    \begin{enumerate}[(a)]
+      \item Sketch the graph of $F(x)$.
+      \item Find the probability density function of $X$.
+      \item Find $P(-1 < X \le 2)$.
+      \item What percentile is the value $0$ of $X$?
+      \item Find $x_{0.82}$, the 82nd percentile of the distribution.
+    \end{enumerate}
+\end{enumerate}
+
+\begin{center}
+  \textbf{\large Show your work to receive full or partial credit.}
+\end{center}
+
+\end{document}
