@@ -1,0 +1,91 @@
+\documentclass[12pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{enumerate}
+\usepackage{array}
+
+\pagestyle{empty}
+
+\begin{document}
+
+\begin{center}
+  \textbf{\large MATH 3305 (Spring 26) \hfill Instructor: Zhao}\\[4pt]
+  \textbf{\large Homework \#14 \hfill Due: N/A (Assigned 5/4)}
+\end{center}
+
+\bigskip
+
+\begin{enumerate}
+  \item (Page 292, Exercise 5.2.18)
+
+    Suppose that random variables $X$ and $Y$ have joint probability distribution function
+    \[
+      f(x, y) = \tfrac{1}{21}(x + y), \quad x = 1, 2, 3;\ y = 1, 2.
+    \]
+    \begin{enumerate}[(a)]
+      \item Find the marginal \textit{probability mass functions} for $X$ and $Y$.
+      \item Find $P(X + Y \le 3)$.
+    \end{enumerate}
+
+    \textbf{PLUS}
+    \begin{enumerate}[(c)]
+      \item Are $X$ and $Y$ independent?
+      \item Find $P(Y = 1 \mid X = 2)$.
+      \item Find $P(X > 1, Y = 2)$.
+    \end{enumerate}
+
+    \textit{Note:} in part (a), ``densities'' should be ``probability mass functions''.
+
+  \newpage
+  \item (Page 306, Exercise 5.5.19)
+
+    Random variables $X$ and $Y$ are discrete with joint distribution given by
+    \[
+      \begin{array}{c|cc}
+        & Y = 0 & Y = 1 \\ \hline
+        X = 0 & \tfrac{1}{6} & \tfrac{1}{3} \\[4pt]
+        X = 1 & \tfrac{1}{3} & \tfrac{1}{6}
+      \end{array}
+    \]
+    Find the correlation coefficient between $X$ and $Y$.
+
+  \newpage
+  \item (Page 306, Exercise 5.5.14)
+
+    Suppose that the joint probability density function for random variables $X$ and $Y$ is
+    \[
+      f(x, y) = 2x + 2y - 4xy, \quad 0 \le x \le 1,\ 0 \le y \le 1.
+    \]
+    Are $X$ and $Y$ independent? Why or why not?
+
+    \textbf{PLUS}
+    \begin{enumerate}[(b)]
+      \item Find $\rho$, the correlation coefficient.
+    \end{enumerate}
+
+  \newpage
+  \item Let random variables $X$ and $Y$ have the joint probability density function
+    \[
+      f(x, y) = \tfrac{1}{4}\, x\, y, \quad 0 < x < 2,\ 0 < y < 2.
+    \]
+    \begin{enumerate}[(a)]
+      \item Find $P(0 < X < 1,\ 0 < Y < 1)$.
+      \item Find $P(X > Y)$.
+      \item Find the marginal probability density function for both $X$ and $Y$.
+      \item Is $X$ independent of $Y$? Justify.
+      \item Compute $\mathrm{Cov}(X, Y)$ and $\rho$.
+    \end{enumerate}
+
+  \newpage
+  \item The waiting time of a customer at a bank follows an exponential distribution with a mean of $5$ minutes. A random sample of two customers is selected. Let $X$ and $Y$ be their waiting times, respectively. Note that $X \sim \mathrm{Exp}(\lambda = 1/5)$, $Y \sim \mathrm{Exp}(\lambda = 1/5)$, and $X$ is independent of $Y$.
+    \begin{enumerate}[(a)]
+      \item $\mathbb{E}\!\left[X(Y - 5)^2\right]$. (do not use integration)
+      \item Determine $f(x, y)$, the joint probability density function of $X$ and $Y$.
+    \end{enumerate}
+\end{enumerate}
+
+\begin{center}
+  \textbf{\large Show your work to receive full or partial credit.}
+\end{center}
+
+\end{document}
